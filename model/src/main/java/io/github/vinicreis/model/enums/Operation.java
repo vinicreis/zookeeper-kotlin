@@ -5,8 +5,6 @@ import io.github.vinicreis.model.util.IOUtil;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static io.github.vinicreis.model.util.IOUtil.read;
-
 /**
  * Enum class that represents an operation from any instance, server or client.
  */
