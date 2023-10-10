@@ -1,49 +1,33 @@
-package io.github.vinicreis.model.log;
+package io.github.vinicreis.model.log
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.Level
+import java.util.logging.Logger
 
-public class ConsoleLog implements Log {
-    private final Logger logger;
-    private boolean debug = false;
+class ConsoleLog(tag: String) : Log {
+    private val logger: Logger
+    override var isDebug: Boolean = false
 
-    public ConsoleLog(String tag) {
-        this.logger = Logger.getLogger(tag);
+    init {
+        logger = Logger.getLogger(tag)
     }
 
-    @Override
-    public void setDebug(boolean enable) {
-        debug = enable;
-
-        d("Debug mode enabled!");
+    override fun e(msg: String) {
+        logger.log(Level.SEVERE, msg)
     }
 
-    public boolean isDebug() {
-        return debug;
+    override fun e(msg: String, e: Throwable) {
+        logger.log(Level.SEVERE, msg, e)
     }
 
-    @Override
-    public void e(String msg) {
-        logger.log(Level.SEVERE, msg);
+    override fun d(msg: String) {
+        if (isDebug) logger.log(Level.INFO, msg)
     }
 
-    @Override
-    public void e(String msg, Throwable e) {
-        logger.log(Level.SEVERE, msg, e);
+    override fun w(msg: String) {
+        logger.log(Level.WARNING, msg)
     }
 
-    @Override
-    public void d(String msg) {
-        if(debug) logger.log(Level.INFO, msg);
-    }
-
-    @Override
-    public void w(String msg) {
-        logger.log(Level.WARNING, msg);
-    }
-
-    @Override
-    public void v(String msg) {
-        logger.log(Level.ALL, msg);
+    override fun v(msg: String) {
+        logger.log(Level.ALL, msg)
     }
 }

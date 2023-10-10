@@ -1,46 +1,44 @@
-package io.github.vinicreis.model.log;
+package io.github.vinicreis.model.log
 
-public interface Log {
-    /**
-     * Set the debug flag to indicate if the debug should be enabled.
-     * @param enable flag to indicate if {@code d} messages will be enabled.
-     */
-    void setDebug(boolean enable);
-
+interface Log {
     /**
      * Indicates if debug is enabled on this logger instance.
      * @return true if debug is enabled, false otherwise.
      */
-    boolean isDebug();
+    /**
+     * Set the debug flag to indicate if the debug should be enabled.
+     * @param enable flag to indicate if `d` messages will be enabled.
+     */
+    var isDebug: Boolean
 
     /**
      * Insert a log with an error message.
      * @param msg message to inserted
      */
-    void e(String msg);
+    fun e(msg: String)
 
     /**
      * Insert a log with a message and an exception.
      * @param msg message to be inserted
      * @param e thrown/caught exception to be logged.
      */
-    void e(String msg, Throwable e);
+    fun e(msg: String, e: Throwable)
 
     /**
      * Insert a debug message.
      * @param msg message to be inserted.
      */
-    void d(String msg);
+    fun d(msg: String)
 
     /**
      * Insert a log warning message.
      * @param msg warning message to be logged.
      */
-    void w(String msg);
+    fun w(msg: String)
 
     /**
      * Insert a verbose message.
      * @param msg verbose message to be inserted.
      */
-    void v(String msg);
+    fun v(msg: String)
 }

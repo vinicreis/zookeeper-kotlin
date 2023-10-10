@@ -96,7 +96,7 @@ public interface Server {
             }
         } catch (OutdatedEntryException e) {
             response = new GetResponse.Builder()
-                    .timestamp(e.getCurrentTimestamp())
+                    .timestamp(e.currentTimestamp)
                     .result(Result.TRY_OTHER_SERVER_OR_LATER)
                     .message("Please, try again later or try other server")
                     .build();
