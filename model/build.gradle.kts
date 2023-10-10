@@ -1,5 +1,6 @@
 plugins {
     id("java-library")
+    kotlin("jvm")
 }
 
 group = "io.github.vinicreis"
@@ -10,8 +11,14 @@ repositories {
     mavenCentral()
 }
 
+
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation(kotlin("stdlib-jdk8"))
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
