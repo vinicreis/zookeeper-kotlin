@@ -1,43 +1,27 @@
-package io.github.vinicreis.model.repository;
+package io.github.vinicreis.model.repository
 
-import io.github.vinicreis.model.repository.thread.TimestampIncrementThread;
+import io.github.vinicreis.model.repository.thread.TimestampIncrementThread
 
-/**
- * Repository used to track the timestamp inside the Controller server.
- */
-public class TimestampRepository {
-    private static final Long DEFAULT_STEP = 100L;
-    private final TimestampIncrementThread thread = new TimestampIncrementThread(DEFAULT_STEP);
+class TimestampRepository {
+    private val thread = TimestampIncrementThread(DEFAULT_STEP)
 
-    /**
-     * Get the current timestamp value registered.
-     * @return a {@code Long} value with the current timestamp
-     * @throws IllegalStateException in case the method is called while the repository thread is not running.
-     */
-    public Long getCurrent() throws IllegalStateException {
-        return thread.getCurrent();
+    @get:Throws(IllegalStateException::class)
+    val current: Long
+        get() = thread.getCurrent()
+
+    fun start() {
+        thread.start()
     }
 
-    /**
-     * Starts the timestamp increment by starting the {@code IncrementThread}.
-     */
-    public void start() {
-        thread.start();
+    fun stop() {
+        thread.interrupt()
     }
 
-    /**
-     * Stops the timestamp increment by starting the {@code IncrementThread}.
-     * Note that only by setting {@code running} as {@code false} finishes the
-     * {@code IncrementThread} instance.
-     */
-    public void stop() {
-        thread.interrupt();
+    fun reset() {
+        thread.reset()
     }
 
-    /**
-     * Stops the increment and sets the current value to zero.
-     */
-    public void reset() {
-        thread.reset();
+    companion object {
+        private const val DEFAULT_STEP = 100L
     }
 }

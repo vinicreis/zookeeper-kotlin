@@ -1,67 +1,59 @@
-package io.github.vinicreis.node.thread;
+package io.github.vinicreis.node.thread
 
-import io.github.vinicreis.model.Server;
-import io.github.vinicreis.model.enums.Operation;
-import io.github.vinicreis.model.log.ConsoleLog;
-import io.github.vinicreis.model.log.Log;
-
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
-
-import static io.github.vinicreis.model.util.AssertionUtils.handleException;
+import io.github.vinicreis.model.Server
+import io.github.vinicreis.model.enums.Operation
+import io.github.vinicreis.model.log.ConsoleLog
+import io.github.vinicreis.model.log.Log
+import java.io.DataInputStream
+import java.io.EOFException
+import java.net.ServerSocket
+import java.net.SocketException
 
 /**
  * Thread to keep listening and dispatch workers to process Controller's operations.
  * @see WorkerThread
  */
-public class DispatcherThread extends Thread {
-    private static final String TAG = "DispatcherThread";
-    private final Log log = new ConsoleLog(TAG);
-    private final Server server;
-    private final ServerSocket serverSocket;
-    private boolean running = true;
+class DispatcherThread(private val server: Server) : Thread() {
+    private val log: Log = ConsoleLog(TAG)
+    private val serverSocket: ServerSocket
+    private var running = true
 
-    public DispatcherThread(Server server) throws IOException {
-        this.server = server;
-        this.serverSocket = new ServerSocket(server.getPort());
+    init {
+        serverSocket = ServerSocket(server.port)
     }
 
-    @Override
-    public void run() {
+    override fun run() {
         try {
             while (running) {
-                log.d("Listening for operation requests...");
-                final Socket socket = serverSocket.accept();
-                log.d("Request received!");
-                final DataInputStream reader = new DataInputStream(socket.getInputStream());
-
-                final String operationCode = reader.readUTF();
-                final String message = reader.readUTF();
-
-                log.d("Starting Worker thread...");
-                new WorkerThread(server, socket, Operation.fromCode(operationCode), message).start();
+                log.d("Listening for operation requests...")
+                val socket = serverSocket.accept()
+                log.d("Request received!")
+                val reader = DataInputStream(socket.getInputStream())
+                val operationCode = reader.readUTF()
+                val message = reader.readUTF()
+                log.d("Starting Worker thread...")
+                WorkerThread(server, socket, Operation.fromCode(operationCode), message).start()
             }
-        } catch (EOFException e) {
-            handleException(TAG, "Invalid input received from client", e);
-        } catch (SocketException e) {
-            log.d("Socket closed!");
-        } catch (Exception e) {
-            handleException(TAG, "Failed during dispatch execution", e);
+        } catch (e: EOFException) {
+            handleException(TAG, "Invalid input received from client", e)
+        } catch (e: SocketException) {
+            log.d("Socket closed!")
+        } catch (e: Exception) {
+            handleException(TAG, "Failed during dispatch execution", e)
         }
     }
 
-    @Override
-    public void interrupt(){
+    override fun interrupt() {
         try {
-            super.interrupt();
-            serverSocket.close();
-            running = false;
-        } catch (Exception e) {
-            handleException(TAG, "Failed while interrupting dispatcher!", e);
+            super.interrupt()
+            serverSocket.close()
+            running = false
+        } catch (e: Exception) {
+            handleException(TAG, "Failed while interrupting dispatcher!", e)
         }
+    }
+
+    companion object {
+        private const val TAG = "DispatcherThread"
     }
 }

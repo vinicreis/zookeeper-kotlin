@@ -1,75 +1,46 @@
-package io.github.vinicreis.controller.thread;
+package io.github.vinicreis.controller.thread
 
-import io.github.vinicreis.controller.Controller;
-import io.github.vinicreis.model.Server;
-import io.github.vinicreis.model.enums.Operation;
-import io.github.vinicreis.model.request.*;
-import io.github.vinicreis.model.response.Response;
-import io.github.vinicreis.model.util.Serializer;
+import io.github.vinicreis.controller.Controller
+import io.github.vinicreis.model.Server
+import io.github.vinicreis.model.enums.Operation
+import io.github.vinicreis.model.request.*
+import io.github.vinicreis.model.response.*
+import io.github.vinicreis.model.util.AssertionUtils.handleException
+import io.github.vinicreis.model.util.Serializer.fromJson
+import io.github.vinicreis.model.util.Serializer.toJson
+import java.io.DataOutputStream
+import java.net.Socket
 
-import java.io.DataOutputStream;
-import java.net.Socket;
-
-import static io.github.vinicreis.model.util.AssertionUtils.handleException;
-
-/**
- * Worker thread to execute any dispatched operation by {@code DispatcherThread}.
- * @see DispatcherThread
- */
-public class WorkerThread extends Thread {
-    private static final String TAG = "WorkerThread";
-    private final Server server;
-    private final Socket socket;
-    private final Operation operation;
-    private final String request;
-
-    public WorkerThread(Server server, Socket socket, Operation operation, String request) {
-        this.server = server;
-        this.socket = socket;
-        this.operation = operation;
-        this.request = request;
-    }
-
-    @Override
-    public void run() {
+class WorkerThread(
+    private val server: Server,
+    private val socket: Socket,
+    private val operation: Operation,
+    private val request: String
+) : Thread() {
+    override fun run() {
         try {
-            final Response response;
-            final DataOutputStream writer = new DataOutputStream(socket.getOutputStream());
-
-            switch (operation) {
-                case JOIN:
-                    if (server instanceof Controller) {
-                        response = ((Controller)server).join(Serializer.fromJson(request, JoinRequest.class));
-                        break;
-                    }
-
-                    throw new IllegalStateException("Nodes can not handle JOIN requests");
-                case PUT:
-                    response = server.put(Serializer.fromJson(request, PutRequest.class));
-                    break;
-                case REPLICATE:
-                    response = server.replicate(Serializer.fromJson(request, ReplicationRequest.class));
-                    break;
-                case GET:
-                    response = server.get(Serializer.fromJson(request, GetRequest.class));
-                    break;
-                case EXIT:
-                    if (server instanceof Controller) {
-                        response = ((Controller)server).exit(Serializer.fromJson(request, ExitRequest.class));
-                        break;
-                    }
-
-                    throw new IllegalStateException("Nodes can not handle EXIT requests");
-                default:
-                    throw new IllegalStateException("Operation unknown!");
+            val writer = DataOutputStream(socket.getOutputStream())
+            val response: Response = when (operation) {
+                Operation.JOIN -> (server as? Controller)?.join(fromJson(request, JoinRequest::class.java))
+                    ?: throw IllegalStateException("Nodes can not handle JOIN requests")
+                Operation.PUT -> server.put(fromJson(request, PutRequest::class.java))
+                Operation.REPLICATE -> server.replicate(fromJson(request, ReplicationRequest::class.java))
+                Operation.GET -> server.get(fromJson(request, GetRequest::class.java))
+                Operation.EXIT -> (server as? Controller)?.exit(fromJson(request, ExitRequest::class.java))
+                    ?: throw IllegalStateException("Nodes can not handle EXIT requests")
+                else -> throw IllegalStateException("Operation unknown!")
             }
 
-            writer.writeUTF(Serializer.toJson(response));
-            writer.flush();
+            writer.writeUTF(toJson(response))
+            writer.flush()
 
-            socket.close();
-        } catch (Exception e) {
-            handleException(TAG, "Failed during worker execution", e);
+            socket.close()
+        } catch (e: Exception) {
+            handleException(TAG, "Failed during worker execution", e)
         }
+    }
+
+    companion object {
+        private const val TAG = "WorkerThread"
     }
 }

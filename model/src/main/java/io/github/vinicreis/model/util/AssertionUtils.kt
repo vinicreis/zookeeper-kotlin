@@ -1,35 +1,27 @@
-package io.github.vinicreis.model.util;
+package io.github.vinicreis.model.util
 
-import io.github.vinicreis.model.log.ConsoleLog;
+import io.github.vinicreis.model.log.ConsoleLog
 
-public class AssertionUtils {
+object AssertionUtils {
     /**
-     * Very similar to {@code assert} call. It checks if any given {@code rule} is true.
+     * Very similar to `assert` call. It checks if any given `rule` is true.
      * @param rule rule to be asserted
-     * @param message {@code RuntimeException} thrown message
+     * @param message `RuntimeException` thrown message
      * @throws RuntimeException if the rule assertion is false
      */
-    public static void check(boolean rule, String message) throws RuntimeException {
-        if(!rule)
-            throw new RuntimeException(message);
-    }
-
-    /**
-     * Checks if a {@code String} object is null or empty.
-     * @param string {@code String} object to be checked
-     * @return {@code true} if the string is {@code null} or empty. Otherwise, {@code false}.
-     */
-    public static boolean isNullOrEmpty(String string) {
-        return string == null || string.isEmpty();
+    @JvmStatic
+    @Throws(RuntimeException::class)
+    fun check(rule: Boolean, message: String?) {
+        if (!rule) throw RuntimeException(message)
     }
 
     /**
      * Handles exception passed to it by logging it.
      * @param tag tag to be used in the log
      * @param message message of the exception
-     * @param e {@code Exception} thrown
+     * @param e `Exception` thrown
      */
-    public static void handleException(String tag, String message, Exception e) {
-        new ConsoleLog(tag).e(message, e);
+    fun handleException(tag: String?, message: String?, e: Exception?) {
+        ConsoleLog(tag!!).e(message!!, e!!)
     }
 }

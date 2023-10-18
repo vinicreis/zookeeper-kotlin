@@ -1,29 +1,15 @@
-package io.github.vinicreis.model.response;
+package io.github.vinicreis.model.response
 
-import io.github.vinicreis.model.enums.Operation;
-import io.github.vinicreis.model.enums.Result;
+import io.github.vinicreis.model.enums.Operation
+import io.github.vinicreis.model.enums.Result
 
-/**
- * Represents a JOIN response to when a {@code Node} instance to JOIN the Controller environment.
- */
-public class JoinResponse extends Response {
+class JoinResponse(
+    result: Result,
+    message: String?,
+) : Response(result, message) {
+    override val operation: Operation = Operation.JOIN
 
-    private JoinResponse(Result result, String message) {
-        super(result, message);
-    }
-
-    /**
-     * JOIN response builder class
-     */
-    public static class Builder extends AbstractBuilder<JoinResponse> {
-        @Override
-        public JoinResponse build() {
-            return new JoinResponse(this.result, this.message);
-        }
-    }
-
-    @Override
-    public Operation getOperation() {
-        return Operation.JOIN;
+    class Builder : Response.Builder<JoinResponse>() {
+        override fun build() = JoinResponse(result, message)
     }
 }

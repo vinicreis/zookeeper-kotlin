@@ -1,118 +1,76 @@
-package io.github.vinicreis.model;
+package io.github.vinicreis.model
 
-import io.github.vinicreis.model.enums.Result;
-import io.github.vinicreis.model.exception.OutdatedEntryException;
-import io.github.vinicreis.model.repository.KeyValueRepository;
-import io.github.vinicreis.model.request.GetRequest;
-import io.github.vinicreis.model.response.GetResponse;
-import io.github.vinicreis.model.response.PutResponse;
-import io.github.vinicreis.model.response.ReplicationResponse;
-import io.github.vinicreis.model.util.AssertionUtils;
-import io.github.vinicreis.model.util.IOUtil;
-import io.github.vinicreis.model.request.PutRequest;
-import io.github.vinicreis.model.request.ReplicationRequest;
+import io.github.vinicreis.model.enums.Result
+import io.github.vinicreis.model.exception.OutdatedEntryException
+import io.github.vinicreis.model.repository.KeyValueRepository
+import io.github.vinicreis.model.request.GetRequest
+import io.github.vinicreis.model.request.PutRequest
+import io.github.vinicreis.model.request.ReplicationRequest
+import io.github.vinicreis.model.response.GetResponse
+import io.github.vinicreis.model.response.PutResponse
+import io.github.vinicreis.model.response.ReplicationResponse
+import io.github.vinicreis.model.util.AssertionUtils
+import io.github.vinicreis.model.util.IOUtil
 
-/**
- * Server generic interface used to represent a server instance.
- */
-public interface Server {
-    /**
-     * Gets the server port.
-     * @return a {@code int} value representing the server port
-     */
-    int getPort();
+interface Server {
+    val port: Int
+    val keyValueRepository: KeyValueRepository
 
-    /**
-     * Gets the instance of thw key/value pair used by the server to save the values.
-     * @return an {@code KeyValueRepository} instance
-     */
-    KeyValueRepository getKeyValueRepository();
+    fun start()
+    fun stop()
+    fun put(request: PutRequest): PutResponse
+    fun replicate(request: ReplicationRequest): ReplicationResponse
 
-    /**
-     * Starts the server execution to listen to requests.
-     */
-    void start();
-
-    /**
-     * Stops the server instance.
-     */
-    void stop();
-
-    /**
-     * Handles the PUT request.
-     * @param request a {@code PutRequest} instance received
-     * @return a {@code PutResponse} instance
-     */
-    PutResponse put(PutRequest request);
-
-    /**
-     * Handles the REPLICATE request.
-     * @param request a {@code ReplicationRequest} instance received
-     * @return a {@code ReplicationResponse} instance
-     */
-    ReplicationResponse replicate(ReplicationRequest request);
-
-    /**
-     * Default implementation that handles a GET request, since both {@code Controller} and
-     * {@code Node} instances handles the GET request the same way.
-     * @param request a {@code GetRequest} instance
-     * @return a {@code GetResponse} instance
-     */
-    default GetResponse get(GetRequest request) {
-        GetResponse response;
-
-        try {
+    fun get(request: GetRequest): GetResponse {
+        val response: GetResponse = try {
             IOUtil.printf(
-                    "Cliente %s:%d GET key: %s ts: %d. ",
-                    request.getHost(),
-                    request.getPort(),
-                    request.getKey(),
-                    request.getTimestamp()
-            );
-
-            final KeyValueRepository.Entry entry = getKeyValueRepository().find(request.getKey(), request.getTimestamp());
-
+                "Cliente %s:%d GET key: %s ts: %d. ",
+                request.host,
+                request.port,
+                request.key,
+                request.timestamp
+            )
+            val entry = keyValueRepository.find(request.key, request.timestamp)
             if (entry == null) {
-                response = new GetResponse.Builder()
-                        .result(Result.NOT_FOUND)
-                        .message(String.format("Valor com a chave %s não encontrado", request.getKey()))
-                        .build();
+                GetResponse.Builder()
+                    .result(Result.NOT_FOUND)
+                    .message(
+                        String.format(
+                            "Valor com a chave %s não encontrado",
+                            request.key
+                        )
+                    )
+                    .build()
             } else {
                 IOUtil.printfLn(
-                        "Cliente %s:%d GET key: %s ts: %d. Meu ts é %d, portanto devolvendo %s",
-                        request.getHost(),
-                        request.getPort(),
-                        request.getKey(),
-                        request.getTimestamp(),
-                        entry.getTimestamp(),
-                        entry.getValue()
-                );
-
-                response = new GetResponse.Builder()
-                        .timestamp(entry.getTimestamp())
-                        .value(entry.getValue())
-                        .result(Result.OK)
-                        .build();
+                    "Cliente %s:%d GET key: %s ts: %d. Meu ts é %d, portanto devolvendo %s",
+                    request.host,
+                    request.port,
+                    request.key,
+                    request.timestamp,
+                    entry.timestamp,
+                    entry.value
+                )
+                GetResponse.Builder()
+                    .timestamp(entry.timestamp)
+                    .value(entry.value)
+                    .result(Result.OK)
+                    .build()
             }
-        } catch (OutdatedEntryException e) {
-            response = new GetResponse.Builder()
-                    .timestamp(e.currentTimestamp)
-                    .result(Result.TRY_OTHER_SERVER_OR_LATER)
-                    .message("Please, try again later or try other server")
-                    .build();
-        } catch (Exception e) {
-            AssertionUtils.handleException("Server", "Failed to process GET operation", e);
-
-            response = new GetResponse.Builder().exception(e).build();
+        } catch (e: OutdatedEntryException) {
+            GetResponse.Builder()
+                .timestamp(e.currentTimestamp)
+                .result(Result.TRY_OTHER_SERVER_OR_LATER)
+                .message("Please, try again later or try other server")
+                .build()
+        } catch (e: Exception) {
+            AssertionUtils.handleException("Server", "Failed to process GET operation", e)
+            GetResponse.Builder().exception(e).build()
         }
 
-        IOUtil.printf("Meu ts é %d, portanto devolvendo ", response.getTimestamp());
+        IOUtil.printf("Meu ts é %d, portanto devolvendo ", response.timestamp)
+        IOUtil.printLn(if(response.result === Result.OK) response.value else response.result.toString())
 
-        if (response.getResult() == Result.OK)
-            IOUtil.printLn(response.getValue());
-        else
-            IOUtil.printLn(response.getResult().toString());
-
-        return response;
+        return response
     }
 }

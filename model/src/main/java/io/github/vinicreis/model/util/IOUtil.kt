@@ -1,19 +1,19 @@
-package io.github.vinicreis.model.util;
+package io.github.vinicreis.model.util
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 
-public class IOUtil {
-    private static final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+object IOUtil {
+    private val reader = BufferedReader(InputStreamReader(System.`in`))
 
     /**
      * Prints a message and jump a new line at the end.
      * @param message message to be printed on the console.
      */
-    public static void printLn(String message) {
-        if(message != null && !message.isEmpty())
-            System.out.println(message);
+    @JvmStatic
+    fun printLn(message: String?) {
+        if (!message.isNullOrEmpty()) println(message)
     }
 
     /**
@@ -21,9 +21,8 @@ public class IOUtil {
      * @param message message to be printed
      * @param args format args to format received message.
      */
-    public static void printf(String message, Object... args) {
-        if(message != null && !message.isEmpty())
-            System.out.printf(message, args);
+    fun printf(message: String?, vararg args: Any?) {
+        if (!message.isNullOrEmpty()) System.out.printf(message, *args)
     }
 
     /**
@@ -31,61 +30,63 @@ public class IOUtil {
      * @param message message to be printed
      * @param args format args to format received message
      */
-    public static void printfLn(String message, Object... args) {
-        if(message != null && !message.isEmpty())
-            System.out.printf(message + "\n", args);
+    @JvmStatic
+    fun printfLn(message: String?, vararg args: Any?) {
+        if (!message.isNullOrEmpty()) System.out.printf(message + "\n", *args)
     }
 
     /**
      * Reads a new line from console.
-     * @return a {@code string} object with the read line on the console.
+     * @return a `string` object with the read line on the console.
      * @throws IOException if an I/O error occurs while reading a line from console
      */
-    public static String read() throws IOException {
-        return reader.readLine();
+    @JvmStatic
+    @Throws(IOException::class)
+    fun read(): String {
+        return reader.readLine()
     }
 
     /**
      * Reads a line from console with an introduction message presented first.
      * @param message message to be presented to the user.
-     * @return a {@code string} object with the read line on the console.
+     * @return a `string` object with the read line on the console.
      * @throws IOException if an I/O error occurs while reading a line from console
      */
-    public static String read(String message)  throws IOException {
-        System.out.print(message + ": ");
-
-        return reader.readLine();
+    @JvmStatic
+    @Throws(IOException::class)
+    fun read(message: String): String {
+        print("$message: ")
+        return reader.readLine()
     }
 
     /**
      * Reads a line from console with a formatted introduction message presented first.
      * @param message message to be presented to the user.
-     * @param args format args to format the {@code message}
-     * @return a {@code string} object with the read line on the console.
+     * @param args format args to format the `message`
+     * @return a `string` object with the read line on the console.
      * @throws IOException if an I/O error occurs while reading a line from console
      */
-    public static String read(String message, Object... args)  throws IOException {
-        System.out.printf(message, args);
+    @JvmStatic
+    @Throws(IOException::class)
+    fun read(message: String?, vararg args: Any?): String {
+        message?.let { System.out.printf(it, *args) }
 
-        return reader.readLine();
+        return reader.readLine()
     }
 
     /**
      * Reads a line from console with an introduction message presented first.
-     * Returns the {@code defaultValue} if no input is read from the user.
+     * Returns the `defaultValue` if no input is read from the user.
      * @param message message to be presented to the user.
-     * @return a {@code string} object with the read line on the console or the default value.
+     * @return a `string` object with the read line on the console or the default value.
      * @throws IOException if an I/O error occurs while reading a line from console
      */
-    public static String readWithDefault(String message, String defaultValue)  throws IOException {
-        System.out.printf(message + " [%s] : ", defaultValue);
-
-        final String read = reader.readLine();
-
-        if (read == null || read.isEmpty() || read.equals("\n"))
-            return defaultValue;
-        else
-            return read;
+    @JvmStatic
+    @Throws(IOException::class)
+    fun readWithDefault(message: String, defaultValue: String): String {
+        System.out.printf("$message [%s] : ", defaultValue)
+        val read = reader.readLine()
+        return if (read == null || read.isEmpty() || read == "\n") defaultValue else read
     }
 
     /**
@@ -93,10 +94,10 @@ public class IOUtil {
      * to the user.
      * @throws IOException if an I/O error occurs.
      */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void pressAnyKeyToFinish() throws IOException {
-        printLn("Pressione qualquer tecla para finalizar...");
-
-        System.in.read();
+    @JvmStatic
+    @Throws(IOException::class)
+    fun pressAnyKeyToFinish() {
+        printLn("Pressione qualquer tecla para finalizar...")
+        System.`in`.read()
     }
 }

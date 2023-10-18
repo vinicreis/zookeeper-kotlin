@@ -1,27 +1,7 @@
-package io.github.vinicreis.model.request;
+package io.github.vinicreis.model.request
 
-import io.github.vinicreis.model.enums.Operation;
+import io.github.vinicreis.model.enums.Operation
 
-/**
- * Represents a JOIN request made when a {@code Node} instance to JOIN the Controller environment.
- */
-public class JoinRequest extends Request {
-    public JoinRequest(String host, int port) {
-        super(host, port);
-    }
-
-    @Override
-    public Operation getOperation() {
-        return Operation.JOIN;
-    }
-
-    @Override
-    public String getHost() {
-        return host;
-    }
-
-    @Override
-    public int getPort() {
-        return port;
-    }
+class JoinRequest(host: String, port: Int) : Request(host, port) {
+    override val operation: Operation = Operation.EXIT
 }

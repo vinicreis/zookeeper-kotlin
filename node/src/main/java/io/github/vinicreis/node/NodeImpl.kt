@@ -1,168 +1,129 @@
-package io.github.vinicreis.node;
+package io.github.vinicreis.node
 
-import io.github.vinicreis.model.enums.Result;
-import io.github.vinicreis.model.log.ConsoleLog;
-import io.github.vinicreis.model.log.Log;
-import io.github.vinicreis.model.repository.KeyValueRepository;
-import io.github.vinicreis.model.request.ExitRequest;
-import io.github.vinicreis.model.request.JoinRequest;
-import io.github.vinicreis.model.request.PutRequest;
-import io.github.vinicreis.model.request.ReplicationRequest;
-import io.github.vinicreis.model.response.ExitResponse;
-import io.github.vinicreis.model.response.JoinResponse;
-import io.github.vinicreis.model.response.PutResponse;
-import io.github.vinicreis.model.response.ReplicationResponse;
-import io.github.vinicreis.node.thread.DispatcherThread;
+import io.github.vinicreis.model.enums.Result
+import io.github.vinicreis.model.log.ConsoleLog
+import io.github.vinicreis.model.log.Log
+import io.github.vinicreis.model.repository.KeyValueRepository
+import io.github.vinicreis.model.request.ExitRequest
+import io.github.vinicreis.model.request.JoinRequest
+import io.github.vinicreis.model.request.PutRequest
+import io.github.vinicreis.model.request.ReplicationRequest
+import io.github.vinicreis.model.response.*
+import io.github.vinicreis.model.util.IOUtil.printfLn
+import io.github.vinicreis.model.util.NetworkUtil.doRequest
+import io.github.vinicreis.node.thread.DispatcherThread
+import java.net.InetAddress
 
-import java.io.IOException;
-import java.net.InetAddress;
+class NodeImpl(
+    override val port: Int,
+    private val controllerHost: String,
+    private val controllerPort: Int,
+    debug: Boolean
+) : Node {
+    override val keyValueRepository: KeyValueRepository
+    private val dispatcher: DispatcherThread
 
-import static io.github.vinicreis.model.util.AssertionUtils.handleException;
-import static io.github.vinicreis.model.util.IOUtil.printfLn;
-import static io.github.vinicreis.model.util.NetworkUtil.doRequest;
-
-public class NodeImpl implements Node {
-    private static final String TAG = "NodeImpl";
-    private static final Log log = new ConsoleLog(TAG);
-    private final KeyValueRepository keyValueRepository;
-    private final DispatcherThread dispatcher;
-    private final String controllerHost;
-    private final int controllerPort;
-    private final int port;
-
-    public NodeImpl(int port, String controllerHost, int controllerPort, boolean debug) throws IOException {
-        this.port = port;
-        this.controllerHost = controllerHost;
-        this.controllerPort = controllerPort;
-        this.dispatcher = new DispatcherThread(this);
-        this.keyValueRepository = new KeyValueRepository();
-
-        log.setDebug(debug);
+    init {
+        dispatcher = DispatcherThread(this)
+        keyValueRepository = KeyValueRepository()
+        log.isDebug = debug
     }
 
-    @Override
-    public int getPort() {
-        return port;
+    override fun start() {
+        dispatcher.start()
+        join()
     }
 
-    @Override
-    public KeyValueRepository getKeyValueRepository() {
-        return keyValueRepository;
+    override fun stop() {
+        dispatcher.interrupt()
+        exit()
     }
 
-    @Override
-    public void start() {
-        dispatcher.start();
-
-        join();
-    }
-
-    @Override
-    public void stop() {
-        dispatcher.interrupt();
-
-        exit();
-    }
-
-    @Override
-    public void join() {
+    override fun join() {
         try {
-            final JoinRequest request = new JoinRequest(InetAddress.getLocalHost().getHostName(), port);
-            final JoinResponse response = doRequest(controllerHost, controllerPort, request, JoinResponse.class);
-
-            if (response.getResult() != Result.OK) {
-                throw new RuntimeException(String.format("Failed to join on controller server: %s", response.getMessage()));
+            val request = JoinRequest(InetAddress.getLocalHost().hostName, port)
+            val response = doRequest(controllerHost, controllerPort, request, JoinResponse::class.java)
+            if (response.result !== Result.OK) {
+                throw RuntimeException(String.format("Failed to join on controller server: %s", response.message))
             }
 
             // TODO: Save controller info to validate REPLICATE requests
-
-            log.d("Node successfully joined!");
-        } catch (Exception e) {
-            handleException(TAG, "Failed to process JOIN operation", e);
+            log.d("Node successfully joined!")
+        } catch (e: Exception) {
+            handleException(TAG, "Failed to process JOIN operation", e)
         }
     }
 
-    @Override
-    public PutResponse put(PutRequest request) {
-        try {
+    override fun put(request: PutRequest?): PutResponse? {
+        return try {
             printfLn(
-                    "Encaminhando %s:%d PUT key: %s value: %s",
-                    request.getHost(),
-                    request.getPort(),
-                    request.getKey(),
-                    request.getValue()
-            );
-
-            final PutRequest controllerRequest = new PutRequest(
-                    InetAddress.getLocalHost().getHostName(),
-                    port,
-                    request.getKey(),
-                    request.getValue()
-            );
-            final PutResponse controllerResponse = doRequest(
-                    controllerHost,
-                    controllerPort,
-                    controllerRequest,
-                    PutResponse.class
-            );
-
-            if (controllerResponse.getResult() != Result.OK) {
-                return new PutResponse.Builder()
-                        .timestamp(controllerResponse.getTimestamp())
-                        .result(Result.ERROR)
-                        .message(controllerResponse.getMessage())
-                        .build();
-            }
-
-            return new PutResponse.Builder()
-                    .timestamp(controllerResponse.getTimestamp())
-                    .result(Result.OK)
-                    .build();
-        } catch (Exception e) {
-            handleException(TAG, "Failed to process PUT operation", e);
-
-            return new PutResponse.Builder().exception(e).build();
+                "Encaminhando %s:%d PUT key: %s value: %s",
+                request!!.getHost(),
+                request.getPort(),
+                request.key,
+                request.value
+            )
+            val controllerRequest = PutRequest(
+                InetAddress.getLocalHost().hostName,
+                port,
+                request.key,
+                request.value
+            )
+            val controllerResponse = doRequest(
+                controllerHost,
+                controllerPort,
+                controllerRequest,
+                PutResponse::class.java
+            )
+            if (controllerResponse.result !== Result.OK) {
+                PutResponse.Builder()
+                    .timestamp(controllerResponse.timestamp)
+                    .result<Response.AbstractBuilder<PutResponse>>(Result.ERROR)
+                    .message<Response.AbstractBuilder<PutResponse>>(controllerResponse.message)
+                    .build()
+            } else PutResponse.Builder()
+                .timestamp(controllerResponse.timestamp)
+                .result<Response.AbstractBuilder<PutResponse>>(Result.OK)
+                .build()
+        } catch (e: Exception) {
+            handleException(TAG, "Failed to process PUT operation", e)
+            PutResponse.Builder().exception<Response.AbstractBuilder<PutResponse>>(e).build()
         }
     }
 
-    @Override
-    public ReplicationResponse replicate(ReplicationRequest request) {
-        try {
+    override fun replicate(request: ReplicationRequest?): ReplicationResponse? {
+        return try {
             printfLn(
-                    "REPLICATION key: %s value: %s ts: %d",
-                    request.getKey(),
-                    request.getValue(),
-                    request.getTimestamp()
-            );
-
-            log.d("Saving replicated data locally...");
-
-            keyValueRepository.replicate(request.getKey(), request.getValue(), request.getTimestamp());
-
-            return new ReplicationResponse.Builder().result(Result.OK).build();
-        } catch (Exception e) {
-            handleException(TAG, "Failed to process REPLICATE operation", e);
-
-            return new ReplicationResponse.Builder().exception(e).build();
+                "REPLICATION key: %s value: %s ts: %d",
+                request!!.key,
+                request.value,
+                request.timestamp
+            )
+            log.d("Saving replicated data locally...")
+            keyValueRepository.replicate(request.key, request.value, request.timestamp)
+            ReplicationResponse.Builder().result<Response.AbstractBuilder<ReplicationResponse>>(Result.OK).build()
+        } catch (e: Exception) {
+            handleException(TAG, "Failed to process REPLICATE operation", e)
+            ReplicationResponse.Builder().exception<Response.AbstractBuilder<ReplicationResponse>>(e).build()
         }
     }
 
-    @Override
-    public void exit() {
+    override fun exit() {
         try {
-            final ExitRequest request = new ExitRequest(InetAddress.getLocalHost().getHostName(), port);
-
-            log.d("Leaving controller...");
-
-            final ExitResponse response = doRequest(controllerHost, controllerPort, request, ExitResponse.class);
-
-            if (response.getResult() != Result.OK) {
-                throw new RuntimeException(String.format("Failed to send EXIT request: %s", response.getMessage()));
+            val request = ExitRequest(InetAddress.getLocalHost().hostName, port)
+            log.d("Leaving controller...")
+            val response = doRequest(controllerHost, controllerPort, request, ExitResponse::class.java)
+            if (response.result !== Result.OK) {
+                throw RuntimeException(String.format("Failed to send EXIT request: %s", response.message))
             }
-
-            log.d("Successfully left on controller!");
-        } catch (Exception e) {
-            handleException(TAG, "Failed to process EXIT request", e);
+            log.d("Successfully left on controller!")
+        } catch (e: Exception) {
+            handleException(TAG, "Failed to process EXIT request", e)
         }
+    }
+
+    companion object {
+        private const val TAG = "NodeImpl"
+        private val log: Log = ConsoleLog(TAG)
     }
 }

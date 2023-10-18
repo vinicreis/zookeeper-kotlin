@@ -1,102 +1,58 @@
-package io.github.vinicreis.controller;
+package io.github.vinicreis.controller
 
-import io.github.vinicreis.model.Server;
-import io.github.vinicreis.model.log.ConsoleLog;
-import io.github.vinicreis.model.log.Log;
-import io.github.vinicreis.model.request.ExitRequest;
-import io.github.vinicreis.model.request.JoinRequest;
-import io.github.vinicreis.model.request.Request;
-import io.github.vinicreis.model.response.ExitResponse;
-import io.github.vinicreis.model.response.JoinResponse;
+import io.github.vinicreis.model.Server
+import io.github.vinicreis.model.log.ConsoleLog
+import io.github.vinicreis.model.log.Log
+import io.github.vinicreis.model.request.*
+import io.github.vinicreis.model.response.ExitResponse
+import io.github.vinicreis.model.response.JoinResponse
+import io.github.vinicreis.model.util.AssertionUtils.handleException
+import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
+import io.github.vinicreis.model.util.IOUtil.readWithDefault
+import java.util.*
 
-import java.util.Arrays;
+interface Controller : Server {
+    fun join(request: JoinRequest): JoinResponse
+    fun exit(request: ExitRequest): ExitResponse
 
-import static io.github.vinicreis.model.util.AssertionUtils.handleException;
-import static io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish;
-import static io.github.vinicreis.model.util.IOUtil.readWithDefault;
+    data class Node(private val request: Request) {
+        val host: String = request.getHost()
+        val port: Int = request.getPort()
 
-/**
- * Generic interface that represents a {@code Controller} instance of a {@code Server}.
- */
-public interface Controller extends Server {
-    /**
-     * Handles a JOIN request from a {@code Node}
-     * @param request {@code JoinRequest} instance
-     * @return {@code JoinResponse} instance
-     */
-    JoinResponse join(JoinRequest request);
+        override fun equals(other: Any?): Boolean {
+            if (other == null) return false
+            if (other !is Node) return false
 
-    /**
-     * Handles a EXIT request from a {@code Node}
-     * @param request {@code ExitRequest} instance
-     * @return {@code ExitResponse} instance
-     */
-    ExitResponse exit(ExitRequest request);
-
-    /**
-     * Class the represents an {@code Node} instance joined to the {@code Controller}
-     */
-    class Node {
-        private final String host;
-        private final int port;
-
-        public Node(Request request) {
-            this.host = request.getHost();
-            this.port = request.getPort();
+            return other.host == host && other.port == port
         }
 
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) return false;
-            if(!(obj instanceof Node)) return false;
-
-            final Node other = (Node)obj;
-
-            return other.getHost().equals(host) && other.port == port;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s:%d", host, port);
-        }
-
-        /**
-         * Gets the host address of joined node.
-         * @return a {@code String} value with the joined node address
-         */
-        public String getHost() {
-            return host;
-        }
-
-        /**
-         * Gets the port of joined node.
-         * @return a {@code int} value with the joined node port
-         */
-        public int getPort() {
-            return port;
+        override fun toString(): String {
+            return String.format("%s:%d", host, port)
         }
     }
 
-    static void main(String[] args) {
-        try {
-            final Log log = new ConsoleLog("ControllerMain");
-            final boolean debug = Arrays.stream(args).anyMatch((arg) -> arg.equals("--debug") || arg.equals("-d"));
-            final int port = Integer.parseInt(readWithDefault("Digite o valor da porta do servidor", "10097"));
-            final Controller controller = new ControllerImpl(port, debug);
+    companion object {
+        fun main(args: Array<String>) {
+            try {
+                val log: Log = ConsoleLog("ControllerMain")
+                val debug = Arrays.stream(args).anyMatch { arg: String -> arg == "--debug" || arg == "-d" }
+                val port = readWithDefault("Digite o valor da porta do servidor", "10097").toInt()
+                val controller: Controller = ControllerImpl(port, debug)
 
-            log.setDebug(debug);
+                log.isDebug = debug
 
-            log.d("Starting controller...");
-            controller.start();
-            log.d("Controller started!");
+                log.d("Starting controller...")
+                controller.start()
+                log.d("Controller started!")
 
-            pressAnyKeyToFinish();
+                pressAnyKeyToFinish()
 
-            log.d("Finishing controller...");
-            controller.stop();
-            log.d("Controller finished!");
-        } catch (Exception e) {
-            handleException("ControllerMain", "Failed start Controller...", e);
+                log.d("Finishing controller...")
+                controller.stop()
+                log.d("Controller finished!")
+            } catch (e: Exception) {
+                handleException("ControllerMain", "Failed start Controller...", e)
+            }
         }
     }
 }

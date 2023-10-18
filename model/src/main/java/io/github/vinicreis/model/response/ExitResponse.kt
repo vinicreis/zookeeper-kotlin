@@ -1,25 +1,17 @@
-package io.github.vinicreis.model.response;
+package io.github.vinicreis.model.response
 
-import io.github.vinicreis.model.enums.Operation;
-import io.github.vinicreis.model.enums.Result;
+import io.github.vinicreis.model.enums.Operation
+import io.github.vinicreis.model.enums.Result
 
 /**
- * Represents a EXIT response made to when a {@code Node} leaves the connection with {@code Controller}
+ * Represents a EXIT response made to when a `Node` leaves the connection with `Controller`
  */
-public class ExitResponse extends Response {
-    private ExitResponse(Result result, String message) {
-        super(result, message);
-    }
+class ExitResponse(result: Result, message: String) : Response(result, message) {
+    override val operation: Operation = Operation.EXIT
 
-    public static class Builder extends AbstractBuilder<ExitResponse> {
-        @Override
-        public ExitResponse build() {
-            return new ExitResponse(result, message);
+    class Builder : Response.Builder<ExitResponse>() {
+        override fun build(): ExitResponse {
+            return ExitResponse(result, message!!)
         }
-    }
-
-    @Override
-    public Operation getOperation() {
-        return Operation.EXIT;
     }
 }

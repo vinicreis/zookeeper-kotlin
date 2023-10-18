@@ -4,12 +4,8 @@ import java.util.logging.Level
 import java.util.logging.Logger
 
 class ConsoleLog(tag: String) : Log {
-    private val logger: Logger
+    private val logger: Logger = Logger.getLogger(tag)
     override var isDebug: Boolean = false
-
-    init {
-        logger = Logger.getLogger(tag)
-    }
 
     override fun e(msg: String) {
         logger.log(Level.SEVERE, msg)

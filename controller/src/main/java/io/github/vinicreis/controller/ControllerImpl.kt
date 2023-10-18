@@ -1,128 +1,99 @@
-package io.github.vinicreis.controller;
+package io.github.vinicreis.controller
 
-import io.github.vinicreis.model.enums.Result;
-import io.github.vinicreis.model.log.ConsoleLog;
-import io.github.vinicreis.model.log.Log;
-import io.github.vinicreis.model.repository.KeyValueRepository;
-import io.github.vinicreis.model.repository.TimestampRepository;
-import io.github.vinicreis.model.request.ExitRequest;
-import io.github.vinicreis.model.request.JoinRequest;
-import io.github.vinicreis.model.request.PutRequest;
-import io.github.vinicreis.model.request.ReplicationRequest;
-import io.github.vinicreis.model.response.ExitResponse;
-import io.github.vinicreis.model.response.JoinResponse;
-import io.github.vinicreis.model.response.PutResponse;
-import io.github.vinicreis.model.response.ReplicationResponse;
-import io.github.vinicreis.controller.thread.DispatcherThread;
-import io.github.vinicreis.controller.thread.ReplicateThread;
+import io.github.vinicreis.controller.thread.DispatcherThread
+import io.github.vinicreis.controller.thread.ReplicateThread
+import io.github.vinicreis.model.enums.Result
+import io.github.vinicreis.model.log.ConsoleLog
+import io.github.vinicreis.model.log.Log
+import io.github.vinicreis.model.repository.KeyValueRepository
+import io.github.vinicreis.model.repository.TimestampRepository
+import io.github.vinicreis.model.request.ExitRequest
+import io.github.vinicreis.model.request.JoinRequest
+import io.github.vinicreis.model.request.PutRequest
+import io.github.vinicreis.model.request.ReplicationRequest
+import io.github.vinicreis.model.response.*
+import io.github.vinicreis.model.util.AssertionUtils.handleException
+import io.github.vinicreis.model.util.IOUtil.printfLn
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
+    private val timestampRepository: TimestampRepository = TimestampRepository()
+    override val keyValueRepository: KeyValueRepository = KeyValueRepository(timestampRepository)
+    private val dispatcher: DispatcherThread = DispatcherThread(this)
+    private val nodes: MutableList<Controller.Node> = mutableListOf()
 
-import static io.github.vinicreis.model.util.AssertionUtils.handleException;
-import static io.github.vinicreis.model.util.IOUtil.printfLn;
-
-public class ControllerImpl implements Controller {
-    private static final String TAG = "ControllerImpl";
-    private static final Log log = new ConsoleLog(TAG);
-    private final KeyValueRepository keyValueRepository;
-    private final TimestampRepository timestampRepository;
-    private final DispatcherThread dispatcher;
-    private final List<Node> nodes;
-    private final int port;
-
-    public ControllerImpl(int port, boolean debug) throws IOException {
-        this.port = port;
-        this.nodes = new ArrayList<>();
-        this.dispatcher = new DispatcherThread(this);
-        this.timestampRepository = new TimestampRepository();
-        this.keyValueRepository = new KeyValueRepository(this.timestampRepository);
-
-        log.setDebug(debug);
+    init {
+        log.isDebug = debug
     }
 
-    @Override
-    public int getPort() {
-        return port;
-    }
-
-    @Override
-    public KeyValueRepository getKeyValueRepository() {
-        return keyValueRepository;
-    }
-
-    @Override
-    public void start() {
+    override fun start() {
         try {
-            timestampRepository.start();
-            dispatcher.start();
-        } catch (Exception e) {
-            handleException(TAG, "Failed to start Controller!", e);
+            timestampRepository.start()
+            dispatcher.start()
+        } catch (e: Exception) {
+            handleException(TAG, "Failed to start Controller!", e)
         }
     }
 
-    @Override
-    public void stop() {
+    override fun stop() {
         try {
-            timestampRepository.stop();
-            dispatcher.interrupt();
-        } catch (Exception e) {
-            handleException(TAG, "Failed while stopping Controller", e);
+            timestampRepository.stop()
+            dispatcher.interrupt()
+        } catch (e: Exception) {
+            handleException(TAG, "Failed while stopping Controller", e)
         }
     }
 
-    @Override
-    public JoinResponse join(JoinRequest request) {
-        try {
-            log.d(String.format("Joining node %s:%d", request.getHost(), request.getPort()));
+    override fun join(request: JoinRequest): JoinResponse {
+        return try {
+            log.d(String.format("Joining node %s:%d", request.getHost(), request.getPort()))
 
-            if (hasNode(new Node(request))) {
-                log.d(String.format("Node %s:%d already joined!", request.getHost(), request.getPort()));
+            if (hasNode(Controller.Node(request))) {
+                log.d(String.format("Node %s:%d already joined!", request.getHost(), request.getPort()))
 
-                return new JoinResponse.Builder()
-                        .result(Result.ERROR)
-                        .message(String.format(
-                                "Node %s:%d already joined!",
-                                request.getHost(),
-                                request.getPort()
-                        )).build();
+                return JoinResponse.Builder()
+                    .result<Response.AbstractBuilder<JoinResponse>>(Result.ERROR)
+                    .message<Response.AbstractBuilder<JoinResponse>>(
+                        String.format(
+                            "Node %s:%d already joined!",
+                            request.getHost(),
+                            request.getPort()
+                        )
+                    ).build()
             }
 
-            nodes.add(new Node(request));
+            nodes.add(Controller.Node(request))
+            log.d(String.format("Node %s:%d joined!", request.getHost(), request.getPort()))
 
-            log.d(String.format("Node %s:%d joined!", request.getHost(), request.getPort()));
+            JoinResponse.Builder()
+                .result<Response.AbstractBuilder<JoinResponse>>(Result.OK)
+                .build()
+        } catch (e: Exception) {
+            handleException(TAG, "Failed to process JOIN operation", e)
 
-            return new JoinResponse.Builder()
-                    .result(Result.OK)
-                    .build();
-        } catch (Exception e) {
-            handleException(TAG, "Failed to process JOIN operation", e);
-            return new JoinResponse.Builder().exception(e).build();
+            JoinResponse.Builder().exception<Response.AbstractBuilder<JoinResponse>>(e).build()
         }
     }
 
-    @Override
-    public PutResponse put(PutRequest request) {
-        try {
+    override fun put(request: PutRequest): PutResponse {
+        return try {
             printfLn(
-                    "Cliente %s:%d PUT key: %s value: %s",
+                "Cliente %s:%d PUT key: %s value: %s",
+                request.getHost(),
+                request.getPort(),
+                request.key,
+                request.value
+            )
+
+            var timestamp = keyValueRepository.insert(request.key, request.value)
+            val replicationResponse = replicate(
+                ReplicationRequest(
                     request.getHost(),
                     request.getPort(),
-                    request.getKey(),
-                    request.getValue()
-            );
-
-            Long timestamp = keyValueRepository.insert(request.getKey(), request.getValue());
-            final ReplicationResponse replicationResponse = replicate(
-                    new ReplicationRequest(
-                            request.getHost(),
-                            request.getPort(),
-                            request.getKey(),
-                            request.getValue(),
-                            timestamp
-                    )
-            );
+                    request.key,
+                    request.value,
+                    timestamp
+                )
+            )
 
             /*
              * The code below is used to simulate the TRY_OTHER_SERVER_OR_LATER scenario.
@@ -132,123 +103,112 @@ public class ControllerImpl implements Controller {
              * the key "testing", the timestamp sent would be greater and the server
              * should return the TRY_OTHER_SERVER result.
              */
-            if (request.getHost().equals("host.docker.internal") && request.getPort() == 10092
-                    && request.getKey().equals("testing") && request.getValue().equals("tosol")){
-                timestamp += 1000L;
+            if (request.getHost() == "host.docker.internal" && request.getPort() == 10092 && request.key == "testing" && request.value == "tosol") {
+                timestamp += 1000L
             }
 
-            if (replicationResponse.getResult() == Result.OK) {
-                return new PutResponse.Builder()
-                        .timestamp(timestamp)
-                        .result(Result.OK)
-                        .build();
-            }
-
-            return new PutResponse.Builder()
-                    .result(replicationResponse.getResult())
-                    .message(
-                            String.format(
-                                    "Falha ao adicionar valor %s a chave %s",
-                                    request.getValue(),
-                                    request.getKey()
-                            )
+            if (replicationResponse.result === Result.OK) {
+                PutResponse.Builder()
+                    .timestamp(timestamp)
+                    .result<Response.AbstractBuilder<PutResponse>>(Result.OK)
+                    .build()
+            } else PutResponse.Builder()
+                .result<Response.AbstractBuilder<PutResponse>>(replicationResponse.result!!)
+                .message<Response.AbstractBuilder<PutResponse>>(
+                    String.format(
+                        "Falha ao adicionar valor %s a chave %s",
+                        request.value,
+                        request.key
                     )
-                    .build();
-        } catch (Exception e) {
-            handleException(TAG, "Failed to process PUT operation", e);
-
-            return new PutResponse.Builder().exception(e).build();
+                )
+                .build()
+        } catch (e: Exception) {
+            handleException(TAG, "Failed to process PUT operation", e)
+            PutResponse.Builder().exception<Response.AbstractBuilder<PutResponse>>(e).build()
         }
     }
 
-    @Override
-    public ReplicationResponse replicate(ReplicationRequest request) {
-        try {
-            final List<Node> nodesWithError = new ArrayList<>(nodes.size());
-            final List<ReplicateThread> threads = new ArrayList<>(nodes.size());
+    override fun replicate(request: ReplicationRequest): ReplicationResponse {
+        return try {
+            val nodesWithError: MutableList<Controller.Node?> = ArrayList(nodes.size)
+            val threads: MutableList<ReplicateThread> = ArrayList(nodes.size)
 
             // Start all threads to join them later to process request asynchronously
-            for (final Node node : nodes) {
-                final ReplicateThread replicateThread = new ReplicateThread(node, request, log.isDebug());
-
-                threads.add(replicateThread);
-                log.d(String.format("Starting replication to node %s...", node.toString()));
-
-                replicateThread.start();
+            for (node in nodes) {
+                val replicateThread = ReplicateThread(node, request, log.isDebug)
+                threads.add(replicateThread)
+                log.d(String.format("Starting replication to node %s...", node.toString()))
+                replicateThread.start()
             }
 
             // Wait for each result at once, but at least they are already being processed
-            for (final ReplicateThread thread : threads) {
-                thread.join();
-
-                if (thread.getResult() != Result.OK) nodesWithError.add(thread.getNode());
-                log.d(String.format(
+            for (thread in threads) {
+                thread.join()
+                if (thread.result !== Result.OK) nodesWithError.add(thread.node)
+                log.d(
+                    String.format(
                         "Replication to node %s got result: %s",
-                        thread.getNode(),
-                        thread.getResult().toString())
-                );
+                        thread.node,
+                        thread.result.toString()
+                    )
+                )
             }
 
             if (nodesWithError.isEmpty()) {
                 printfLn(
-                        "Enviando PUT_OK ao Cliente %s:%d da key: %s ts: %d",
-                        request.getHost(),
-                        request.getPort(),
-                        request.getKey(),
-                        request.getTimestamp()
-                );
+                    "Enviando PUT_OK ao Cliente %s:%d da key: %s ts: %d",
+                    request.getHost(),
+                    request.getPort(),
+                    request.key,
+                    request.timestamp
+                )
 
-                return new ReplicationResponse.Builder()
-                        .result(Result.OK)
-                        .build();
+                return ReplicationResponse.Builder()
+                    .result<Response.AbstractBuilder<ReplicationResponse>>(Result.OK)
+                    .build()
             }
 
-            return new ReplicationResponse.Builder()
-                    .result(Result.ERROR)
-                    .message(
-                            String.format(
-                                    "Falha ao replicar o dado no peer no(s) servidor(s) %s",
-                                    String.join(
-                                            ", ",
-                                            nodesWithError.stream().map(Node::toString).toArray(String[]::new)
-                                    )
-                            )
-                    ).build();
-        } catch (Exception e) {
-            handleException(TAG, "Failed to process REPLICATE operation", e);
+            ReplicationResponse.Builder()
+                .result<Response.AbstractBuilder<ReplicationResponse>>(Result.ERROR)
+                .message<Response.AbstractBuilder<ReplicationResponse>>(
+                    "Falha ao replicar o dado no peer no(s) servidor(s) ${nodesWithError.joinToString(", ")}"
+                ).build()
+        } catch (e: Exception) {
+            handleException(TAG, "Failed to process REPLICATE operation", e)
 
-            return new ReplicationResponse.Builder().exception(e).build();
+            ReplicationResponse.Builder().exception<Response.AbstractBuilder<ReplicationResponse>>(e).build()
         }
     }
 
-    @Override
-    public ExitResponse exit(ExitRequest request) {
-        try {
-            final Node node = new Node(request);
+    override fun exit(request: ExitRequest): ExitResponse {
+        return try {
+            val node = Controller.Node(request)
+            if (!hasNode(node)) return ExitResponse.Builder()
+                .result<Response.AbstractBuilder<ExitResponse>>(Result.ERROR)
+                .message<Response.AbstractBuilder<ExitResponse>>("Servidor %s:%d não conectado!")
+                .build()
 
-            if (!hasNode(node))
-                return new ExitResponse.Builder()
-                        .result(Result.ERROR)
-                        .message("Servidor %s:%d não conectado!")
-                        .build();
+            nodes.remove(node)
+            log.d(String.format("Node %s exited!", node))
 
-            nodes.remove(node);
+            ExitResponse.Builder()
+                .result<Response.AbstractBuilder<ExitResponse>>(Result.OK)
+                .build()
+        } catch (e: Exception) {
+            handleException(TAG, String.format("Failed to remove node %s:%d", request.getHost(), request.getPort()), e)
 
-            log.d(String.format("Node %s exited!", node));
-
-            return new ExitResponse.Builder()
-                    .result(Result.OK)
-                    .build();
-        } catch (Exception e) {
-            handleException(TAG, String.format("Failed to remove node %s:%d", request.getHost(), request.getPort()), e);
-
-            return new ExitResponse.Builder()
-                    .exception(e)
-                    .build();
+            ExitResponse.Builder()
+                .exception<Response.AbstractBuilder<ExitResponse>>(e)
+                .build()
         }
     }
 
-    private boolean hasNode(Node node) {
-        return nodes.contains(node);
+    private fun hasNode(node: Controller.Node): Boolean {
+        return nodes.contains(node)
+    }
+
+    companion object {
+        private const val TAG = "ControllerImpl"
+        private val log: Log = ConsoleLog(TAG)
     }
 }

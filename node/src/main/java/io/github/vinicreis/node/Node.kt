@@ -1,51 +1,47 @@
-package io.github.vinicreis.node;
+package io.github.vinicreis.node
 
-import io.github.vinicreis.model.Server;
-import io.github.vinicreis.model.log.ConsoleLog;
-import io.github.vinicreis.model.log.Log;
-
-import java.util.Arrays;
-
-import static io.github.vinicreis.model.util.AssertionUtils.handleException;
-import static io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish;
-import static io.github.vinicreis.model.util.IOUtil.readWithDefault;
+import io.github.vinicreis.model.Server
+import io.github.vinicreis.model.log.ConsoleLog
+import io.github.vinicreis.model.log.Log
+import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
+import io.github.vinicreis.model.util.IOUtil.readWithDefault
+import java.util.*
 
 /**
- * Generic interface that represents {@code Node} instance of a {@code Server}
+ * Generic interface that represents `Node` instance of a `Server`
  */
-public interface Node extends Server {
+interface Node : Server {
     /**
-     * Trigger the JOIN process from a {@code Node} to a {@code Controller}
+     * Trigger the JOIN process from a `Node` to a `Controller`
      */
-    void join();
+    fun join()
 
     /**
-     * Trigger the EXIT process from a {@code Node} to a {@code Controller}
+     * Trigger the EXIT process from a `Node` to a `Controller`
      */
-    void exit();
+    fun exit()
 
-    static void main(String[] args) {
-        try {
-            final Log log = new ConsoleLog("NodeMain");
-            final boolean debug = Arrays.stream(args).anyMatch((arg) -> arg.equals("--debug") || arg.equals("-d"));
-            final int port = Integer.parseInt(readWithDefault("Digite a porta do servidor", "10098"));
-            final String controllerHost = readWithDefault("Digite o endereço do Controller", "localhost");
-            final int controllerPort = Integer.parseInt(readWithDefault("Digite a porta do Controller", "10097"));
-            final Node node = new NodeImpl(port, controllerHost, controllerPort, debug);
-
-            log.setDebug(debug);
-
-            log.d("Starting node...");
-            node.start();
-            log.d("Node running...");
-
-            pressAnyKeyToFinish();
-
-            log.d("Finishing node...");
-            node.stop();
-            log.d("Node finished!");
-        } catch (Exception e) {
-            handleException("NodeMain", "Failed to initialize Node", e);
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            try {
+                val log: Log = ConsoleLog("NodeMain")
+                val debug = Arrays.stream(args).anyMatch { arg: String -> arg == "--debug" || arg == "-d" }
+                val port = readWithDefault("Digite a porta do servidor", "10098").toInt()
+                val controllerHost = readWithDefault("Digite o endereço do Controller", "localhost")
+                val controllerPort = readWithDefault("Digite a porta do Controller", "10097").toInt()
+                val node: Node = NodeImpl(port, controllerHost, controllerPort, debug)
+                log.isDebug = debug
+                log.d("Starting node...")
+                node.start()
+                log.d("Node running...")
+                pressAnyKeyToFinish()
+                log.d("Finishing node...")
+                node.stop()
+                log.d("Node finished!")
+            } catch (e: Exception) {
+                handleException("NodeMain", "Failed to initialize Node", e)
+            }
         }
     }
 }

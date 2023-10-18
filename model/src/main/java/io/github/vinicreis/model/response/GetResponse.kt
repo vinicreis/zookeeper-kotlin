@@ -1,78 +1,33 @@
-package io.github.vinicreis.model.response;
+package io.github.vinicreis.model.response
 
-import com.google.gson.annotations.SerializedName;
-import io.github.vinicreis.model.enums.Operation;
-import io.github.vinicreis.model.enums.Result;
+import com.google.gson.annotations.SerializedName
+import io.github.vinicreis.model.enums.Operation
+import io.github.vinicreis.model.enums.Result
 
-/**
- * Represents a GET response made to when a {@code Node} leaves the connection with {@code Controller}
- */
-public class GetResponse extends Response {
-    @SerializedName("value") private final String value;
-    @SerializedName("timestamp") private final Long timestamp;
+class GetResponse(
+    result: Result,
+    message: String?,
+    @SerializedName("timestamp") val timestamp: Long?,
+    @SerializedName("value") val value: String?
+) : Response(result, message) {
+    override val operation: Operation = Operation.GET
 
-    private GetResponse(Result result, String message, String value, Long timestamp) {
-        super(result, message);
+    class Builder : Response.Builder<GetResponse>() {
+        private var value: String? = null
+        private var timestamp: Long? = null
 
-        this.value = value;
-        this.timestamp = timestamp;
-    }
+        override fun build() = GetResponse(result, message, timestamp, value)
 
-    /**
-     * GET response builder class
-     */
-    public static class Builder extends AbstractBuilder<GetResponse> {
-        private String value = null;
-        private Long timestamp = null;
+        fun value(value: String): Builder {
+            this.value = value
 
-        /**
-         * Adds a value to be returned on the response.
-         * @param value a {@code String} value to be added
-         * @return a {@code Builder} instance to chain building
-         */
-        public Builder value(String value) {
-            this.value = value;
-
-            return this;
+            return this
         }
 
-        /**
-         * Adds a timestamp to be returned on the response.
-         * @param timestamp a {@code String} value to be added
-         * @return a {@code Builder} instance to chain building
-         */
-        public Builder timestamp(Long timestamp) {
-            this.timestamp = timestamp;
+        fun timestamp(timestamp: Long): Builder {
+            this.timestamp = timestamp
 
-            return this;
+            return this
         }
-
-        @Override
-        public GetResponse build() {
-            return new GetResponse(result, message, value, timestamp);
-        }
-    }
-
-    @Override
-    public Operation getOperation() {
-        return Operation.GET;
-    }
-
-    /**
-     * Gets the value found by the {@code Server} if found.
-     * @return {@code null} if the value is found and is not outdated. Otherwise,
-     * a {@code String} value associated to the key
-     */
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     *
-     * @return {@code null} if the value is found and is not outdated. Otherwise,
-     * a {@code Long} value representing the timestamp related to the key receibed
-     */
-    public Long getTimestamp() {
-        return timestamp;
     }
 }

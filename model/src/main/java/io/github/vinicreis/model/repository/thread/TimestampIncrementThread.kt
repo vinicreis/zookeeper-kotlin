@@ -1,68 +1,46 @@
-package io.github.vinicreis.model.repository.thread;
+package io.github.vinicreis.model.repository.thread
 
-import io.github.vinicreis.model.log.ConsoleLog;
-import io.github.vinicreis.model.log.Log;
+import io.github.vinicreis.model.log.ConsoleLog
+import io.github.vinicreis.model.log.Log
+import java.util.concurrent.atomic.AtomicLong
 
-import java.util.concurrent.atomic.AtomicLong;
+class TimestampIncrementThread(private val step: Long) : Thread() {
+    private var running = false
+    private val current = AtomicLong(0L)
 
-/**
- * Thread started to keep incrementing the timestamp on background based on the {@code step} time.
- * Note that the {@code step} parameter denotes the time between each timestamp increment.
- */
-public class TimestampIncrementThread extends Thread {
-    private static final String TAG = "TimestampIncrementThread";
-    private static final Log log = new ConsoleLog(TAG);
-    private final Long step;
-    private boolean running = false;
-    private final AtomicLong current = new AtomicLong(0L);
-
-    public TimestampIncrementThread(Long step) {
-        this.step = step;
-    }
-
-    @Override
-    public void run() {
+    override fun run() {
         try {
-            running = true;
-
+            running = true
             while (running) {
-                if (current.get() == Long.MAX_VALUE)
-                    current.set(0L);
-                else
-                    current.incrementAndGet();
-
-                sleep(step);
+                if (current.get() == Long.MAX_VALUE) current.set(0L) else current.incrementAndGet()
+                sleep(step)
             }
-        } catch (InterruptedException e) {
-            log.d("Timestamp clock interrupted!");
-
-            reset();
+        } catch (e: InterruptedException) {
+            log.d("Timestamp clock interrupted!")
+            reset()
         }
     }
 
-    @Override
-    public void interrupt() {
-        running = false;
+    override fun interrupt() {
+        running = false
 
-        super.interrupt();
+        super.interrupt()
     }
 
-    /**
-     * Get the current timestamp value registered.
-     * @return a {@code Long} value with the current timestamp
-     * @throws IllegalStateException in case the method is called while the repository thread is not running.
-     */
-    public Long getCurrent() throws IllegalStateException {
-        if(running) return current.get();
+    @Throws(IllegalStateException::class)
+    fun getCurrent(): Long {
+        if (running) return current.get()
 
-        throw new IllegalStateException("Timestamp clock not running");
+        throw IllegalStateException("Timestamp clock not running")
     }
 
-    /**
-     * Stops the increment and sets the current value to zero.
-     */
-    public void reset() {
-        running = false;
-        current.set(0L);
+    fun reset() {
+        running = false
+        current.set(0L)
+    }
+
+    companion object {
+        private const val TAG = "TimestampIncrementThread"
+        private val log: Log = ConsoleLog(TAG)
     }
 }

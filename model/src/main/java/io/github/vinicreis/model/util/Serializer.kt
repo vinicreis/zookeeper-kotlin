@@ -1,19 +1,17 @@
-package io.github.vinicreis.model.util;
+package io.github.vinicreis.model.util
 
-import com.google.gson.Gson;
+import com.google.gson.Gson
 
-/**
- * Implements static methods to handle serialization operation to have a default
- * serialization strategy for the whole project.
- */
-public class Serializer {
-    private static final Gson gson = new Gson();
+object Serializer {
+    private val gson = Gson()
 
-    public static String toJson(Object obj) {
-        return gson.toJson(obj);
+    @JvmStatic
+    fun toJson(obj: Any?): String {
+        return gson.toJson(obj)
     }
 
-    public static <T> T fromJson(String json, Class<T> clazz) {
-        return gson.fromJson(json, clazz);
+    @JvmStatic
+    fun <T> fromJson(json: String?, clazz: Class<T>?): T {
+        return gson.fromJson(json, clazz)
     }
 }

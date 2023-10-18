@@ -1,69 +1,51 @@
-package io.github.vinicreis.controller.thread;
+package io.github.vinicreis.controller.thread
 
-import io.github.vinicreis.controller.Controller;
-import io.github.vinicreis.model.enums.Result;
-import io.github.vinicreis.model.log.ConsoleLog;
-import io.github.vinicreis.model.log.Log;
-import io.github.vinicreis.model.request.ReplicationRequest;
-import io.github.vinicreis.model.response.ReplicationResponse;
-
-import java.io.IOException;
-
-import static io.github.vinicreis.model.util.AssertionUtils.handleException;
-import static io.github.vinicreis.model.util.NetworkUtil.doRequest;
+import io.github.vinicreis.controller.Controller
+import io.github.vinicreis.model.enums.Result
+import io.github.vinicreis.model.log.ConsoleLog
+import io.github.vinicreis.model.log.Log
+import io.github.vinicreis.model.request.ReplicationRequest
+import io.github.vinicreis.model.response.ReplicationResponse
+import io.github.vinicreis.model.util.NetworkUtil.doRequest
+import java.io.IOException
+import kotlin.concurrent.Volatile
 
 /**
  * Thread to send a REPLICATE request to nodes asynchronously.
  */
-public class ReplicateThread extends Thread {
-    private static final String TAG = "ReplicateThread";
-    private static final Log log = new ConsoleLog(TAG);
-    private volatile Result result;
-    private final Controller.Node node;
-    private final ReplicationRequest request;
-    private final boolean debug;
+class ReplicateThread(val node: Controller.Node, private val request: ReplicationRequest?, private val debug: Boolean) :
+    Thread() {
+    @Volatile
+    var result: Result? = null
+        private set
 
-    public ReplicateThread(Controller.Node node, ReplicationRequest request, boolean debug) {
-        this.request = request;
-        this.node = node;
-        this.debug = debug;
-    }
-
-    @Override
-    public void run() {
-        try {
+    override fun run() {
+        result = try {
             log.d(
-                    String.format(
-                            "Sending replication request of key %s with value %s to %s:%d",
-                            request.getKey(),
-                            request.getValue(),
-                            node.getHost(),
-                            node.getPort()
-                    )
-            );
-
-
-            final ReplicationResponse response = doRequest(
-                    node.getHost(),
-                    node.getPort(),
-                    request,
-                    ReplicationResponse.class,
-                    debug
-            );
-
-            result = response.getResult();
-        } catch (IOException e) {
-            handleException(TAG, String.format("Failed during REPLICATE to node %s:%d", node.getHost(), node.getPort()), e);
-
-            result = Result.EXCEPTION;
+                String.format(
+                    "Sending replication request of key %s with value %s to %s:%d",
+                    request!!.key,
+                    request.value,
+                    node.host,
+                    node.port
+                )
+            )
+            val response = doRequest(
+                node.host,
+                node.port,
+                request,
+                ReplicationResponse::class.java,
+                debug
+            )
+            response!!.result
+        } catch (e: IOException) {
+            handleException(TAG, String.format("Failed during REPLICATE to node %s:%d", node.host, node.port), e)
+            Result.EXCEPTION
         }
     }
 
-    public Result getResult() {
-        return result;
-    }
-
-    public Controller.Node getNode() {
-        return node;
+    companion object {
+        private const val TAG = "ReplicateThread"
+        private val log: Log = ConsoleLog(TAG)
     }
 }
