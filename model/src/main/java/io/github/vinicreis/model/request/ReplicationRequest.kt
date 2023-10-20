@@ -7,7 +7,8 @@ class ReplicationRequest(
     host: String,
     port: Int,
     @SerializedName("key") val key: String,
-    @SerializedName("value") val value: String
+    @SerializedName("value") val value: String,
+    @SerializedName("timestamp") val timestamp: Long,
 ) : Request(host, port) {
     override val operation: Operation = Operation.EXIT
 }

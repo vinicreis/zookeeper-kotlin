@@ -8,8 +8,4 @@ class ReplicationResponse(
     message: String?,
 ) : Response(result, message) {
     override val operation: Operation = Operation.REPLICATE
-
-    class Builder : Response.Builder<ReplicationResponse>() {
-        override fun build() = ReplicationResponse(result, message)
-    }
 }

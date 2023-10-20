@@ -45,24 +45,24 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
 
     override fun join(request: JoinRequest): JoinResponse {
         return try {
-            log.d(String.format("Joining node %s:%d", request.getHost(), request.getPort()))
+            log.d(String.format("Joining node %s:%d", request.host, request.port))
 
             if (hasNode(Controller.Node(request))) {
-                log.d(String.format("Node %s:%d already joined!", request.getHost(), request.getPort()))
+                log.d(String.format("Node %s:%d already joined!", request.host, request.port))
 
                 return JoinResponse.Builder()
                     .result<Response.AbstractBuilder<JoinResponse>>(Result.ERROR)
                     .message<Response.AbstractBuilder<JoinResponse>>(
                         String.format(
                             "Node %s:%d already joined!",
-                            request.getHost(),
-                            request.getPort()
+                            request.host,
+                            request.port
                         )
                     ).build()
             }
 
             nodes.add(Controller.Node(request))
-            log.d(String.format("Node %s:%d joined!", request.getHost(), request.getPort()))
+            log.d(String.format("Node %s:%d joined!", request.host, request.port))
 
             JoinResponse.Builder()
                 .result<Response.AbstractBuilder<JoinResponse>>(Result.OK)
@@ -78,8 +78,8 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
         return try {
             printfLn(
                 "Cliente %s:%d PUT key: %s value: %s",
-                request.getHost(),
-                request.getPort(),
+                request.host,
+                request.port,
                 request.key,
                 request.value
             )
@@ -87,8 +87,8 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
             var timestamp = keyValueRepository.insert(request.key, request.value)
             val replicationResponse = replicate(
                 ReplicationRequest(
-                    request.getHost(),
-                    request.getPort(),
+                    request.host,
+                    request.port,
                     request.key,
                     request.value,
                     timestamp
@@ -103,7 +103,7 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
              * the key "testing", the timestamp sent would be greater and the server
              * should return the TRY_OTHER_SERVER result.
              */
-            if (request.getHost() == "host.docker.internal" && request.getPort() == 10092 && request.key == "testing" && request.value == "tosol") {
+            if (request.host == "host.docker.internal" && request.port == 10092 && request.key == "testing" && request.value == "tosol") {
                 timestamp += 1000L
             }
 
@@ -157,8 +157,8 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
             if (nodesWithError.isEmpty()) {
                 printfLn(
                     "Enviando PUT_OK ao Cliente %s:%d da key: %s ts: %d",
-                    request.getHost(),
-                    request.getPort(),
+                    request.host,
+                    request.port,
                     request.key,
                     request.timestamp
                 )
@@ -195,7 +195,7 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
                 .result<Response.AbstractBuilder<ExitResponse>>(Result.OK)
                 .build()
         } catch (e: Exception) {
-            handleException(TAG, String.format("Failed to remove node %s:%d", request.getHost(), request.getPort()), e)
+            handleException(TAG, String.format("Failed to remove node %s:%d", request.host, request.port), e)
 
             ExitResponse.Builder()
                 .exception<Response.AbstractBuilder<ExitResponse>>(e)

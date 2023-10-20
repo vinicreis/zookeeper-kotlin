@@ -16,8 +16,8 @@ interface Controller : Server {
     fun exit(request: ExitRequest): ExitResponse
 
     data class Node(private val request: Request) {
-        val host: String = request.getHost()
-        val port: Int = request.getPort()
+        val host: String = request.host
+        val port: Int = request.port
 
         override fun equals(other: Any?): Boolean {
             if (other == null) return false
@@ -35,7 +35,7 @@ interface Controller : Server {
         fun main(args: Array<String>) {
             try {
                 val log: Log = ConsoleLog("ControllerMain")
-                val debug = Arrays.stream(args).anyMatch { arg: String -> arg == "--debug" || arg == "-d" }
+                val debug = args.any { it in listOf("--debug", "-d") }
                 val port = readWithDefault("Digite o valor da porta do servidor", "10097").toInt()
                 val controller: Controller = ControllerImpl(port, debug)
 

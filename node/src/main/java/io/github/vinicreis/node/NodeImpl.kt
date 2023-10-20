@@ -58,8 +58,8 @@ class NodeImpl(
         return try {
             printfLn(
                 "Encaminhando %s:%d PUT key: %s value: %s",
-                request!!.getHost(),
-                request.getPort(),
+                request!!.host,
+                request.port,
                 request.key,
                 request.value
             )

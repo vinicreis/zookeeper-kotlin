@@ -8,8 +8,4 @@ class JoinResponse(
     message: String?,
 ) : Response(result, message) {
     override val operation: Operation = Operation.JOIN
-
-    class Builder : Response.Builder<JoinResponse>() {
-        override fun build() = JoinResponse(result, message)
-    }
 }

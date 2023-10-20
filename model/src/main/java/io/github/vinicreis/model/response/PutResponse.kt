@@ -10,16 +10,4 @@ class PutResponse(
     @SerializedName("timestamp") val timestamp: Long?
 ) : Response(result, message) {
     override val operation: Operation = Operation.PUT
-
-    class Builder : Response.Builder<PutResponse>() {
-        private var timestamp: Long? = null
-
-        override fun build() = PutResponse(result, message, timestamp)
-
-        fun timestamp(timestamp: Long): Builder {
-            this.timestamp = timestamp
-
-            return this
-        }
-    }
 }
