@@ -16,7 +16,7 @@ import kotlin.concurrent.Volatile
 class ReplicateThread(val node: Controller.Node, private val request: ReplicationRequest?, private val debug: Boolean) :
     Thread() {
     @Volatile
-    var result: Result? = null
+    var result: Result = null
         private set
 
     override fun run() {
@@ -37,7 +37,7 @@ class ReplicateThread(val node: Controller.Node, private val request: Replicatio
                 ReplicationResponse::class.java,
                 debug
             )
-            response!!.result
+            response.result
         } catch (e: IOException) {
             handleException(TAG, String.format("Failed during REPLICATE to node %s:%d", node.host, node.port), e)
             Result.EXCEPTION

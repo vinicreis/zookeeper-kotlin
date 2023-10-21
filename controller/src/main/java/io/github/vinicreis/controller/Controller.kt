@@ -1,19 +1,21 @@
 package io.github.vinicreis.controller
 
 import io.github.vinicreis.model.Server
+import io.github.vinicreis.model.enums.Result
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
-import io.github.vinicreis.model.request.*
+import io.github.vinicreis.model.request.ExitRequest
+import io.github.vinicreis.model.request.JoinRequest
+import io.github.vinicreis.model.request.Request
 import io.github.vinicreis.model.response.ExitResponse
 import io.github.vinicreis.model.response.JoinResponse
 import io.github.vinicreis.model.util.AssertionUtils.handleException
 import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readWithDefault
-import java.util.*
 
 interface Controller : Server {
-    fun join(request: JoinRequest): JoinResponse
-    fun exit(request: ExitRequest): ExitResponse
+    fun join(request: JoinRequest): Result<JoinResponse>
+    fun exit(request: ExitRequest): Result<ExitResponse>
 
     data class Node(private val request: Request) {
         val host: String = request.host

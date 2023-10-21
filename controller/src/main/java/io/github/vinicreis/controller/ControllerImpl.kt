@@ -1,6 +1,6 @@
 package io.github.vinicreis.controller
 
-import io.github.vinicreis.controller.thread.DispatcherThread
+import io.github.vinicreis.controller.thread.Dispatcher
 import io.github.vinicreis.controller.thread.ReplicateThread
 import io.github.vinicreis.model.enums.Result
 import io.github.vinicreis.model.log.ConsoleLog
@@ -11,14 +11,17 @@ import io.github.vinicreis.model.request.ExitRequest
 import io.github.vinicreis.model.request.JoinRequest
 import io.github.vinicreis.model.request.PutRequest
 import io.github.vinicreis.model.request.ReplicationRequest
-import io.github.vinicreis.model.response.*
+import io.github.vinicreis.model.response.ExitResponse
+import io.github.vinicreis.model.response.JoinResponse
+import io.github.vinicreis.model.response.PutResponse
+import io.github.vinicreis.model.response.ReplicationResponse
 import io.github.vinicreis.model.util.AssertionUtils.handleException
 import io.github.vinicreis.model.util.IOUtil.printfLn
 
 class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
     private val timestampRepository: TimestampRepository = TimestampRepository()
     override val keyValueRepository: KeyValueRepository = KeyValueRepository(timestampRepository)
-    private val dispatcher: DispatcherThread = DispatcherThread(this)
+    private val dispatcher: Dispatcher = Dispatcher(this)
     private val nodes: MutableList<Controller.Node> = mutableListOf()
 
     init {
@@ -37,44 +40,40 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
     override fun stop() {
         try {
             timestampRepository.stop()
-            dispatcher.interrupt()
+            dispatcher.stop()
         } catch (e: Exception) {
             handleException(TAG, "Failed while stopping Controller", e)
         }
     }
 
-    override fun join(request: JoinRequest): JoinResponse {
+    override fun join(request: JoinRequest): Result<JoinResponse> {
         return try {
             log.d(String.format("Joining node %s:%d", request.host, request.port))
 
             if (hasNode(Controller.Node(request))) {
                 log.d(String.format("Node %s:%d already joined!", request.host, request.port))
 
-                return JoinResponse.Builder()
-                    .result<Response.AbstractBuilder<JoinResponse>>(Result.ERROR)
-                    .message<Response.AbstractBuilder<JoinResponse>>(
-                        String.format(
-                            "Node %s:%d already joined!",
-                            request.host,
-                            request.port
-                        )
-                    ).build()
+                return Result.ErrorResult(
+                    message = "Node ${request.host}:${request.port} is already joined!"
+                )
             }
 
             nodes.add(Controller.Node(request))
-            log.d(String.format("Node %s:%d joined!", request.host, request.port))
+            log.d("Node ${request.host}:${request.port} joined!")
 
-            JoinResponse.Builder()
-                .result<Response.AbstractBuilder<JoinResponse>>(Result.OK)
-                .build()
+            Result.OkResult(
+                data = JoinResponse()
+            )
         } catch (e: Exception) {
             handleException(TAG, "Failed to process JOIN operation", e)
 
-            JoinResponse.Builder().exception<Response.AbstractBuilder<JoinResponse>>(e).build()
+            Result.ExceptionResult(
+                e = e
+            )
         }
     }
 
-    override fun put(request: PutRequest): PutResponse {
+    override fun put(request: PutRequest): Result<PutResponse> {
         return try {
             printfLn(
                 "Cliente %s:%d PUT key: %s value: %s",
@@ -107,28 +106,22 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
                 timestamp += 1000L
             }
 
-            if (replicationResponse.result === Result.OK) {
-                PutResponse.Builder()
-                    .timestamp(timestamp)
-                    .result<Response.AbstractBuilder<PutResponse>>(Result.OK)
-                    .build()
-            } else PutResponse.Builder()
-                .result<Response.AbstractBuilder<PutResponse>>(replicationResponse.result!!)
-                .message<Response.AbstractBuilder<PutResponse>>(
-                    String.format(
-                        "Falha ao adicionar valor %s a chave %s",
-                        request.value,
-                        request.key
-                    )
+            when(replicationResponse) {
+                is Result.OkResult<ReplicationResponse> -> Result.OkResult(
+                    data = PutResponse(timestamp)
                 )
-                .build()
+                else -> replicationResponse
+            }
         } catch (e: Exception) {
             handleException(TAG, "Failed to process PUT operation", e)
-            PutResponse.Builder().exception<Response.AbstractBuilder<PutResponse>>(e).build()
+
+            Result.ExceptionResult(
+                e = e
+            )
         }
     }
 
-    override fun replicate(request: ReplicationRequest): ReplicationResponse {
+    override fun replicate(request: ReplicationRequest): Result<ReplicationResponse> {
         return try {
             val nodesWithError: MutableList<Controller.Node?> = ArrayList(nodes.size)
             val threads: MutableList<ReplicateThread> = ArrayList(nodes.size)
@@ -144,7 +137,7 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
             // Wait for each result at once, but at least they are already being processed
             for (thread in threads) {
                 thread.join()
-                if (thread.result !== Result.OK) nodesWithError.add(thread.node)
+                if (thread.result !is Result.OkResult<*>) nodesWithError.add(thread.node)
                 log.d(
                     String.format(
                         "Replication to node %s got result: %s",
@@ -163,43 +156,42 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
                     request.timestamp
                 )
 
-                return ReplicationResponse.Builder()
-                    .result<Response.AbstractBuilder<ReplicationResponse>>(Result.OK)
-                    .build()
+                return Result.OkResult(
+                    data = ReplicationResponse()
+                )
             }
 
-            ReplicationResponse.Builder()
-                .result<Response.AbstractBuilder<ReplicationResponse>>(Result.ERROR)
-                .message<Response.AbstractBuilder<ReplicationResponse>>(
-                    "Falha ao replicar o dado no peer no(s) servidor(s) ${nodesWithError.joinToString(", ")}"
-                ).build()
+            Result.ErrorResult(
+                message = "Failed to replicate data on servers ${nodesWithError.joinToString(", ")}"
+            )
         } catch (e: Exception) {
             handleException(TAG, "Failed to process REPLICATE operation", e)
 
-            ReplicationResponse.Builder().exception<Response.AbstractBuilder<ReplicationResponse>>(e).build()
+            Result.ExceptionResult(
+                e = e
+            )
         }
     }
 
-    override fun exit(request: ExitRequest): ExitResponse {
+    override fun exit(request: ExitRequest): Result<ExitResponse> {
         return try {
             val node = Controller.Node(request)
-            if (!hasNode(node)) return ExitResponse.Builder()
-                .result<Response.AbstractBuilder<ExitResponse>>(Result.ERROR)
-                .message<Response.AbstractBuilder<ExitResponse>>("Servidor %s:%d não conectado!")
-                .build()
+            if (!hasNode(node)) return Result.ErrorResult(
+                message = "Servidor ${request.host}:${request.port} não conectado!"
+            )
 
             nodes.remove(node)
             log.d(String.format("Node %s exited!", node))
 
-            ExitResponse.Builder()
-                .result<Response.AbstractBuilder<ExitResponse>>(Result.OK)
-                .build()
+            Result.OkResult(
+                data = ExitResponse()
+            )
         } catch (e: Exception) {
             handleException(TAG, String.format("Failed to remove node %s:%d", request.host, request.port), e)
 
-            ExitResponse.Builder()
-                .exception<Response.AbstractBuilder<ExitResponse>>(e)
-                .build()
+            Result.ExceptionResult(
+                e = e
+            )
         }
     }
 

@@ -10,7 +10,6 @@ import io.github.vinicreis.model.response.GetResponse
 import io.github.vinicreis.model.response.PutResponse
 import io.github.vinicreis.model.response.ReplicationResponse
 import io.github.vinicreis.model.util.AssertionUtils
-import io.github.vinicreis.model.util.IOUtil
 
 interface Server {
     val port: Int
@@ -18,59 +17,35 @@ interface Server {
 
     fun start()
     fun stop()
-    fun put(request: PutRequest): PutResponse
-    fun replicate(request: ReplicationRequest): ReplicationResponse
+    fun put(request: PutRequest): Result<PutResponse>
+    fun replicate(request: ReplicationRequest): Result<ReplicationResponse>
 
-    fun get(request: GetRequest): GetResponse {
-        val response: GetResponse = try {
-            IOUtil.printf(
-                "Cliente %s:%d GET key: %s ts: %d. ",
-                request.host,
-                request.port,
-                request.key,
-                request.timestamp
-            )
+    fun get(request: GetRequest): Result<GetResponse> {
+        return try {
             val entry = keyValueRepository.find(request.key, request.timestamp)
-            if (entry == null) {
-                GetResponse.Builder()
-                    .result(Result.NOT_FOUND)
-                    .message(
-                        String.format(
-                            "Valor com a chave %s não encontrado",
-                            request.key
-                        )
+
+            entry?.let {
+                Result.OkResult(
+                    data = GetResponse(
+                        key = request.key,
+                        value = it.value,
+                        timestamp = it.timestamp
                     )
-                    .build()
-            } else {
-                IOUtil.printfLn(
-                    "Cliente %s:%d GET key: %s ts: %d. Meu ts é %d, portanto devolvendo %s",
-                    request.host,
-                    request.port,
-                    request.key,
-                    request.timestamp,
-                    entry.timestamp,
-                    entry.value
                 )
-                GetResponse.Builder()
-                    .timestamp(entry.timestamp)
-                    .value(entry.value)
-                    .result(Result.OK)
-                    .build()
-            }
+            } ?: Result.NotFound(
+                message = "Value with key ${request.key} was not found"
+            )
         } catch (e: OutdatedEntryException) {
-            GetResponse.Builder()
-                .timestamp(e.currentTimestamp)
-                .result(Result.TRY_OTHER_SERVER_OR_LATER)
-                .message("Please, try again later or try other server")
-                .build()
+            Result.TryOtherServer(
+                message = "Please, try again later or try other server",
+                timestamp = e.currentTimestamp
+            )
         } catch (e: Exception) {
             AssertionUtils.handleException("Server", "Failed to process GET operation", e)
-            GetResponse.Builder().exception(e).build()
+
+            Result.ExceptionResult(
+                e = e
+            )
         }
-
-        IOUtil.printf("Meu ts é %d, portanto devolvendo ", response.timestamp)
-        IOUtil.printLn(if(response.result === Result.OK) response.value else response.result.toString())
-
-        return response
     }
 }

@@ -4,6 +4,9 @@ import io.github.vinicreis.model.Server
 import io.github.vinicreis.model.enums.Operation
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
+import io.github.vinicreis.model.util.AssertionUtils.handleException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.DataInputStream
 import java.io.EOFException
 import java.net.ServerSocket
@@ -13,16 +16,12 @@ import java.net.SocketException
  * Thread to keep listening and dispatch workers to process Controller's operations.
  * @see WorkerThread
  */
-class DispatcherThread(private val server: Server) : Thread() {
+class Dispatcher(private val server: Server) {
     private val log: Log = ConsoleLog(TAG)
-    private val serverSocket: ServerSocket
+    private val serverSocket: ServerSocket = ServerSocket(server.port)
     private var running = true
 
-    init {
-        serverSocket = ServerSocket(server.port)
-    }
-
-    override fun run() {
+    private suspend fun run() = withContext(Dispatchers.IO) {
         try {
             while (running) {
                 log.d("Listening for operation requests...")
@@ -43,7 +42,11 @@ class DispatcherThread(private val server: Server) : Thread() {
         }
     }
 
-    override fun interrupt() {
+    fun start() {
+
+    }
+
+    fun stop() {
         try {
             super.interrupt()
             serverSocket.close()
