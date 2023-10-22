@@ -3,9 +3,9 @@ package io.github.vinicreis.node
 import io.github.vinicreis.model.Server
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
-import io.github.vinicreis.model.util.Utils.handleException
 import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readWithDefault
+import io.github.vinicreis.model.util.handleException
 import java.util.*
 
 interface Node : Server {
@@ -13,6 +13,8 @@ interface Node : Server {
     fun exit()
 
     companion object {
+        private const val TAG = "NodeMain"
+
         @JvmStatic
         fun main(args: Array<String>) {
             try {
@@ -30,8 +32,8 @@ interface Node : Server {
                 log.d("Finishing node...")
                 node.stop()
                 log.d("Node finished!")
-            } catch (e: Exception) {
-                handleException("NodeMain", "Failed to initialize Node", e)
+            } catch (e: Throwable) {
+                handleException(TAG, "Failed to initialize Node", e)
             }
         }
     }

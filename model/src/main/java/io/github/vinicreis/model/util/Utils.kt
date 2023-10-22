@@ -5,11 +5,11 @@ import io.github.vinicreis.model.log.ConsoleLog
 fun handleException(tag: String, message: String, block: () -> Unit) {
     try {
         block()
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         ConsoleLog(tag).e(message, e)
     }
 }
 
-fun handleException(tag: String, message: String, e: Exception) {
+fun handleException(tag: String, message: String, e: Throwable) {
     ConsoleLog(tag).e(message, e)
 }

@@ -1,5 +1,8 @@
 package io.github.vinicreis.model.response
 
-data class ExitResponse(
-    override val message: String? = null
-) : Response
+import io.github.vinicreis.model.enums.OperationResult
+
+class ExitResponse(
+    result: OperationResult,
+    message: String? = null
+) : Response(result, message)

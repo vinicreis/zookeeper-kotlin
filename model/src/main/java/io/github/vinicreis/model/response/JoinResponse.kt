@@ -1,3 +1,8 @@
 package io.github.vinicreis.model.response
 
-class JoinResponse
+import io.github.vinicreis.model.enums.OperationResult
+
+class JoinResponse(
+    result: OperationResult,
+    message: String? = null
+) : Response(result, message)

@@ -1,6 +1,6 @@
 package io.github.vinicreis.node
 
-import io.github.vinicreis.model.enums.Result
+import io.github.vinicreis.model.enums.OperationResult
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
 import io.github.vinicreis.model.repository.KeyValueRepository
@@ -11,6 +11,7 @@ import io.github.vinicreis.model.request.ReplicationRequest
 import io.github.vinicreis.model.response.*
 import io.github.vinicreis.model.util.IOUtil.printfLn
 import io.github.vinicreis.model.util.NetworkUtil.doRequest
+import io.github.vinicreis.model.util.handleException
 import io.github.vinicreis.node.thread.DispatcherThread
 import java.net.InetAddress
 
@@ -41,22 +42,22 @@ class NodeImpl(
         try {
             val request = JoinRequest(InetAddress.getLocalHost().hostName, port)
             val response = doRequest(controllerHost, controllerPort, request, JoinResponse::class.java)
-            if (response.result !== Result.OK) {
+            if (response.result !== OperationResult.OK) {
                 throw RuntimeException(String.format("Failed to join on controller server: %s", response.message))
             }
 
             // TODO: Save controller info to validate REPLICATE requests
             log.d("Node successfully joined!")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(TAG, "Failed to process JOIN operation", e)
         }
     }
 
-    override fun put(request: PutRequest?): PutResponse? {
+    override fun put(request: PutRequest): PutResponse {
         return try {
             printfLn(
                 "Encaminhando %s:%d PUT key: %s value: %s",
-                request!!.host,
+                request.host,
                 request.port,
                 request.key,
                 request.value
@@ -83,13 +84,13 @@ class NodeImpl(
                 .timestamp(controllerResponse.timestamp)
                 .result<Response.AbstractBuilder<PutResponse>>(Result.OK)
                 .build()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(TAG, "Failed to process PUT operation", e)
             PutResponse.Builder().exception<Response.AbstractBuilder<PutResponse>>(e).build()
         }
     }
 
-    override fun replicate(request: ReplicationRequest?): ReplicationResponse? {
+    override fun replicate(request: ReplicationRequest): ReplicationResponse {
         return try {
             printfLn(
                 "REPLICATION key: %s value: %s ts: %d",
@@ -100,7 +101,7 @@ class NodeImpl(
             log.d("Saving replicated data locally...")
             keyValueRepository.replicate(request.key, request.value, request.timestamp)
             ReplicationResponse.Builder().result<Response.AbstractBuilder<ReplicationResponse>>(Result.OK).build()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(TAG, "Failed to process REPLICATE operation", e)
             ReplicationResponse.Builder().exception<Response.AbstractBuilder<ReplicationResponse>>(e).build()
         }
@@ -115,7 +116,7 @@ class NodeImpl(
                 throw RuntimeException(String.format("Failed to send EXIT request: %s", response.message))
             }
             log.d("Successfully left on controller!")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(TAG, "Failed to process EXIT request", e)
         }
     }

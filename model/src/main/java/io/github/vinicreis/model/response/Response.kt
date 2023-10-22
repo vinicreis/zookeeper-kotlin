@@ -1,7 +1,9 @@
 package io.github.vinicreis.model.response
 
 import com.google.gson.annotations.SerializedName
+import io.github.vinicreis.model.enums.OperationResult
 
-interface Response {
-    val message: String?
-}
+abstract class Response(
+    @SerializedName("result") val result: OperationResult,
+    @SerializedName("message") val message: String?
+)

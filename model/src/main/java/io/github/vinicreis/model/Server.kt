@@ -1,6 +1,5 @@
 package io.github.vinicreis.model
 
-import io.github.vinicreis.model.enums.Result
 import io.github.vinicreis.model.exception.OutdatedEntryException
 import io.github.vinicreis.model.repository.KeyValueRepository
 import io.github.vinicreis.model.request.GetRequest
@@ -38,7 +37,7 @@ interface Server {
                 message = "Please, try again later or try other server",
                 timestamp = e.currentTimestamp
             )
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Utils.handleException("Server", "Failed to process GET operation", e)
 
             Result.ExceptionResult(

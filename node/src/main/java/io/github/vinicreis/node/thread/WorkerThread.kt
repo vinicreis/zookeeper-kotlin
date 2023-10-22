@@ -49,7 +49,7 @@ class WorkerThread(
             writer.writeUTF(toJson(response))
             writer.flush()
             socket.close()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(TAG, "Failed during worker execution", e)
         }
     }

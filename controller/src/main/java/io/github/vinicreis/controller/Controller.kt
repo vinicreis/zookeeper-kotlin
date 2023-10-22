@@ -1,7 +1,6 @@
 package io.github.vinicreis.controller
 
 import io.github.vinicreis.model.Server
-import io.github.vinicreis.model.enums.Result
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
 import io.github.vinicreis.model.request.ExitRequest
@@ -9,9 +8,9 @@ import io.github.vinicreis.model.request.JoinRequest
 import io.github.vinicreis.model.request.Request
 import io.github.vinicreis.model.response.ExitResponse
 import io.github.vinicreis.model.response.JoinResponse
-import io.github.vinicreis.model.util.Utils.handleException
 import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readWithDefault
+import io.github.vinicreis.model.util.handleException
 
 interface Controller : Server {
     fun join(request: JoinRequest): JoinResponse
@@ -34,6 +33,8 @@ interface Controller : Server {
     }
 
     companion object {
+        private const val TAG = "ControllerMain"
+
         @JvmStatic
         fun main(args: Array<String>) {
             try {
@@ -53,8 +54,8 @@ interface Controller : Server {
                 log.d("Finishing controller...")
                 controller.stop()
                 log.d("Controller finished!")
-            } catch (e: Exception) {
-                handleException("ControllerMain", "Failed start Controller...", e)
+            } catch (e: Throwable) {
+                handleException(TAG, "Failed start Controller...", e)
             }
         }
     }

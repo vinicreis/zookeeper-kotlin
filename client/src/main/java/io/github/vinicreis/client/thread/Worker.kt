@@ -5,19 +5,21 @@ import io.github.vinicreis.model.enums.Operation
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
 import io.github.vinicreis.model.util.IOUtil.read
+import io.github.vinicreis.model.util.handleException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
-/**
- * Client worker thread read user input and run operations.
- */
-class WorkerThread(private val client: Client) : Thread() {
+class Worker(private val client: Client) {
     private var running = true
-    override fun run() {
+
+    private suspend fun run() = withContext(Dispatchers.IO) {
         log.d("Starting worker thread...")
         while (running) {
             try {
                 val operation = Operation.readToClient()
                 when (operation) {
-                    Operation.GET -> client[read("Digite a chave a ser lida")]
+                    Operation.GET -> client.get(read("Digite a chave a ser lida"))
                     Operation.PUT -> client.put(
                         read("Digite a chave utilizada"),
                         read("Digite o valor a ser armazenado")
@@ -31,9 +33,15 @@ class WorkerThread(private val client: Client) : Thread() {
             } catch (e: NumberFormatException) {
                 running = false
                 client.stop()
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 handleException(TAG, "Failed during thread execution!", e)
             }
+        }
+    }
+
+    fun start() {
+        runBlocking {
+            run()
         }
     }
 

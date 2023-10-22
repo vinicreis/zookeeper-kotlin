@@ -38,7 +38,7 @@ class DispatcherThread(private val server: Server) : Thread() {
             handleException(TAG, "Invalid input received from client", e)
         } catch (e: SocketException) {
             log.d("Socket closed!")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(TAG, "Failed during dispatch execution", e)
         }
     }
@@ -48,7 +48,7 @@ class DispatcherThread(private val server: Server) : Thread() {
             super.interrupt()
             serverSocket.close()
             running = false
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             handleException(TAG, "Failed while interrupting dispatcher!", e)
         }
     }
