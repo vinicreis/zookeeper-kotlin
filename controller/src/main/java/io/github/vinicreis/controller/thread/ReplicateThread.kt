@@ -37,7 +37,8 @@ class ReplicateThread(val node: Controller.Node, private val request: Replicatio
                 ReplicationResponse::class.java,
                 debug
             )
-            response.result
+
+            response
         } catch (e: IOException) {
             handleException(TAG, String.format("Failed during REPLICATE to node %s:%d", node.host, node.port), e)
             Result.EXCEPTION

@@ -15,12 +15,17 @@ import io.github.vinicreis.model.response.ExitResponse
 import io.github.vinicreis.model.response.JoinResponse
 import io.github.vinicreis.model.response.PutResponse
 import io.github.vinicreis.model.response.ReplicationResponse
-import io.github.vinicreis.model.util.AssertionUtils.handleException
 import io.github.vinicreis.model.util.IOUtil.printfLn
+import io.github.vinicreis.model.util.NetworkUtil
+import io.github.vinicreis.model.util.handleException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
-    private val timestampRepository: TimestampRepository = TimestampRepository()
     override val keyValueRepository: KeyValueRepository = KeyValueRepository(timestampRepository)
+    private val timestampRepository: TimestampRepository = TimestampRepository()
     private val dispatcher: Dispatcher = Dispatcher(this)
     private val nodes: MutableList<Controller.Node> = mutableListOf()
 
@@ -106,11 +111,27 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
                 timestamp += 1000L
             }
 
-            when(replicationResponse) {
+            when (replicationResponse) {
                 is Result.OkResult<ReplicationResponse> -> Result.OkResult(
                     data = PutResponse(timestamp)
                 )
-                else -> replicationResponse
+
+                is Result.ErrorResult -> Result.ErrorResult(
+                    message = replicationResponse.message
+                )
+
+                is Result.ExceptionResult -> Result.ExceptionResult(
+                    e = replicationResponse.e
+                )
+
+                is Result.NotFound -> Result.NotFound(
+                    message = replicationResponse.message
+                )
+
+                is Result.TryOtherServer -> Result.TryOtherServer(
+                    message = replicationResponse.message,
+                    timestamp = replicationResponse.timestamp
+                )
             }
         } catch (e: Exception) {
             handleException(TAG, "Failed to process PUT operation", e)
@@ -124,27 +145,31 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
     override fun replicate(request: ReplicationRequest): Result<ReplicationResponse> {
         return try {
             val nodesWithError: MutableList<Controller.Node?> = ArrayList(nodes.size)
-            val threads: MutableList<ReplicateThread> = ArrayList(nodes.size)
+            val jobs: MutableList<Job> = mutableListOf()
 
             // Start all threads to join them later to process request asynchronously
-            for (node in nodes) {
-                val replicateThread = ReplicateThread(node, request, log.isDebug)
-                threads.add(replicateThread)
-                log.d(String.format("Starting replication to node %s...", node.toString()))
-                replicateThread.start()
-            }
+            runBlocking {
+                for (node in nodes) {
+                    val result = async {
+                        NetworkUtil.doRequest(
+                            node.host,
+                            node.port,
+                            request,
+                            ReplicationResponse::class.java,
+                            log.isDebug
+                        )
+                    }.await()
 
-            // Wait for each result at once, but at least they are already being processed
-            for (thread in threads) {
-                thread.join()
-                if (thread.result !is Result.OkResult<*>) nodesWithError.add(thread.node)
-                log.d(
-                    String.format(
-                        "Replication to node %s got result: %s",
-                        thread.node,
-                        thread.result.toString()
+                    if (result !is Result.OkResult<*>) nodesWithError.add(node)
+
+                    log.d(
+                        String.format(
+                            "Replication to node %s got result: %s",
+                            node,
+                            result.toString()
+                        )
                     )
-                )
+                }
             }
 
             if (nodesWithError.isEmpty()) {

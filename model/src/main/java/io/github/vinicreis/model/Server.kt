@@ -9,7 +9,7 @@ import io.github.vinicreis.model.request.ReplicationRequest
 import io.github.vinicreis.model.response.GetResponse
 import io.github.vinicreis.model.response.PutResponse
 import io.github.vinicreis.model.response.ReplicationResponse
-import io.github.vinicreis.model.util.AssertionUtils
+import io.github.vinicreis.model.util.Utils
 
 interface Server {
     val port: Int
@@ -41,7 +41,7 @@ interface Server {
                 timestamp = e.currentTimestamp
             )
         } catch (e: Exception) {
-            AssertionUtils.handleException("Server", "Failed to process GET operation", e)
+            Utils.handleException("Server", "Failed to process GET operation", e)
 
             Result.ExceptionResult(
                 e = e

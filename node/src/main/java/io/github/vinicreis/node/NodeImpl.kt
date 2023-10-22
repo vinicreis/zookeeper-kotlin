@@ -20,12 +20,10 @@ class NodeImpl(
     private val controllerPort: Int,
     debug: Boolean
 ) : Node {
-    override val keyValueRepository: KeyValueRepository
-    private val dispatcher: DispatcherThread
+    override val keyValueRepository: KeyValueRepository = KeyValueRepository()
+    private val dispatcher: DispatcherThread = DispatcherThread(this)
 
     init {
-        dispatcher = DispatcherThread(this)
-        keyValueRepository = KeyValueRepository()
         log.isDebug = debug
     }
 

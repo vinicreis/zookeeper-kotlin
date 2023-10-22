@@ -9,7 +9,7 @@ import io.github.vinicreis.model.request.JoinRequest
 import io.github.vinicreis.model.request.Request
 import io.github.vinicreis.model.response.ExitResponse
 import io.github.vinicreis.model.response.JoinResponse
-import io.github.vinicreis.model.util.AssertionUtils.handleException
+import io.github.vinicreis.model.util.Utils.handleException
 import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readWithDefault
 
@@ -34,6 +34,7 @@ interface Controller : Server {
     }
 
     companion object {
+        @JvmStatic
         fun main(args: Array<String>) {
             try {
                 val log: Log = ConsoleLog("ControllerMain")

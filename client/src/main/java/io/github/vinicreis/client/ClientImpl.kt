@@ -8,8 +8,7 @@ import io.github.vinicreis.model.request.GetRequest
 import io.github.vinicreis.model.request.PutRequest
 import io.github.vinicreis.model.response.GetResponse
 import io.github.vinicreis.model.response.PutResponse
-import io.github.vinicreis.model.util.AssertionUtils.check
-import io.github.vinicreis.model.util.AssertionUtils.isNullOrEmpty
+import io.github.vinicreis.model.util.Utils.isNullOrEmpty
 import io.github.vinicreis.model.util.IOUtil.printLn
 import io.github.vinicreis.model.util.IOUtil.printfLn
 import io.github.vinicreis.model.util.NetworkUtil.doRequest

@@ -3,22 +3,13 @@ package io.github.vinicreis.node
 import io.github.vinicreis.model.Server
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
+import io.github.vinicreis.model.util.Utils.handleException
 import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readWithDefault
 import java.util.*
 
-/**
- * Generic interface that represents `Node` instance of a `Server`
- */
 interface Node : Server {
-    /**
-     * Trigger the JOIN process from a `Node` to a `Controller`
-     */
     fun join()
-
-    /**
-     * Trigger the EXIT process from a `Node` to a `Controller`
-     */
     fun exit()
 
     companion object {
