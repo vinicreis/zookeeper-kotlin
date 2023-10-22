@@ -6,4 +6,5 @@ data class GetResponse(
     @SerializedName("key") val key: String,
     @SerializedName("value") val value: String,
     @SerializedName("timestamp") val timestamp: Long,
-)
+    @SerializedName("message") override val message: String?
+) : Response

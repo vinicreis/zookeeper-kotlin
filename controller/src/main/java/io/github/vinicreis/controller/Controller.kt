@@ -14,8 +14,8 @@ import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readWithDefault
 
 interface Controller : Server {
-    fun join(request: JoinRequest): Result<JoinResponse>
-    fun exit(request: ExitRequest): Result<ExitResponse>
+    fun join(request: JoinRequest): JoinResponse
+    fun exit(request: ExitRequest): ExitResponse
 
     data class Node(private val request: Request) {
         val host: String = request.host

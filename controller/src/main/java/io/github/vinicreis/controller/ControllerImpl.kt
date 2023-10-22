@@ -1,7 +1,6 @@
 package io.github.vinicreis.controller
 
 import io.github.vinicreis.controller.thread.Dispatcher
-import io.github.vinicreis.controller.thread.ReplicateThread
 import io.github.vinicreis.model.enums.Result
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
@@ -20,7 +19,6 @@ import io.github.vinicreis.model.util.NetworkUtil
 import io.github.vinicreis.model.util.handleException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class ControllerImpl(override val port: Int, debug: Boolean) : Controller {

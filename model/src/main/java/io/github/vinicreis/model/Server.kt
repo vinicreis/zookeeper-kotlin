@@ -17,20 +17,18 @@ interface Server {
 
     fun start()
     fun stop()
-    fun put(request: PutRequest): Result<PutResponse>
-    fun replicate(request: ReplicationRequest): Result<ReplicationResponse>
+    fun put(request: PutRequest): PutResponse
+    fun replicate(request: ReplicationRequest): ReplicationResponse
 
-    fun get(request: GetRequest): Result<GetResponse> {
+    fun get(request: GetRequest): GetResponse {
         return try {
             val entry = keyValueRepository.find(request.key, request.timestamp)
 
             entry?.let {
-                Result.OkResult(
-                    data = GetResponse(
-                        key = request.key,
-                        value = it.value,
-                        timestamp = it.timestamp
-                    )
+                GetResponse(
+                    key = request.key,
+                    value = it.value,
+                    timestamp = it.timestamp
                 )
             } ?: Result.NotFound(
                 message = "Value with key ${request.key} was not found"
