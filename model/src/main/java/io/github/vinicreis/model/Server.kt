@@ -1,5 +1,6 @@
 package io.github.vinicreis.model
 
+import io.github.vinicreis.model.enums.OperationResult
 import io.github.vinicreis.model.exception.OutdatedEntryException
 import io.github.vinicreis.model.repository.KeyValueRepository
 import io.github.vinicreis.model.request.GetRequest
@@ -8,7 +9,7 @@ import io.github.vinicreis.model.request.ReplicationRequest
 import io.github.vinicreis.model.response.GetResponse
 import io.github.vinicreis.model.response.PutResponse
 import io.github.vinicreis.model.response.ReplicationResponse
-import io.github.vinicreis.model.util.Utils
+import io.github.vinicreis.model.util.handleException
 
 interface Server {
     val port: Int
@@ -25,23 +26,27 @@ interface Server {
 
             entry?.let {
                 GetResponse(
+                    result = OperationResult.OK,
                     key = request.key,
                     value = it.value,
                     timestamp = it.timestamp
                 )
-            } ?: Result.NotFound(
+            } ?: GetResponse(
+                result = OperationResult.NOT_FOUND,
                 message = "Value with key ${request.key} was not found"
             )
         } catch (e: OutdatedEntryException) {
-            Result.TryOtherServer(
+            GetResponse(
+                result = OperationResult.TRY_AGAIN_ON_OTHER_SERVER,
                 message = "Please, try again later or try other server",
                 timestamp = e.currentTimestamp
             )
         } catch (e: Throwable) {
-            Utils.handleException("Server", "Failed to process GET operation", e)
+            handleException("Server", "Failed to process GET operation", e)
 
-            Result.ExceptionResult(
-                e = e
+            GetResponse(
+                result = OperationResult.ERROR,
+                message = "Failed to process operation"
             )
         }
     }

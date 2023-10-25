@@ -2,6 +2,7 @@
   <configuration default="false" name="Controller" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="io.github.vinicreis.controller.Controller" />
     <module name="zookeeper-kotlin.controller.main" />
+    <option name="PROGRAM_PARAMETERS" value="--debug" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="io.github.vinicreis.controller.*" />

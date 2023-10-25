@@ -17,15 +17,15 @@ import io.github.vinicreis.model.response.ReplicationResponse
 import io.github.vinicreis.model.util.IOUtil.printfLn
 import io.github.vinicreis.model.util.NetworkUtil
 import io.github.vinicreis.model.util.handleException
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
     private val timestampRepository: TimestampRepository = TimestampRepository()
     override val keyValueRepository: KeyValueRepository = KeyValueRepository(timestampRepository)
     private val dispatcher: Dispatcher = Dispatcher(this)
     private val nodes: MutableList<Controller.Node> = mutableListOf()
+    private var timestampJob: Job? = null
+    private var dispatcherJob: Job? = null
 
     init {
         log.isDebug = debug
@@ -33,8 +33,8 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
 
     override fun start() {
         try {
-            timestampRepository.start()
-            dispatcher.start()
+            timestampJob = CoroutineScope(Dispatchers.IO).launch { timestampRepository.run() }
+            dispatcherJob = CoroutineScope(Dispatchers.IO).launch { dispatcher.run() }
         } catch (e: Throwable) {
             handleException(TAG, "Failed to start Controller!", e)
         }
@@ -42,8 +42,8 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
 
     override fun stop() {
         try {
-            timestampRepository.stop()
-            dispatcher.stop()
+            timestampJob?.cancel()
+            dispatcherJob?.cancel()
         } catch (e: Throwable) {
             handleException(TAG, "Failed while stopping Controller", e)
         }

@@ -20,9 +20,8 @@ class Dispatcher(private val server: Server) {
     private val log: Log = ConsoleLog(TAG)
     private val serverSocket: ServerSocket = ServerSocket(server.port)
     private var running = true
-    private var job: Job? = null
 
-    private suspend fun run() = withContext(Dispatchers.IO) {
+    suspend fun run() = withContext(Dispatchers.IO) {
         try {
             while (running) {
                 log.d("Listening for operation requests...")
@@ -41,24 +40,8 @@ class Dispatcher(private val server: Server) {
             log.d("Socket closed!")
         } catch (e: Throwable) {
             handleException(TAG, "Failed during dispatch execution", e)
-        }
-    }
-
-    fun start() {
-        runBlocking {
-            job = launch {
-                run()
-            }
-        }
-    }
-
-    fun stop() {
-        try {
-            job?.cancel()
+        } finally {
             serverSocket.close()
-            running = false
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed while interrupting dispatcher!", e)
         }
     }
 
