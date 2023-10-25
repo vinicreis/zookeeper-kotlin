@@ -1,7 +1,6 @@
 package io.github.vinicreis.model.repository
 
 import io.github.vinicreis.model.exception.OutdatedEntryException
-import io.github.vinicreis.model.util.Utils
 import java.util.concurrent.ConcurrentHashMap
 
 class KeyValueRepository {
@@ -19,9 +18,9 @@ class KeyValueRepository {
     data class Entry(val value: String, val timestamp: Long)
 
     fun insert(key: String, value: String): Long {
-        Utils.check(timestampRepository != null, "Timestamp repository is not initialized!")
+        timestampRepository ?: throw IllegalStateException("Timestamp repository is not initialized!")
 
-        val timestamp = timestampRepository!!.current
+        val timestamp = timestampRepository.current
         data[key] = Entry(value, timestamp)
 
         return timestamp

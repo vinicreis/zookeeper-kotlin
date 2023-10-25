@@ -12,7 +12,11 @@ import io.github.vinicreis.model.response.*
 import io.github.vinicreis.model.util.IOUtil.printfLn
 import io.github.vinicreis.model.util.NetworkUtil.doRequest
 import io.github.vinicreis.model.util.handleException
-import io.github.vinicreis.node.thread.DispatcherThread
+import io.github.vinicreis.node.thread.Dispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.net.InetAddress
 
 class NodeImpl(
@@ -22,20 +26,21 @@ class NodeImpl(
     debug: Boolean
 ) : Node {
     override val keyValueRepository: KeyValueRepository = KeyValueRepository()
-    private val dispatcher: DispatcherThread = DispatcherThread(this)
+    private val dispatcher: Dispatcher = Dispatcher(this)
+    private var job: Job? = null
 
     init {
         log.isDebug = debug
     }
 
     override fun start() {
-        dispatcher.start()
+        job = CoroutineScope(Dispatchers.IO).launch { dispatcher.run() }
         join()
     }
 
     override fun stop() {
-        dispatcher.interrupt()
         exit()
+        job?.cancel()
     }
 
     override fun join() {
@@ -74,19 +79,19 @@ class NodeImpl(
                 controllerRequest,
                 PutResponse::class.java
             )
-            if (controllerResponse.result !== Result.OK) {
-                PutResponse.Builder()
-                    .timestamp(controllerResponse.timestamp)
-                    .result<Response.AbstractBuilder<PutResponse>>(Result.ERROR)
-                    .message<Response.AbstractBuilder<PutResponse>>(controllerResponse.message)
-                    .build()
-            } else PutResponse.Builder()
-                .timestamp(controllerResponse.timestamp)
-                .result<Response.AbstractBuilder<PutResponse>>(Result.OK)
-                .build()
+
+            PutResponse(
+                result = OperationResult.OK,
+                timestamp = controllerResponse.timestamp,
+                message = controllerResponse.message
+            )
         } catch (e: Throwable) {
             handleException(TAG, "Failed to process PUT operation", e)
-            PutResponse.Builder().exception<Response.AbstractBuilder<PutResponse>>(e).build()
+
+            PutResponse(
+                result = OperationResult.ERROR,
+                message = "Failed to process operation"
+            )
         }
     }
 
@@ -94,16 +99,20 @@ class NodeImpl(
         return try {
             printfLn(
                 "REPLICATION key: %s value: %s ts: %d",
-                request!!.key,
+                request.key,
                 request.value,
                 request.timestamp
             )
             log.d("Saving replicated data locally...")
             keyValueRepository.replicate(request.key, request.value, request.timestamp)
-            ReplicationResponse.Builder().result<Response.AbstractBuilder<ReplicationResponse>>(Result.OK).build()
+            ReplicationResponse(result = OperationResult.OK)
         } catch (e: Throwable) {
             handleException(TAG, "Failed to process REPLICATE operation", e)
-            ReplicationResponse.Builder().exception<Response.AbstractBuilder<ReplicationResponse>>(e).build()
+
+            ReplicationResponse(
+                result = OperationResult.ERROR,
+                message = "Failed to process operation"
+            )
         }
     }
 
@@ -112,7 +121,7 @@ class NodeImpl(
             val request = ExitRequest(InetAddress.getLocalHost().hostName, port)
             log.d("Leaving controller...")
             val response = doRequest(controllerHost, controllerPort, request, ExitResponse::class.java)
-            if (response.result !== Result.OK) {
+            if (response.result !== OperationResult.OK) {
                 throw RuntimeException(String.format("Failed to send EXIT request: %s", response.message))
             }
             log.d("Successfully left on controller!")

@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 class Worker(private val client: Client) {
     private var running = true
 
-    private suspend fun run() = withContext(Dispatchers.IO) {
+    suspend fun run() = withContext(Dispatchers.IO) {
         log.d("Starting worker thread...")
         while (running) {
             try {
@@ -36,12 +36,6 @@ class Worker(private val client: Client) {
             } catch (e: Throwable) {
                 handleException(TAG, "Failed during thread execution!", e)
             }
-        }
-    }
-
-    fun start() {
-        runBlocking {
-            run()
         }
     }
 

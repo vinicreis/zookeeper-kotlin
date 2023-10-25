@@ -12,6 +12,10 @@ import io.github.vinicreis.model.util.IOUtil.printLn
 import io.github.vinicreis.model.util.IOUtil.printfLn
 import io.github.vinicreis.model.util.NetworkUtil.doRequest
 import io.github.vinicreis.model.util.handleException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.ConnectException
 import java.net.InetAddress
@@ -27,16 +31,18 @@ class ClientImpl(
     private val host: String = InetAddress.getLocalHost().canonicalHostName
     private val keyTimestampMap: HashMap<String, Long?> = LinkedHashMap()
     private val worker: Worker = Worker(this)
+    private var job: Job? = null
 
     init {
         log.isDebug = debug
     }
 
     override fun start() {
-        worker.start()
+        job = CoroutineScope(Dispatchers.IO).launch { worker.run() }
     }
 
     override fun stop() {
+        job?.cancel()
         printLn("Encerrando...")
     }
 

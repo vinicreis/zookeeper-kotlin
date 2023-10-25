@@ -3,6 +3,7 @@ package io.github.vinicreis.model.util
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
 import io.github.vinicreis.model.request.Request
+import io.github.vinicreis.model.response.Response
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
@@ -14,7 +15,7 @@ object NetworkUtil {
 
     @JvmStatic
     @Throws(IOException::class)
-    fun <Req : Request?, Res : Response?> doRequest(
+    fun <Req : Request, Res : Response> doRequest(
         host: String?,
         port: Int,
         request: Req,

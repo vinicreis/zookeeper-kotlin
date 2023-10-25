@@ -4,35 +4,29 @@ import io.github.vinicreis.model.Server
 import io.github.vinicreis.model.enums.Operation
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
+import io.github.vinicreis.model.util.handleException
+import kotlinx.coroutines.*
 import java.io.DataInputStream
 import java.io.EOFException
 import java.net.ServerSocket
 import java.net.SocketException
 
-/**
- * Thread to keep listening and dispatch workers to process Controller's operations.
- * @see WorkerThread
- */
-class DispatcherThread(private val server: Server) : Thread() {
+class Dispatcher(private val server: Server) {
     private val log: Log = ConsoleLog(TAG)
-    private val serverSocket: ServerSocket
+    private val serverSocket: ServerSocket = ServerSocket(server.port)
     private var running = true
 
-    init {
-        serverSocket = ServerSocket(server.port)
-    }
-
-    override fun run() {
+    suspend fun run() = withContext(Dispatchers.IO) {
         try {
             while (running) {
                 log.d("Listening for operation requests...")
                 val socket = serverSocket.accept()
                 log.d("Request received!")
                 val reader = DataInputStream(socket.getInputStream())
-                val operationCode = reader.readUTF()
+                val operationCode = reader.readUTF().toInt()
                 val message = reader.readUTF()
                 log.d("Starting Worker thread...")
-                WorkerThread(server, socket, Operation.fromCode(operationCode), message).start()
+                WorkerThread(server, socket, Operation.fromClient(operationCode), message).start()
             }
         } catch (e: EOFException) {
             handleException(TAG, "Invalid input received from client", e)
@@ -40,16 +34,8 @@ class DispatcherThread(private val server: Server) : Thread() {
             log.d("Socket closed!")
         } catch (e: Throwable) {
             handleException(TAG, "Failed during dispatch execution", e)
-        }
-    }
-
-    override fun interrupt() {
-        try {
-            super.interrupt()
+        } finally {
             serverSocket.close()
-            running = false
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed while interrupting dispatcher!", e)
         }
     }
 

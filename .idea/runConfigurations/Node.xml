@@ -2,6 +2,7 @@
   <configuration default="false" name="Node" type="Application" factoryName="Application" singleton="false" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="io.github.vinicreis.node.Node" />
     <module name="zookeeper-kotlin.node.main" />
+    <option name="PROGRAM_PARAMETERS" value="--debug" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="io.github.vinicreis.node.*" />
