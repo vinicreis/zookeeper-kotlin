@@ -9,5 +9,5 @@ class GetRequest(
     @SerializedName("key") val key: String,
     @SerializedName("timestamp") val timestamp: Long
 ) : Request(host, port) {
-    override val operation: Operation = Operation.EXIT
+    override val operation: Operation = Operation.GET
 }

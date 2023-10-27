@@ -10,5 +10,5 @@ class ReplicationRequest(
     @SerializedName("value") val value: String,
     @SerializedName("timestamp") val timestamp: Long,
 ) : Request(host, port) {
-    override val operation: Operation = Operation.EXIT
+    override val operation: Operation = Operation.REPLICATE
 }

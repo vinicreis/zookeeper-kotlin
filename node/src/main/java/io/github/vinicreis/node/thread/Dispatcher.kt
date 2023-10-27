@@ -23,10 +23,14 @@ class Dispatcher(private val server: Server) {
                 val socket = serverSocket.accept()
                 log.d("Request received!")
                 val reader = DataInputStream(socket.getInputStream())
+
                 val operationCode = reader.readUTF().toInt()
                 val message = reader.readUTF()
+
                 log.d("Starting Worker thread...")
-                WorkerThread(server, socket, Operation.fromClient(operationCode), message).start()
+                CoroutineScope(Dispatchers.IO).launch {
+                    Worker(server, socket, Operation.fromClient(operationCode), message).run()
+                }
             }
         } catch (e: EOFException) {
             handleException(TAG, "Invalid input received from client", e)

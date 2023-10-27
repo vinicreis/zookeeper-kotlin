@@ -9,6 +9,7 @@ import io.github.vinicreis.model.request.Request
 import io.github.vinicreis.model.response.ExitResponse
 import io.github.vinicreis.model.response.JoinResponse
 import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
+import io.github.vinicreis.model.util.IOUtil.readIntWithDefault
 import io.github.vinicreis.model.util.IOUtil.readWithDefault
 import io.github.vinicreis.model.util.handleException
 
@@ -40,7 +41,7 @@ interface Controller : Server {
             try {
                 val log: Log = ConsoleLog("ControllerMain")
                 val debug = args.any { it in listOf("--debug", "-d") }
-                val port = readWithDefault("Digite o valor da porta do servidor", "10097").toInt()
+                val port = readIntWithDefault("Digite o valor da porta do servidor", 10097)
                 val controller: Controller = ControllerImpl(port, debug)
 
                 log.isDebug = debug

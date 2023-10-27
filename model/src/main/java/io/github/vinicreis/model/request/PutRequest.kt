@@ -8,5 +8,5 @@ class PutRequest(
     val key: String,
     val value: String
 ) : Request(host, port) {
-    override val operation: Operation = Operation.EXIT
+    override val operation: Operation = Operation.PUT
 }

@@ -8,8 +8,6 @@ import io.github.vinicreis.model.request.GetRequest
 import io.github.vinicreis.model.request.PutRequest
 import io.github.vinicreis.model.response.GetResponse
 import io.github.vinicreis.model.response.PutResponse
-import io.github.vinicreis.model.util.IOUtil.printLn
-import io.github.vinicreis.model.util.IOUtil.printfLn
 import io.github.vinicreis.model.util.NetworkUtil.doRequest
 import io.github.vinicreis.model.util.handleException
 import kotlinx.coroutines.CoroutineScope
@@ -43,7 +41,7 @@ class ClientImpl(
 
     override fun stop() {
         job?.cancel()
-        printLn("Encerrando...")
+        println("Encerrando...")
     }
 
     override fun get(key: String) {
@@ -57,22 +55,14 @@ class ClientImpl(
 
             when (response.result) {
                 OperationResult.OK,
-                OperationResult.TRY_AGAIN_ON_OTHER_SERVER -> printfLn(
-                    "GET_%s key: %s value: %s realizada no servidor %s:%d, meu timestamp %d e do servidor %d",
-                    response.result,
-                    key,
-                    response.value,
-                    serverHost,
-                    serverPort,
-                    request.timestamp,
-                    response.timestamp
+                OperationResult.TRY_AGAIN_ON_OTHER_SERVER -> println(
+                    "GET_${response.result} key: $key value: ${response.value} realizada no servidor" +
+                            " $serverHost:$serverPort, meu timestamp ${request.timestamp} e do servidor ${response.timestamp}",
                 )
 
                 OperationResult.ERROR,
-                OperationResult.NOT_FOUND -> printfLn(
-                    "Falha ao obter o valor da key %s: %s",
-                    key,
-                    response.message
+                OperationResult.NOT_FOUND -> println(
+                    "Falha ao obter o valor da key $key: ${response.message}",
                 )
             }
         } catch (e: Throwable) {
@@ -92,13 +82,8 @@ class ClientImpl(
 
             keyTimestampMap[key] = response.timestamp
 
-            printfLn(
-                "PUT_OK key: %s value: %s timestamp: %d realizada no servidor %s:%d",
-                key,
-                value,
-                response.timestamp,
-                serverHost,
-                serverPort
+            println(
+                "PUT_OK key: $key value: $value timestamp: ${response.timestamp} realizada no servidor $serverHost:$serverPort",
             )
         } catch (e: ConnectException) {
             log.e(String.format("Failed connect to socket on ${host}:${serverPort}", host, port), e)

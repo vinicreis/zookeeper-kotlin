@@ -1,6 +1,8 @@
 package io.github.vinicreis.model.enums
 
 import io.github.vinicreis.model.util.IOUtil
+import io.github.vinicreis.model.util.IOUtil.read
+import io.github.vinicreis.model.util.IOUtil.readInt
 import java.io.IOException
 import java.util.*
 
@@ -10,6 +12,8 @@ enum class Operation(val code: Int) {
     PUT(2),
     REPLICATE(3),
     EXIT(4);
+
+    override fun toString() = "$name [${code}]"
 
     companion object {
         @Throws(InterruptedException::class)
@@ -24,10 +28,7 @@ enum class Operation(val code: Int) {
         @Throws(IOException::class, InterruptedException::class)
         fun readToClient(): Operation {
             return fromClient(
-                IOUtil.read(
-                    "Digite a operação desejada ou outra tecla para encerrar...\n%s: ",
-                    printToClient()
-                ).toInt()
+                readInt("Digite a operação desejada ou outra tecla para encerrar...\n${printToClient()}")
             )
         }
 

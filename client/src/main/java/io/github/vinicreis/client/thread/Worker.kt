@@ -16,7 +16,9 @@ class Worker(private val client: Client) {
         log.d("Starting worker thread...")
         while (running) {
             try {
+                // FIXME: Value is not being reads
                 val operation = Operation.readToClient()
+
                 when (operation) {
                     Operation.GET -> client.get(read("Digite a chave a ser lida"))
                     Operation.PUT -> client.put(
@@ -27,9 +29,11 @@ class Worker(private val client: Client) {
                     else -> throw IllegalArgumentException("Client should not call any option other than GET or PUT")
                 }
             } catch (e: InterruptedException) {
+                log.e("Fail", e)
                 running = false
                 client.stop()
             } catch (e: NumberFormatException) {
+                log.e("Fail", e)
                 running = false
                 client.stop()
             } catch (e: Throwable) {

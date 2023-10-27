@@ -32,7 +32,7 @@ class Dispatcher(private val server: Server) {
                 val message = reader.readUTF()
                 log.d("Starting Worker thread...")
 
-                send(message, socket, Operation.fromClient(operationCode.toInt()))
+                send(message, socket, Operation.valueOf(operationCode))
             }
         } catch (e: EOFException) {
             handleException(TAG, "Invalid input received from client", e)

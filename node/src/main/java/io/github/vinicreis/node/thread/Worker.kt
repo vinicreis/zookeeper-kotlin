@@ -13,21 +13,13 @@ import kotlinx.coroutines.*
 import java.io.DataOutputStream
 import java.net.Socket
 
-class WorkerThread(
+class Worker(
     private val server: Server,
     private val socket: Socket,
     private val operation: Operation,
     private val request: String
 ){
-    private var job: Job? = null
-
-    fun start() {
-        runBlocking {
-            job = launch { run() }
-        }
-    }
-
-    private suspend fun run() = withContext(Dispatchers.IO) {
+    suspend fun run() = withContext(Dispatchers.IO) {
         try {
             val writer = DataOutputStream(socket.getOutputStream())
             val response: Response = when (operation) {
@@ -38,6 +30,7 @@ class WorkerThread(
                 Operation.EXIT -> throw IllegalStateException("Nodes can not handle EXIT requests")
                 else -> throw IllegalStateException("Operation unknown!")
             }
+
             writer.writeUTF(toJson(response))
             writer.flush()
             socket.close()

@@ -12,8 +12,14 @@ class TimestampRepository(private val step: Long = DEFAULT_STEP) {
     suspend fun run() = withContext(Dispatchers.IO) {
         try {
             running = true
+
             while (running) {
-                if (counter.get() == Long.MAX_VALUE) counter.set(0L) else counter.incrementAndGet()
+                if (counter.get() == Long.MAX_VALUE) {
+                    counter.set(0L)
+                } else {
+                    counter.incrementAndGet()
+                }
+
                 delay(step)
             }
         } catch (e: InterruptedException) {

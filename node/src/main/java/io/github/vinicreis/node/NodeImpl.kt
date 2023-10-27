@@ -9,7 +9,6 @@ import io.github.vinicreis.model.request.JoinRequest
 import io.github.vinicreis.model.request.PutRequest
 import io.github.vinicreis.model.request.ReplicationRequest
 import io.github.vinicreis.model.response.*
-import io.github.vinicreis.model.util.IOUtil.printfLn
 import io.github.vinicreis.model.util.NetworkUtil.doRequest
 import io.github.vinicreis.model.util.handleException
 import io.github.vinicreis.node.thread.Dispatcher
@@ -48,10 +47,9 @@ class NodeImpl(
             val request = JoinRequest(InetAddress.getLocalHost().hostName, port)
             val response = doRequest(controllerHost, controllerPort, request, JoinResponse::class.java)
             if (response.result !== OperationResult.OK) {
-                throw RuntimeException(String.format("Failed to join on controller server: %s", response.message))
+                throw RuntimeException("Failed to join on controller server: ${response.message}")
             }
 
-            // TODO: Save controller info to validate REPLICATE requests
             log.d("Node successfully joined!")
         } catch (e: Throwable) {
             handleException(TAG, "Failed to process JOIN operation", e)
@@ -60,13 +58,9 @@ class NodeImpl(
 
     override fun put(request: PutRequest): PutResponse {
         return try {
-            printfLn(
-                "Encaminhando %s:%d PUT key: %s value: %s",
-                request.host,
-                request.port,
-                request.key,
-                request.value
-            )
+            with(request) {
+                println("Encaminhando $host:$port PUT key: $key value: $value",)
+            }
             val controllerRequest = PutRequest(
                 InetAddress.getLocalHost().hostName,
                 port,
@@ -97,12 +91,9 @@ class NodeImpl(
 
     override fun replicate(request: ReplicationRequest): ReplicationResponse {
         return try {
-            printfLn(
-                "REPLICATION key: %s value: %s ts: %d",
-                request.key,
-                request.value,
-                request.timestamp
-            )
+            with(request) {
+                println("REPLICATION key: $key value: $value ts: $timestamp")
+            }
             log.d("Saving replicated data locally...")
             keyValueRepository.replicate(request.key, request.value, request.timestamp)
             ReplicationResponse(result = OperationResult.OK)

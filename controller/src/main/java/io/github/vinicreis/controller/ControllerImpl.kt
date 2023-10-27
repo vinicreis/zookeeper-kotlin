@@ -14,7 +14,6 @@ import io.github.vinicreis.model.response.ExitResponse
 import io.github.vinicreis.model.response.JoinResponse
 import io.github.vinicreis.model.response.PutResponse
 import io.github.vinicreis.model.response.ReplicationResponse
-import io.github.vinicreis.model.util.IOUtil.printfLn
 import io.github.vinicreis.model.util.NetworkUtil
 import io.github.vinicreis.model.util.handleException
 import kotlinx.coroutines.*
@@ -80,13 +79,9 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
 
     override fun put(request: PutRequest): PutResponse {
         return try {
-            printfLn(
-                "Cliente %s:%d PUT key: %s value: %s",
-                request.host,
-                request.port,
-                request.key,
-                request.value
-            )
+            with(request) {
+                print("Cliente $host:$port PUT key $key with value = $value")
+            }
 
             var timestamp = keyValueRepository.insert(request.key, request.value)
             val replicationResponse = replicate(
@@ -162,13 +157,11 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
             }
 
             if (nodesWithError.isEmpty()) {
-                printfLn(
-                    "Enviando PUT_OK ao Cliente %s:%d da key: %s ts: %d",
-                    request.host,
-                    request.port,
-                    request.key,
-                    request.timestamp
-                )
+                with(request) {
+                    println(
+                        "Enviando PUT_OK ao Cliente $host:$port da key: $key ts: $timestamp",
+                    )
+                }
 
                 return ReplicationResponse(
                     result = OperationResult.OK
