@@ -4,8 +4,6 @@ import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readIntWithDefault
 import io.github.vinicreis.model.util.IOUtil.readWithDefault
 import io.github.vinicreis.model.util.handleException
-import java.util.*
-import java.util.stream.Collectors
 
 interface Client {
     fun start()

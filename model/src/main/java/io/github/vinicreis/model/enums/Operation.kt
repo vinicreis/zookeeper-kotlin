@@ -1,7 +1,5 @@
 package io.github.vinicreis.model.enums
 
-import io.github.vinicreis.model.util.IOUtil
-import io.github.vinicreis.model.util.IOUtil.read
 import io.github.vinicreis.model.util.IOUtil.readInt
 import java.io.IOException
 import java.util.*

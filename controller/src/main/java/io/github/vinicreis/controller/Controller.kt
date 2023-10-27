@@ -10,7 +10,6 @@ import io.github.vinicreis.model.response.ExitResponse
 import io.github.vinicreis.model.response.JoinResponse
 import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readIntWithDefault
-import io.github.vinicreis.model.util.IOUtil.readWithDefault
 import io.github.vinicreis.model.util.handleException
 
 interface Controller : Server {
