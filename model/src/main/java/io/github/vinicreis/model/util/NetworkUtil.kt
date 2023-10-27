@@ -39,10 +39,10 @@ object NetworkUtil {
                 val out = DataOutputStream(socket.getOutputStream())
                 val json = Serializer.toJson(request)
                 log.isDebug = debug
-                log.d(java.lang.String.format("Sending operation %s", request!!.operation))
+                log.d("Sending operation ${request!!.operation}")
                 out.writeUTF(request.operation.name)
                 out.flush()
-                log.d(String.format("Sending JSON: %s", json))
+                log.d("Sending JSON: $json")
                 out.writeUTF(json)
                 out.flush()
                 return Serializer.fromJson(`in`.readUTF(), responseClass)

@@ -77,7 +77,7 @@ class ClientImpl(
             val request = PutRequest(host, port, key, value)
             val response = doRequest(serverHost, serverPort, request, PutResponse::class.java)
             if (response.result != OperationResult.OK) {
-                throw RuntimeException(String.format("PUT operation failed: %s", response.message))
+                throw RuntimeException("PUT operation failed: ${response.message}")
             }
 
             keyTimestampMap[key] = response.timestamp
@@ -86,7 +86,7 @@ class ClientImpl(
                 "PUT_OK key: $key value: $value timestamp: ${response.timestamp} realizada no servidor $serverHost:$serverPort",
             )
         } catch (e: ConnectException) {
-            log.e(String.format("Failed connect to socket on ${host}:${serverPort}", host, port), e)
+            log.e("Failed connect to socket on ${host}:${serverPort}", e)
         } catch (e: IOException) {
             log.e("Failed to run PUT operation", e)
         } catch (e: Throwable) {

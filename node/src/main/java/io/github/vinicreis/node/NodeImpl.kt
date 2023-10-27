@@ -113,7 +113,7 @@ class NodeImpl(
             log.d("Leaving controller...")
             val response = doRequest(controllerHost, controllerPort, request, ExitResponse::class.java)
             if (response.result !== OperationResult.OK) {
-                throw RuntimeException(String.format("Failed to send EXIT request: %s", response.message))
+                throw RuntimeException("Failed to send EXIT request: ${response.message}")
             }
             log.d("Successfully left on controller!")
         } catch (e: Throwable) {

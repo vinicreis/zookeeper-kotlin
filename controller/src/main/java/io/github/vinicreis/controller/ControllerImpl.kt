@@ -50,10 +50,10 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
 
     override fun join(request: JoinRequest): JoinResponse {
         return try {
-            log.d(String.format("Joining node %s:%d", request.host, request.port))
+            log.d("Joining node ${request.host}:${request.port}")
 
             if (hasNode(Controller.Node(request))) {
-                log.d(String.format("Node %s:%d already joined!", request.host, request.port))
+                log.d("Node ${request.host}:${request.port} already joined!")
 
                 return JoinResponse(
                     result = OperationResult.ERROR,
@@ -141,13 +141,7 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
 
                         if (result.result != OperationResult.OK) nodesWithError.add(node)
 
-                        log.d(
-                            String.format(
-                                "Replication to node %s got result: %s",
-                                node,
-                                result.toString()
-                            )
-                        )
+                        log.d("Replication to node $node got result: $result")
                     }
 
                     jobs.add(job)
@@ -185,13 +179,14 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
     override fun exit(request: ExitRequest): ExitResponse {
         return try {
             val node = Controller.Node(request)
+
             if (!hasNode(node)) return ExitResponse(
                 result = OperationResult.ERROR,
                 message = "Server ${request.host}:${request.port} not connected!"
             )
 
             nodes.remove(node)
-            log.d(String.format("Node %s exited!", node))
+            log.d("Node $node exited!")
 
             ExitResponse(
                 result = OperationResult.OK

@@ -20,16 +20,7 @@ interface Controller : Server {
         val host: String = request.host
         val port: Int = request.port
 
-        override fun equals(other: Any?): Boolean {
-            if (other == null) return false
-            if (other !is Node) return false
-
-            return other.host == host && other.port == port
-        }
-
-        override fun toString(): String {
-            return String.format("%s:%d", host, port)
-        }
+        override fun toString() = "$host:$port"
     }
 
     companion object {
