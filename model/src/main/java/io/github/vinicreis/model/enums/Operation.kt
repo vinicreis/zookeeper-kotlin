@@ -1,6 +1,6 @@
 package io.github.vinicreis.model.enums
 
-import io.github.vinicreis.model.util.IOUtil.readInt
+import io.github.vinicreis.model.util.IOUtil.read
 import java.io.IOException
 import java.util.*
 
@@ -15,10 +15,10 @@ enum class Operation(val code: Int) {
 
     companion object {
         @Throws(InterruptedException::class)
-        fun fromClient(code: Int): Operation {
+        fun fromClient(code: String): Operation {
             return when (code) {
-                1 -> GET
-                2 -> PUT
+                "1" -> GET
+                "2" -> PUT
                 else -> throw InterruptedException("Interrupt command from input!")
             }
         }
@@ -26,7 +26,7 @@ enum class Operation(val code: Int) {
         @Throws(IOException::class, InterruptedException::class)
         fun readToClient(): Operation {
             return fromClient(
-                readInt("Digite a operação desejada ou outra tecla para encerrar...\n${printToClient()}")
+                read("Digite a operação desejada ou outra tecla para encerrar...\n${printToClient()}")
             )
         }
 

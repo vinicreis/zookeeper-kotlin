@@ -127,11 +127,9 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
 
             // Start all threads to join them later to process request asynchronously
             runBlocking {
-                val jobs = mutableListOf<Job>()
-
-                for (node in nodes) {
-                    val job = launch {
-                        val result = NetworkUtil.doRequest(
+                nodes.map { node ->
+                    launch {
+                        val response = NetworkUtil.doRequest(
                             node.host,
                             node.port,
                             request,
@@ -139,15 +137,11 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
                             log.isDebug
                         )
 
-                        if (result.result != OperationResult.OK) nodesWithError.add(node)
+                        if (response.result != OperationResult.OK) nodesWithError.add(node)
 
-                        log.d("Replication to node $node got result: $result")
+                        log.d("Replication to node $node got result: ${response.result}")
                     }
-
-                    jobs.add(job)
-                }
-
-                jobs.forEach { it.join() }
+                }.joinAll()
             }
 
             if (nodesWithError.isEmpty()) {

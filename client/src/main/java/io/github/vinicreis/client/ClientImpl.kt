@@ -10,10 +10,7 @@ import io.github.vinicreis.model.response.GetResponse
 import io.github.vinicreis.model.response.PutResponse
 import io.github.vinicreis.model.util.NetworkUtil.doRequest
 import io.github.vinicreis.model.util.handleException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.ConnectException
 import java.net.InetAddress
@@ -36,7 +33,7 @@ class ClientImpl(
     }
 
     override fun start() {
-        job = CoroutineScope(Dispatchers.IO).launch { worker.run() }
+        worker.run()
     }
 
     override fun stop() {

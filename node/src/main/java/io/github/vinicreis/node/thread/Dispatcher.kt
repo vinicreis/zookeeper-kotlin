@@ -24,12 +24,12 @@ class Dispatcher(private val server: Server) {
                 log.d("Request received!")
                 val reader = DataInputStream(socket.getInputStream())
 
-                val operationCode = reader.readUTF().toInt()
+                val operationCode = reader.readUTF()
                 val message = reader.readUTF()
 
                 log.d("Starting Worker thread...")
                 CoroutineScope(Dispatchers.IO).launch {
-                    Worker(server, socket, Operation.fromClient(operationCode), message).run()
+                    Worker(server, socket, Operation.valueOf(operationCode), message).run()
                 }
             }
         } catch (e: EOFException) {

@@ -1,6 +1,5 @@
 package io.github.vinicreis.client
 
-import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readIntWithDefault
 import io.github.vinicreis.model.util.IOUtil.readWithDefault
 import io.github.vinicreis.model.util.handleException
@@ -24,10 +23,6 @@ interface Client {
                 val serverPorts = serverPortsList.replace(" ", "").split(",").map(String::toInt)
                 val client: Client = ClientImpl(port, serverHost, serverPorts, debug)
                 client.start()
-
-                pressAnyKeyToFinish()
-
-                client.stop()
             } catch (e: Throwable) {
                 handleException(TAG, "Failed to start client!", e)
             }

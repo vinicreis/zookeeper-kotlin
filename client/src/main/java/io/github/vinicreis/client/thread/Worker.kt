@@ -6,17 +6,14 @@ import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
 import io.github.vinicreis.model.util.IOUtil.read
 import io.github.vinicreis.model.util.handleException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class Worker(private val client: Client) {
     private var running = true
 
-    suspend fun run() = withContext(Dispatchers.IO) {
+    fun run() {
         log.d("Starting worker thread...")
         while (running) {
             try {
-                // FIXME: Value is not being reads
                 val operation = Operation.readToClient()
 
                 when (operation) {
@@ -29,11 +26,9 @@ class Worker(private val client: Client) {
                     else -> throw IllegalArgumentException("Client should not call any option other than GET or PUT")
                 }
             } catch (e: InterruptedException) {
-                log.e("Fail", e)
                 running = false
                 client.stop()
             } catch (e: NumberFormatException) {
-                log.e("Fail", e)
                 running = false
                 client.stop()
             } catch (e: Throwable) {
