@@ -1,5 +1,6 @@
 plugins {
     id("java-library")
+    kotlin("jvm")
 }
 
 group = "io.github.vinicreis"
@@ -9,8 +10,15 @@ repositories {
     mavenCentral()
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     api(project(":model"))
+
+    implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
