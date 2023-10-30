@@ -13,14 +13,6 @@ object IOUtil {
 
     @JvmStatic
     @Throws(IOException::class)
-    fun readInt(message: String): Int {
-        print("$message: ")
-
-        return Scanner(System.`in`).nextInt()
-    }
-
-    @JvmStatic
-    @Throws(IOException::class)
     fun readWithDefault(message: String, defaultValue: String): String {
         print("$message [$defaultValue] : ")
         val read = readlnOrNull()
@@ -33,7 +25,7 @@ object IOUtil {
     fun readIntWithDefault(message: String, defaultValue: Int): Int {
         print("$message [$defaultValue] : ")
 
-        return try { Scanner(System.`in`).nextInt() } catch (e: Exception) { defaultValue }
+        return readln().toIntOrNull() ?: defaultValue
     }
 
     /**

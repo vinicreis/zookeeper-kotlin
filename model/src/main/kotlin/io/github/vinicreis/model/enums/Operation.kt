@@ -1,8 +1,6 @@
 package io.github.vinicreis.model.enums
 
 import io.github.vinicreis.model.util.IOUtil.read
-import java.io.IOException
-import java.util.*
 
 enum class Operation(val code: Int) {
     JOIN(0),
@@ -14,19 +12,17 @@ enum class Operation(val code: Int) {
     override fun toString() = "$name [${code}]"
 
     companion object {
-        @Throws(InterruptedException::class)
-        fun fromClient(code: String): Operation {
+        private fun fromClient(code: String): Operation {
             return when (code) {
                 "1" -> GET
                 "2" -> PUT
-                else -> throw InterruptedException("Interrupt command from input!")
+                else -> throw IllegalArgumentException("Unknown operation entered!")
             }
         }
 
-        @Throws(IOException::class, InterruptedException::class)
         fun readToClient(): Operation {
             return fromClient(
-                read("Digite a operação desejada ou outra tecla para encerrar...\n${printToClient()}")
+                read("Digite a operação desejada ou Ctrl+D para encerrar...\n${printToClient()}")
             )
         }
 

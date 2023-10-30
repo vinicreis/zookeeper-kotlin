@@ -25,7 +25,7 @@ class ClientImpl(
 ) : Client {
     private val host: String = InetAddress.getLocalHost().canonicalHostName
     private val keyTimestampMap: HashMap<String, Long?> = LinkedHashMap()
-    private val worker: Worker = Worker(this)
+    private val worker: Worker = Worker(this, debug)
     private var job: Job? = null
 
     init {

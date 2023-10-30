@@ -7,11 +7,16 @@ import io.github.vinicreis.model.log.Log
 import io.github.vinicreis.model.util.IOUtil.read
 import io.github.vinicreis.model.util.handleException
 
-class Worker(private val client: Client) {
+class Worker(private val client: Client, debug: Boolean) {
     private var running = true
+
+    init {
+        log.isDebug = debug
+    }
 
     fun run() {
         log.d("Starting worker thread...")
+
         while (running) {
             try {
                 val operation = Operation.readToClient()
@@ -25,10 +30,9 @@ class Worker(private val client: Client) {
 
                     else -> throw IllegalArgumentException("Client should not call any option other than GET or PUT")
                 }
-            } catch (e: InterruptedException) {
-                running = false
-                client.stop()
-            } catch (e: NumberFormatException) {
+            } catch (e: IllegalArgumentException) {
+                println("Opção inválida! Tente novamente ou pressione Ctrl+D para finalizar.")
+            } catch (e: RuntimeException) {
                 running = false
                 client.stop()
             } catch (e: Throwable) {
