@@ -1,9 +1,13 @@
+import org.gradle.accessors.dm.LibrariesForLibs
+
 plugins {
-    kotlin("jvm")
     `java-library`
+    kotlin("jvm")
 
     id("zookeeper.detekt")
 }
+
+val libs = the<LibrariesForLibs>()
 
 group = "io.github.vinicreis"
 version = "1.0.0-SNAPSHOT"
@@ -14,7 +18,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
+    testImplementation(platform(libs.junit.bom))
 }
 
 tasks.test {
