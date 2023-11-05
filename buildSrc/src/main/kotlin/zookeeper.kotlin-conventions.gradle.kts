@@ -1,5 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.9.20"
+    kotlin("jvm")
+    `java-library`
+
+    id("zookeeper.detekt")
 }
 
 group = "io.github.vinicreis"
@@ -11,6 +14,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    testImplementation(platform("org.junit:junit-bom:5.9.1"))
 }
 
 tasks.test {
@@ -18,5 +22,5 @@ tasks.test {
 }
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(17)
 }
