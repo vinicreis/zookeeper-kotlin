@@ -1,8 +1,13 @@
 plugins {
     `kotlin-dsl`
-    id("io.gitlab.arturbosch.detekt") version "1.23.3"
 }
 
 repositories {
-    gradlePluginPortal() // so that external plugins can be resolved in dependencies section
+    mavenCentral()
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20")
+    implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.3")
 }
