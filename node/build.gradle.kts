@@ -1,6 +1,7 @@
 plugins {
     id("java-library")
     kotlin("jvm")
+    id("detekt")
 }
 
 group = "io.github.vinicreis"
