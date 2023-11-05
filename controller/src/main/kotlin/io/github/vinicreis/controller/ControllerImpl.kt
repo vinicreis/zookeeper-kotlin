@@ -18,7 +18,11 @@ import io.github.vinicreis.model.util.NetworkUtil
 import io.github.vinicreis.model.util.handleException
 import kotlinx.coroutines.*
 
-class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
+class ControllerImpl(
+    override val port: Int,
+    debug: Boolean,
+    private val coroutineScope: CoroutineScope
+) : Controller {
     private val timestampRepository: TimestampRepository = TimestampRepository()
     override val keyValueRepository: KeyValueRepository = KeyValueRepository(timestampRepository)
     private val dispatcher: Dispatcher = Dispatcher(this)
@@ -32,8 +36,8 @@ class ControllerImpl(override val port: Int, debug: Boolean) : Controller {
 
     override fun start() {
         try {
-            timestampJob = CoroutineScope(Dispatchers.IO).launch { timestampRepository.run() }
-            dispatcherJob = CoroutineScope(Dispatchers.IO).launch { dispatcher.run() }
+            timestampJob = coroutineScope.launch { timestampRepository.run() }
+            dispatcherJob = coroutineScope.launch { dispatcher.run() }
         } catch (e: Throwable) {
             handleException(TAG, "Failed to start Controller!", e)
         }

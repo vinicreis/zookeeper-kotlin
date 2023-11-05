@@ -11,6 +11,10 @@ import io.github.vinicreis.model.response.JoinResponse
 import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readIntWithDefault
 import io.github.vinicreis.model.util.handleException
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 interface Controller : Server {
     fun join(request: JoinRequest): JoinResponse
@@ -29,10 +33,12 @@ interface Controller : Server {
         @JvmStatic
         fun main(args: Array<String>) {
             try {
+                val coroutineContext = Dispatchers.IO + SupervisorJob() + CoroutineName(TAG)
+                val coroutineScope = CoroutineScope(coroutineContext)
                 val log: Log = ConsoleLog("ControllerMain")
                 val debug = args.any { it in listOf("--debug", "-d") }
                 val port = readIntWithDefault("Digite o valor da porta do servidor", 10097)
-                val controller: Controller = ControllerImpl(port, debug)
+                val controller: Controller = ControllerImpl(port, debug, coroutineScope)
 
                 log.isDebug = debug
 

@@ -8,12 +8,14 @@ import io.github.vinicreis.model.request.ExitRequest
 import io.github.vinicreis.model.request.JoinRequest
 import io.github.vinicreis.model.request.PutRequest
 import io.github.vinicreis.model.request.ReplicationRequest
-import io.github.vinicreis.model.response.*
+import io.github.vinicreis.model.response.ExitResponse
+import io.github.vinicreis.model.response.JoinResponse
+import io.github.vinicreis.model.response.PutResponse
+import io.github.vinicreis.model.response.ReplicationResponse
 import io.github.vinicreis.model.util.NetworkUtil.doRequest
 import io.github.vinicreis.model.util.handleException
 import io.github.vinicreis.node.thread.Dispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.net.InetAddress
@@ -22,7 +24,8 @@ class NodeImpl(
     override val port: Int,
     private val controllerHost: String,
     private val controllerPort: Int,
-    debug: Boolean
+    debug: Boolean,
+    private val coroutineScope: CoroutineScope
 ) : Node {
     override val keyValueRepository: KeyValueRepository = KeyValueRepository()
     private val dispatcher: Dispatcher = Dispatcher(this)
@@ -33,7 +36,7 @@ class NodeImpl(
     }
 
     override fun start() {
-        job = CoroutineScope(Dispatchers.IO).launch { dispatcher.run() }
+        job = coroutineScope.launch { dispatcher.run() }
         join()
     }
 
