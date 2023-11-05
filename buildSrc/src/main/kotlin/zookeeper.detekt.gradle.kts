@@ -21,6 +21,8 @@ detekt {
 }
 
 tasks.withType<Detekt>().configureEach {
+    gradle.startParameter.isContinueOnFailure = true
+
     include(kotlinFiles)
     exclude(resourceFiles, buildFiles)
 
@@ -33,8 +35,9 @@ tasks.withType<Detekt>().configureEach {
 }
 
 tasks.withType<Detekt>().configureEach {
-    jvmTarget = "1.8"
+    jvmTarget = "17"
 }
+
 tasks.withType<DetektCreateBaselineTask>().configureEach {
-    jvmTarget = "1.8"
+    jvmTarget = "17"
 }
