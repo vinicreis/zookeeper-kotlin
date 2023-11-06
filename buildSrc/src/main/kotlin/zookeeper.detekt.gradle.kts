@@ -13,10 +13,10 @@ val resourceFiles = "**/resources/**"
 val buildFiles = "**/build/**"
 
 detekt {
-    buildUponDefaultConfig = true // preconfigure defaults
-    allRules = false // activate all available (even unstable) rules.
+    buildUponDefaultConfig = true
+    allRules = false
     source.setFrom(projectSource)
-    config.setFrom(configFile) // point to your custom config defining rules to run, overwriting default behavior
+    config.setFrom(configFile)
     baseline = baselineFile
 }
 
@@ -27,9 +27,9 @@ tasks.withType<Detekt>().configureEach {
     exclude(resourceFiles, buildFiles)
 
     reports {
-        html.required.set(true) // observe findings in your browser with structure and code snippets
+        html.required.set(true)
         html.outputLocation.set(file("build/reports/detekt.html"))
-        md.required.set(true) // simple Markdown format
+        md.required.set(true)
         md.outputLocation.set(file("build/reports/detekt.md"))
     }
 }
