@@ -1,7 +1,9 @@
 package io.github.vinicreis.model.repository
 
 import io.github.vinicreis.model.log.ConsoleLog
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicLong
 
 class TimestampRepository(private val step: Long = DEFAULT_STEP) {

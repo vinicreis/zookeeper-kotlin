@@ -4,10 +4,11 @@ import io.github.vinicreis.model.Server
 import io.github.vinicreis.model.enums.Operation
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
-import io.github.vinicreis.model.util.handleException
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.DataInputStream
-import java.io.EOFException
 import java.net.ServerSocket
 import java.net.SocketException
 
@@ -32,12 +33,8 @@ class Dispatcher(private val server: Server) {
                     Worker(server, socket, Operation.valueOf(operationCode), message).run()
                 }
             }
-        } catch (e: EOFException) {
-            handleException(TAG, "Invalid input received from client", e)
         } catch (e: SocketException) {
-            log.d("Socket closed!")
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed during dispatch execution", e)
+            log.e("Socket closed!", e)
         } finally {
             serverSocket.close()
         }

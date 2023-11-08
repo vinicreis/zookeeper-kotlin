@@ -1,0 +1,14 @@
+[versions]
+kotlin = "1.9.20"
+gson = "2.10.1"
+coroutines = "1.7.3"
+detekt = "1.23.3"
+junit-bom = "5.9.1"
+
+[libraries]
+kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit-bom" }

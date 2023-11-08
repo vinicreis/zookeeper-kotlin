@@ -10,7 +10,10 @@ import io.github.vinicreis.model.response.ExitResponse
 import io.github.vinicreis.model.response.JoinResponse
 import io.github.vinicreis.model.util.IOUtil.pressAnyKeyToFinish
 import io.github.vinicreis.model.util.IOUtil.readIntWithDefault
-import io.github.vinicreis.model.util.handleException
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 interface Controller : Server {
     fun join(request: JoinRequest): JoinResponse
@@ -25,29 +28,28 @@ interface Controller : Server {
 
     companion object {
         private const val TAG = "ControllerMain"
+        private const val DEFAULT_PORT = 10097
 
         @JvmStatic
         fun main(args: Array<String>) {
-            try {
-                val log: Log = ConsoleLog("ControllerMain")
-                val debug = args.any { it in listOf("--debug", "-d") }
-                val port = readIntWithDefault("Digite o valor da porta do servidor", 10097)
-                val controller: Controller = ControllerImpl(port, debug)
+            val coroutineContext = Dispatchers.IO + SupervisorJob() + CoroutineName(TAG)
+            val coroutineScope = CoroutineScope(coroutineContext)
+            val log: Log = ConsoleLog("ControllerMain")
+            val debug = args.any { it in listOf("--debug", "-d") }
+            val port = readIntWithDefault("Digite o valor da porta do servidor", DEFAULT_PORT)
+            val controller: Controller = ControllerImpl(port, debug, coroutineScope)
 
-                log.isDebug = debug
+            log.isDebug = debug
 
-                log.d("Starting controller...")
-                controller.start()
-                log.d("Controller started!")
+            log.d("Starting controller...")
+            controller.start()
+            log.d("Controller started!")
 
-                pressAnyKeyToFinish()
+            pressAnyKeyToFinish()
 
-                log.d("Finishing controller...")
-                controller.stop()
-                log.d("Controller finished!")
-            } catch (e: Throwable) {
-                handleException(TAG, "Failed start Controller...", e)
-            }
+            log.d("Finishing controller...")
+            controller.stop()
+            log.d("Controller finished!")
         }
     }
 }

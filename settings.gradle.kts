@@ -5,13 +5,11 @@ pluginManagement {
     }
 }
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
-}
-
 rootProject.name = "zookeeper-kotlin"
-include("model")
-include("client")
-include("client")
-include("controller")
-include("node")
+include(
+    "model",
+    "client",
+    "client",
+    "controller",
+    "node"
+)

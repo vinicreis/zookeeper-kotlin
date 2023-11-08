@@ -2,7 +2,7 @@ package io.github.vinicreis.model.enums
 
 import io.github.vinicreis.model.util.IOUtil.read
 
-enum class Operation(val code: Int) {
+enum class Operation(private val code: Int) {
     JOIN(0),
     GET(1),
     PUT(2),
