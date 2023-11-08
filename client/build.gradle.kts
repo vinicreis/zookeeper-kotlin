@@ -7,3 +7,11 @@ dependencies {
 
     implementation(libs.coroutines.core)
 }
+
+tasks.withType<Jar> {
+    manifest {
+        attributes(
+            "Main-Class" to "io.github.vinicreis.client.Client"
+        )
+    }
+}

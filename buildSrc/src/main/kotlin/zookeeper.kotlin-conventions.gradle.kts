@@ -37,3 +37,15 @@ java {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.withType<Jar> {
+    doFirst {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+        configurations.compileClasspath.get().forEach {
+            if (it.exists()) {
+                from(if (it.isDirectory) it else zipTree(it))
+            }
+        }
+    }
+}
