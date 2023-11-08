@@ -5,10 +5,14 @@ import io.github.vinicreis.model.Server
 import io.github.vinicreis.model.enums.Operation
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
-import io.github.vinicreis.model.request.*
+import io.github.vinicreis.model.request.ExitRequest
+import io.github.vinicreis.model.request.GetRequest
+import io.github.vinicreis.model.request.JoinRequest
+import io.github.vinicreis.model.request.PutRequest
+import io.github.vinicreis.model.request.ReplicationRequest
 import io.github.vinicreis.model.util.Serializer
-import io.github.vinicreis.model.util.handleException
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.EOFException
@@ -35,11 +39,9 @@ class Dispatcher(private val server: Server) {
                 send(message, socket, Operation.valueOf(operationCode))
             }
         } catch (e: EOFException) {
-            handleException(TAG, "Invalid input received from client", e)
+            log.e("Invalid input received from client", e)
         } catch (e: SocketException) {
-            log.d("Socket closed!")
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed during dispatch execution", e)
+            log.e("Socket closed!", e)
         } finally {
             serverSocket.close()
         }
@@ -50,23 +52,27 @@ class Dispatcher(private val server: Server) {
         socket: Socket,
         operation: Operation
     ) = withContext(Dispatchers.IO) {
-        handleException(TAG, "Failed during worker execution") {
+        try {
             val writer = DataOutputStream(socket.getOutputStream())
             val response = when (operation) {
                 Operation.JOIN -> (server as? Controller)?.join(Serializer.fromJson(request, JoinRequest::class.java))
-                    ?: throw IllegalStateException("Nodes can not handle JOIN requests")
+                    ?: error("Nodes can not handle JOIN requests")
+
                 Operation.PUT -> server.put(Serializer.fromJson(request, PutRequest::class.java))
                 Operation.REPLICATE -> server.replicate(Serializer.fromJson(request, ReplicationRequest::class.java))
                 Operation.GET -> server.get(Serializer.fromJson(request, GetRequest::class.java))
                 Operation.EXIT -> (server as? Controller)?.exit(Serializer.fromJson(request, ExitRequest::class.java))
-                    ?: throw IllegalStateException("Nodes can not handle EXIT requests")
-                else -> throw IllegalStateException("Operation unknown!")
+                    ?: error("Nodes can not handle EXIT requests")
+
+                else -> error("Operation unknown!")
             }
 
             writer.writeUTF(Serializer.toJson(response))
             writer.flush()
 
             socket.close()
+        } catch (e: IllegalStateException) {
+            log.e("Something went wrong", e)
         }
     }
 

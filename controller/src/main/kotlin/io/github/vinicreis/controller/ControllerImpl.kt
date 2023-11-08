@@ -3,7 +3,6 @@ package io.github.vinicreis.controller
 import io.github.vinicreis.controller.thread.Dispatcher
 import io.github.vinicreis.model.enums.OperationResult
 import io.github.vinicreis.model.log.ConsoleLog
-import io.github.vinicreis.model.log.Log
 import io.github.vinicreis.model.repository.KeyValueRepository
 import io.github.vinicreis.model.repository.TimestampRepository
 import io.github.vinicreis.model.request.ExitRequest
@@ -15,8 +14,12 @@ import io.github.vinicreis.model.response.JoinResponse
 import io.github.vinicreis.model.response.PutResponse
 import io.github.vinicreis.model.response.ReplicationResponse
 import io.github.vinicreis.model.util.NetworkUtil
-import io.github.vinicreis.model.util.handleException
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.io.IOException
 
 class ControllerImpl(
     override val port: Int,
@@ -29,65 +32,49 @@ class ControllerImpl(
     private val nodes: MutableList<Controller.Node> = mutableListOf()
     private var timestampJob: Job? = null
     private var dispatcherJob: Job? = null
+    override val log = ConsoleLog(TAG)
 
     init {
         log.isDebug = debug
     }
 
     override fun start() {
-        try {
-            timestampJob = coroutineScope.launch { timestampRepository.run() }
-            dispatcherJob = coroutineScope.launch { dispatcher.run() }
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed to start Controller!", e)
-        }
+        timestampJob = coroutineScope.launch { timestampRepository.run() }
+        dispatcherJob = coroutineScope.launch { dispatcher.run() }
     }
 
     override fun stop() {
-        try {
-            timestampJob?.cancel()
-            dispatcherJob?.cancel()
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed while stopping Controller", e)
-        }
+        timestampJob?.cancel()
+        dispatcherJob?.cancel()
     }
 
     override fun join(request: JoinRequest): JoinResponse {
-        return try {
-            log.d("Joining node ${request.host}:${request.port}")
+        log.d("Joining node ${request.host}:${request.port}")
 
-            if (hasNode(Controller.Node(request))) {
-                log.d("Node ${request.host}:${request.port} already joined!")
+        if (hasNode(Controller.Node(request))) {
+            log.d("Node ${request.host}:${request.port} already joined!")
 
-                return JoinResponse(
-                    result = OperationResult.ERROR,
-                    message = "Node ${request.host}:${request.port} is already joined!"
-                )
-            }
-
-            nodes.add(Controller.Node(request))
-            log.d("Node ${request.host}:${request.port} joined!")
-
-            JoinResponse(
-                result = OperationResult.OK
-            )
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed to process JOIN operation", e)
-
-            JoinResponse(
+            return JoinResponse(
                 result = OperationResult.ERROR,
-                message = "Failed to process operation"
+                message = "Node ${request.host}:${request.port} is already joined!"
             )
         }
+
+        nodes.add(Controller.Node(request))
+        log.d("Node ${request.host}:${request.port} joined!")
+
+        return JoinResponse(
+            result = OperationResult.OK
+        )
     }
 
     override fun put(request: PutRequest): PutResponse {
         return try {
             with(request) {
-                print("Cliente $host:$port PUT key $key with value = $value")
+                print("Client $host:$port PUT key $key with value = $value")
             }
 
-            var timestamp = keyValueRepository.insert(request.key, request.value)
+            val timestamp = keyValueRepository.insert(request.key, request.value)
             val replicationResponse = replicate(
                 ReplicationRequest(
                     request.host,
@@ -98,25 +85,13 @@ class ControllerImpl(
                 )
             )
 
-            /*
-             * The code below is used to simulate the TRY_OTHER_SERVER_OR_LATER scenario.
-             * If the client host is localhost ("host.docker.internal:10092") and the port is 10092,
-             * along with the key "testing" and the value "tosol", the timestamp returned should be greater
-             * than the saved one. So, when the same client tries to get the value with
-             * the key "testing", the timestamp sent would be greater and the server
-             * should return the TRY_OTHER_SERVER result.
-             */
-            if (request.host == "host.docker.internal" && request.port == 10092 && request.key == "testing" && request.value == "tosol") {
-                timestamp += 1000L
-            }
-
             PutResponse(
                 result = replicationResponse.result,
                 message = replicationResponse.message,
                 timestamp = timestamp
             )
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed to process PUT operation", e)
+        } catch (e: IllegalStateException) {
+            log.e("Failed to process PUT operation", e)
 
             PutResponse(
                 result = OperationResult.ERROR,
@@ -126,77 +101,66 @@ class ControllerImpl(
     }
 
     override fun replicate(request: ReplicationRequest): ReplicationResponse {
-        return try {
-            val nodesWithError: MutableList<Controller.Node?> = ArrayList(nodes.size)
+        val nodesWithError: MutableList<Controller.Node?> = ArrayList(nodes.size)
 
-            // Start all threads to join them later to process request asynchronously
-            runBlocking {
-                nodes.map { node ->
-                    launch {
-                        val response = NetworkUtil.doRequest(
+        // Start all threads to join them later to process request asynchronously
+        runBlocking {
+            nodes.map { node ->
+                launch {
+                    try {
+                        NetworkUtil.doRequest(
                             node.host,
                             node.port,
                             request,
                             ReplicationResponse::class.java,
                             log.isDebug
-                        )
+                        ).run {
+                            if (result != OperationResult.OK) {
+                                nodesWithError.add(node)
+                            }
 
-                        if (response.result != OperationResult.OK) nodesWithError.add(node)
-
-                        log.d("Replication to node $node got result: ${response.result}")
+                            log.d("Replication to node $node got result: $result")
+                        }
+                    } catch (e: IOException) {
+                        log.e("Failed to process request to node $node", e)
+                        nodesWithError.add(node)
                     }
-                }.joinAll()
-            }
-
-            if (nodesWithError.isEmpty()) {
-                with(request) {
-                    println(
-                        "Enviando PUT_OK ao Cliente $host:$port da key: $key ts: $timestamp",
-                    )
                 }
+            }.joinAll()
+        }
 
-                return ReplicationResponse(
-                    result = OperationResult.OK
+        if (nodesWithError.isEmpty()) {
+            with(request) {
+                println(
+                    "Enviando PUT_OK ao Cliente $host:$port da key: $key ts: $timestamp",
                 )
             }
 
-            ReplicationResponse(
-                result = OperationResult.ERROR,
-                message = "Failed to replicate data on servers ${nodesWithError.joinToString(", ")}"
-            )
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed to process REPLICATE operation", e)
-
-            ReplicationResponse(
-                result = OperationResult.ERROR,
-                message = "Failed to process REPLICATE operation"
+            return ReplicationResponse(
+                result = OperationResult.OK
             )
         }
+
+        return ReplicationResponse(
+            result = OperationResult.ERROR,
+            message = "Failed to replicate data on servers ${nodesWithError.joinToString(", ")}"
+        )
     }
 
     override fun exit(request: ExitRequest): ExitResponse {
-        return try {
-            val node = Controller.Node(request)
+        val node = Controller.Node(request)
 
-            if (!hasNode(node)) return ExitResponse(
-                result = OperationResult.ERROR,
-                message = "Server ${request.host}:${request.port} not connected!"
-            )
+        if (!hasNode(node)) return ExitResponse(
+            result = OperationResult.ERROR,
+            message = "Server ${request.host}:${request.port} not connected!"
+        )
 
-            nodes.remove(node)
-            log.d("Node $node exited!")
+        nodes.remove(node)
+        log.d("Node $node exited!")
 
-            ExitResponse(
-                result = OperationResult.OK
-            )
-        } catch (e: Throwable) {
-            handleException(TAG, "Failed to remove node ${request.host}:${request.port}", e)
-
-            ExitResponse(
-                result = OperationResult.ERROR,
-                message = "Failed to remove node ${request.host}:${request.port}"
-            )
-        }
+        return ExitResponse(
+            result = OperationResult.OK
+        )
     }
 
     private fun hasNode(node: Controller.Node): Boolean {
@@ -205,6 +169,5 @@ class ControllerImpl(
 
     companion object {
         private const val TAG = "ControllerImpl"
-        private val log: Log = ConsoleLog(TAG)
     }
 }

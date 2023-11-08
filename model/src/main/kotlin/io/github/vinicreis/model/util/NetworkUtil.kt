@@ -14,7 +14,6 @@ object NetworkUtil {
     val log: Log = ConsoleLog(TAG)
 
     @JvmStatic
-    @Throws(IOException::class)
     fun <Req : Request, Res : Response> doRequest(
         host: String?,
         port: Int,
@@ -25,7 +24,6 @@ object NetworkUtil {
     }
 
     @JvmStatic
-    @Throws(IOException::class)
     fun <Req : Request?, Res : Response?> doRequest(
         host: String?,
         port: Int,

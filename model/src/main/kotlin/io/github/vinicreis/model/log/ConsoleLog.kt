@@ -11,7 +11,7 @@ class ConsoleLog(tag: String) : Log {
         logger.log(Level.SEVERE, msg)
     }
 
-    override fun e(msg: String, e: Throwable) {
+    override fun e(msg: String, e: Exception) {
         logger.log(Level.SEVERE, msg, e)
     }
 

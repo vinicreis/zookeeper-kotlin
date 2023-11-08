@@ -5,7 +5,6 @@ import io.github.vinicreis.model.enums.Operation
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
 import io.github.vinicreis.model.util.IOUtil.read
-import io.github.vinicreis.model.util.handleException
 
 class Worker(private val client: Client, debug: Boolean) {
     private var running = true
@@ -14,6 +13,7 @@ class Worker(private val client: Client, debug: Boolean) {
         log.isDebug = debug
     }
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     fun run() {
         log.d("Starting worker thread...")
 
@@ -28,15 +28,13 @@ class Worker(private val client: Client, debug: Boolean) {
                         read("Digite o valor a ser armazenado")
                     )
 
-                    else -> throw IllegalArgumentException("Client should not call any option other than GET or PUT")
+                    else -> error("Client should not call any option other than GET or PUT")
                 }
-            } catch (e: IllegalArgumentException) {
+            } catch (e: IllegalStateException) {
                 println("Opção inválida! Tente novamente ou pressione Ctrl+D para finalizar.")
             } catch (e: RuntimeException) {
                 running = false
                 client.stop()
-            } catch (e: Throwable) {
-                handleException(TAG, "Failed during thread execution!", e)
             }
         }
     }
