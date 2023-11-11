@@ -49,7 +49,12 @@ class NodeImpl(
         try {
             val request = JoinRequest(InetAddress.getLocalHost().hostName, port)
 
-            doRequest(controllerHost, controllerPort, request, JoinResponse::class.java).run {
+            doRequest(
+                host = controllerHost,
+                port = controllerPort,
+                request = request,
+                responseClass = JoinResponse::class.java
+            ).run {
                 if (result !== OperationResult.OK) {
                     error("Failed to join on controller server: $message")
                 }
@@ -67,17 +72,18 @@ class NodeImpl(
                 println("Encaminhando $host:$port PUT key: $key value: $value",)
             }
             val controllerRequest = PutRequest(
-                InetAddress.getLocalHost().hostName,
-                port,
-                request.key,
-                request.value
+                host = InetAddress.getLocalHost().hostName,
+                port = port,
+                key = request.key,
+                value = request.value
             )
 
             doRequest(
-                controllerHost,
-                controllerPort,
-                controllerRequest,
-                PutResponse::class.java
+                host = controllerHost,
+                port = controllerPort,
+                request = controllerRequest,
+                responseClass = PutResponse::class.java,
+                debug = log.isDebug
             ).run {
                 PutResponse(
                     result = result,
@@ -110,7 +116,12 @@ class NodeImpl(
         try {
             val request = ExitRequest(InetAddress.getLocalHost().hostName, port)
 
-            doRequest(controllerHost, controllerPort, request, ExitResponse::class.java).run {
+            doRequest(
+                host = controllerHost,
+                port = controllerPort,
+                request = request,
+                responseClass = ExitResponse::class.java
+            ).run {
                 if (result !== OperationResult.OK) {
                     error("Failed to send EXIT request: $message")
                 }

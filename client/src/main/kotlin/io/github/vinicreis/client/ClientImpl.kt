@@ -9,7 +9,6 @@ import io.github.vinicreis.model.request.PutRequest
 import io.github.vinicreis.model.response.GetResponse
 import io.github.vinicreis.model.response.PutResponse
 import io.github.vinicreis.model.util.NetworkUtil.doRequest
-import kotlinx.coroutines.Job
 import java.io.IOException
 import java.net.ConnectException
 import java.net.InetAddress
@@ -24,7 +23,6 @@ class ClientImpl(
     private val host: String = InetAddress.getLocalHost().canonicalHostName
     private val keyTimestampMap: HashMap<String, Long> = LinkedHashMap()
     private val worker: Worker = Worker(this, debug)
-    private var job: Job? = null
 
     init {
         log.isDebug = debug
@@ -35,7 +33,6 @@ class ClientImpl(
     }
 
     override fun stop() {
-        job?.cancel()
         println("Encerrando...")
     }
 
@@ -43,9 +40,19 @@ class ClientImpl(
         try {
             val serverPort = serverPorts.random()
             val timestamp = keyTimestampMap.getOrDefault(key, 0L)
-            val request = GetRequest(host, port, key, timestamp)
+            val request = GetRequest(
+                host = host,
+                port = port,
+                key = key,
+                timestamp = timestamp
+            )
 
-            doRequest(serverHost, serverPort, request, GetResponse::class.java).run {
+            doRequest(
+                host = serverHost,
+                port = serverPort,
+                request = request,
+                responseClass = GetResponse::class.java
+            ).run {
                 keyTimestampMap[key] = timestamp
 
                 when (result) {
@@ -64,7 +71,7 @@ class ClientImpl(
             log.e("Failed to process GET request", e)
 
             println(
-                "Falha ao obter o valor da key $key",
+                "Falha ao obter o valor da key $key"
             )
         }
     }
@@ -73,14 +80,32 @@ class ClientImpl(
         val serverPort = serverPorts.random()
 
         try {
-            val request = PutRequest(host, port, key, value)
+            val request = PutRequest(
+                host = host,
+                port = port,
+                key = key,
+                value = value
+            )
 
-            doRequest(serverHost, serverPort, request, PutResponse::class.java).run {
+            doRequest(
+                host = serverHost,
+                port = serverPort,
+                request = request,
+                responseClass = PutResponse::class.java,
+                debug = log.isDebug
+            ).run {
                 when(result) {
-                    OperationResult.NOT_FOUND -> println("Key $key not found on server")
-                    OperationResult.ERROR -> println("Failed to get key $key from server")
-                    OperationResult.TRY_AGAIN_ON_OTHER_SERVER -> println("Failed to get key $key from server. " +
-                            "Please, try again or try other server")
+                    OperationResult.NOT_FOUND -> {
+                        println("Key $key not found on server")
+                    }
+                    OperationResult.ERROR -> {
+                        println("Failed to get key $key from server")
+                    }
+                    OperationResult.TRY_AGAIN_ON_OTHER_SERVER -> {
+                        println(
+                            "Failed to get key $key from server. Please, try again or try other server"
+                        )
+                    }
                     OperationResult.OK -> {
                         keyTimestampMap[key] = timestamp ?: 0L
 

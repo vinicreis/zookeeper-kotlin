@@ -14,6 +14,7 @@ import kotlinx.coroutines.withContext
 import java.io.DataOutputStream
 import java.net.Socket
 import java.net.SocketException
+import kotlin.coroutines.CoroutineContext
 
 class Worker(
     private val server: Server,
@@ -21,7 +22,9 @@ class Worker(
     private val operation: Operation,
     private val request: String
 ){
-    suspend fun run() = withContext(Dispatchers.IO) {
+    suspend fun run(
+        coroutineContext: CoroutineContext = Dispatchers.IO
+    ): Unit = withContext(coroutineContext) {
         try {
             val writer = DataOutputStream(socket.getOutputStream())
             val response: Response = when (operation) {
@@ -30,7 +33,6 @@ class Worker(
                 Operation.REPLICATE -> server.replicate(fromJson(request, ReplicationRequest::class.java))
                 Operation.GET -> server.get(fromJson(request, GetRequest::class.java))
                 Operation.EXIT -> error("Nodes can not handle EXIT requests")
-                else -> error("Operation unknown!")
             }
 
             writer.writeUTF(toJson(response))

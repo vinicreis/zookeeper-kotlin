@@ -20,11 +20,17 @@ object NetworkUtil {
         request: Req,
         responseClass: Class<Res>?
     ): Res {
-        return doRequest(host, port, request, responseClass, false)
+        return doRequest(
+            host = host,
+            port = port,
+            request = request,
+            responseClass = responseClass,
+            debug = false
+        )
     }
 
     @JvmStatic
-    fun <Req : Request?, Res : Response?> doRequest(
+    fun <Req : Request, Res : Response> doRequest(
         host: String?,
         port: Int,
         request: Req,
@@ -37,7 +43,7 @@ object NetworkUtil {
                 val out = DataOutputStream(socket.getOutputStream())
                 val json = Serializer.toJson(request)
                 log.isDebug = debug
-                log.d("Sending operation ${request!!.operation}")
+                log.d("Sending operation ${request.operation}")
                 out.writeUTF(request.operation.name)
                 out.flush()
                 log.d("Sending JSON: $json")

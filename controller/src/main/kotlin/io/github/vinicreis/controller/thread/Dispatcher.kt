@@ -19,15 +19,17 @@ import java.io.EOFException
 import java.net.ServerSocket
 import java.net.Socket
 import java.net.SocketException
+import kotlin.coroutines.CoroutineContext
 
 class Dispatcher(private val server: Server) {
     private val log: Log = ConsoleLog(TAG)
     private val serverSocket: ServerSocket = ServerSocket(server.port)
-    private var running = true
 
-    suspend fun run() = withContext(Dispatchers.IO) {
+    suspend fun run(
+        coroutineContext: CoroutineContext = Dispatchers.IO
+    ): Unit = withContext(coroutineContext) {
         try {
-            while (running) {
+            while (true) {
                 log.d("Listening for operation requests...")
                 val socket = serverSocket.accept()
                 log.d("Request received!")
@@ -50,8 +52,9 @@ class Dispatcher(private val server: Server) {
     private suspend fun send(
         request: String,
         socket: Socket,
-        operation: Operation
-    ) = withContext(Dispatchers.IO) {
+        operation: Operation,
+        coroutineContext: CoroutineContext = Dispatchers.IO
+    ): Unit = withContext(coroutineContext) {
         try {
             val writer = DataOutputStream(socket.getOutputStream())
             val response = when (operation) {
@@ -63,8 +66,6 @@ class Dispatcher(private val server: Server) {
                 Operation.GET -> server.get(Serializer.fromJson(request, GetRequest::class.java))
                 Operation.EXIT -> (server as? Controller)?.exit(Serializer.fromJson(request, ExitRequest::class.java))
                     ?: error("Nodes can not handle EXIT requests")
-
-                else -> error("Operation unknown!")
             }
 
             writer.writeUTF(Serializer.toJson(response))

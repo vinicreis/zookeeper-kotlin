@@ -5,13 +5,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.coroutines.CoroutineContext
 
 class TimestampRepository(private val step: Long = DEFAULT_STEP) {
     private var running = false
     private val counter: AtomicLong = AtomicLong(0L)
     val current: Long get() = counter.get()
 
-    suspend fun run() = withContext(Dispatchers.IO) {
+    suspend fun run(
+        coroutineContext: CoroutineContext = Dispatchers.IO
+    ): Unit = withContext(coroutineContext) {
         try {
             running = true
 

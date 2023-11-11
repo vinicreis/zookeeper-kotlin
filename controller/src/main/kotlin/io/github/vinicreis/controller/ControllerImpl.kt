@@ -77,11 +77,11 @@ class ControllerImpl(
             val timestamp = keyValueRepository.insert(request.key, request.value)
             val replicationResponse = replicate(
                 ReplicationRequest(
-                    request.host,
-                    request.port,
-                    request.key,
-                    request.value,
-                    timestamp
+                    host = request.host,
+                    port = request.port,
+                    key = request.key,
+                    value = request.value,
+                    timestamp = timestamp
                 )
             )
 
@@ -109,11 +109,11 @@ class ControllerImpl(
                 launch {
                     try {
                         NetworkUtil.doRequest(
-                            node.host,
-                            node.port,
-                            request,
-                            ReplicationResponse::class.java,
-                            log.isDebug
+                            host = node.host,
+                            port = node.port,
+                            request = request,
+                            responseClass = ReplicationResponse::class.java,
+                            debug = log.isDebug
                         ).run {
                             if (result != OperationResult.OK) {
                                 nodesWithError.add(node)
@@ -150,10 +150,12 @@ class ControllerImpl(
     override fun exit(request: ExitRequest): ExitResponse {
         val node = Controller.Node(request)
 
-        if (!hasNode(node)) return ExitResponse(
-            result = OperationResult.ERROR,
-            message = "Server ${request.host}:${request.port} not connected!"
-        )
+        if (!hasNode(node)) {
+            return ExitResponse(
+                result = OperationResult.ERROR,
+                message = "Server ${request.host}:${request.port} not connected!"
+            )
+        }
 
         nodes.remove(node)
         log.d("Node $node exited!")

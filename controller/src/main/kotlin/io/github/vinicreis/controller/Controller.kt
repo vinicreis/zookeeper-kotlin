@@ -31,6 +31,7 @@ interface Controller : Server {
         private const val DEFAULT_PORT = 10097
 
         @JvmStatic
+        @Suppress("InjectDispatcher")
         fun main(args: Array<String>) {
             val coroutineContext = Dispatchers.IO + SupervisorJob() + CoroutineName(TAG)
             val coroutineScope = CoroutineScope(coroutineContext)

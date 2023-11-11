@@ -4,22 +4,23 @@ import io.github.vinicreis.model.Server
 import io.github.vinicreis.model.enums.Operation
 import io.github.vinicreis.model.log.ConsoleLog
 import io.github.vinicreis.model.log.Log
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.DataInputStream
 import java.net.ServerSocket
 import java.net.SocketException
+import kotlin.coroutines.CoroutineContext
 
 class Dispatcher(private val server: Server) {
     private val log: Log = ConsoleLog(TAG)
     private val serverSocket: ServerSocket = ServerSocket(server.port)
-    private var running = true
 
-    suspend fun run() = withContext(Dispatchers.IO) {
+    suspend fun run(
+        coroutineContext: CoroutineContext = Dispatchers.IO
+    ): Unit = withContext(coroutineContext) {
         try {
-            while (running) {
+            while (true) {
                 log.d("Listening for operation requests...")
                 val socket = serverSocket.accept()
                 log.d("Request received!")
@@ -29,8 +30,14 @@ class Dispatcher(private val server: Server) {
                 val message = reader.readUTF()
 
                 log.d("Starting Worker thread...")
-                CoroutineScope(Dispatchers.IO).launch {
-                    Worker(server, socket, Operation.valueOf(operationCode), message).run()
+
+                launch(coroutineContext) {
+                    Worker(
+                        server = server,
+                        socket = socket,
+                        operation = Operation.valueOf(operationCode),
+                        request = message
+                    ).run(coroutineContext)
                 }
             }
         } catch (e: SocketException) {

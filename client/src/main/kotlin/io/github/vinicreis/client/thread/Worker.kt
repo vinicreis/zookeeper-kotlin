@@ -27,8 +27,9 @@ class Worker(private val client: Client, debug: Boolean) {
                         read("Digite a chave utilizada"),
                         read("Digite o valor a ser armazenado")
                     )
-
-                    else -> error("Client should not call any option other than GET or PUT")
+                    Operation.JOIN,
+                    Operation.REPLICATE,
+                    Operation.EXIT -> error("Client should not call any option other than GET or PUT")
                 }
             } catch (e: IllegalStateException) {
                 println("Opção inválida! Tente novamente ou pressione Ctrl+D para finalizar.")

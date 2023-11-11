@@ -21,7 +21,13 @@ interface Client {
             val serverHost = readWithDefault("Digite o host do servidor", "archlaptop")
             val serverPortsList = readWithDefault("Dígite as portas do servidor", DEFAULT_SERVER_PORTS)
             val serverPorts = serverPortsList.replace(" ", "").split(",").map(String::toInt)
-            val client: Client = ClientImpl(port, serverHost, serverPorts, debug)
+            val client: Client = ClientImpl(
+                port = port,
+                serverHost = serverHost,
+                serverPorts = serverPorts,
+                debug = debug
+            )
+
             client.start()
         }
     }

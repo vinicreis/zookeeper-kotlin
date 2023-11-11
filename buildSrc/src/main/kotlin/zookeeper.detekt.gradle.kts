@@ -13,7 +13,7 @@ val resourceFiles = "**/resources/**"
 val buildFiles = "**/build/**"
 
 detekt {
-    buildUponDefaultConfig = true
+    buildUponDefaultConfig = false
     allRules = false
     source.setFrom(projectSource)
     config.setFrom(configFile)

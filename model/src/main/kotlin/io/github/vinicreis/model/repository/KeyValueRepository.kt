@@ -32,8 +32,7 @@ class KeyValueRepository {
     fun find(key: String, timestamp: Long?): Entry? {
         return data.getOrDefault(key, null)?.also { entry ->
             timestamp?.let {
-                if(entry.timestamp < it)
-                    error("Outdated entry found!")
+                if(entry.timestamp < it) error("Outdated entry found!")
             }
         }
     }

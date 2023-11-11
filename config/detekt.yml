@@ -99,7 +99,7 @@ complexity:
     active: true
     threshold: 4
   ComplexInterface:
-    active: false
+    active: true
     threshold: 10
     includeStaticDeclarations: false
     includePrivateDeclarations: false
@@ -107,7 +107,7 @@ complexity:
   CyclomaticComplexMethod:
     active: true
     threshold: 15
-    ignoreSingleWhenExpression: false
+    ignoreSingleWhenExpression: true
     ignoreSimpleWhenEntries: false
     ignoreNestingFunctions: false
     nestingFunctions:
@@ -140,15 +140,15 @@ complexity:
     active: false
     threshold: 6
   NamedArguments:
-    active: false
+    active: true
     threshold: 3
     ignoreArgumentsMatchingNames: false
   NestedBlockDepth:
     active: true
     threshold: 4
   NestedScopeFunctions:
-    active: false
-    threshold: 1
+    active: true
+    threshold: 2
     functions:
       - 'kotlin.apply'
       - 'kotlin.run'
@@ -179,7 +179,7 @@ complexity:
 coroutines:
   active: true
   GlobalCoroutineUsage:
-    active: false
+    active: true
   InjectDispatcher:
     active: true
     dispatcherNames:
@@ -191,9 +191,9 @@ coroutines:
   SleepInsteadOfDelay:
     active: true
   SuspendFunSwallowedCancellation:
-    active: false
+    active: true
   SuspendFunWithCoroutineScopeReceiver:
-    active: false
+    active: true
   SuspendFunWithFlowReturnType:
     active: true
 
@@ -404,13 +404,13 @@ potential-bugs:
     forbiddenTypePatterns:
       - 'kotlin.String'
   CastNullableToNonNullableType:
-    active: false
+    active: true
   CastToNullableType:
-    active: false
+    active: true
   Deprecation:
     active: false
   DontDowncastCollectionTypes:
-    active: false
+    active: true
   DoubleMutabilityForCollection:
     active: true
     mutableTypes:
@@ -423,7 +423,7 @@ potential-bugs:
       - 'java.util.LinkedHashMap'
       - 'java.util.HashMap'
   ElseCaseInsteadOfExhaustiveWhen:
-    active: false
+    active: true
     ignoredSubjectTypes: []
   EqualsAlwaysReturnsTrueOrFalse:
     active: true
@@ -454,7 +454,7 @@ potential-bugs:
   ImplicitDefaultLocale:
     active: true
   ImplicitUnitReturnType:
-    active: false
+    active: true
     allowExplicitReturnType: true
   InvalidRange:
     active: true
@@ -469,10 +469,10 @@ potential-bugs:
   MapGetWithNotNullAssertionOperator:
     active: true
   MissingPackageDeclaration:
-    active: false
+    active: true
     excludes: ['**/*.kts']
   NullCheckOnMutableProperty:
-    active: false
+    active: true
   NullableToStringCall:
     active: false
   PropertyUsedBeforeDeclaration:
@@ -504,15 +504,15 @@ potential-bugs:
 style:
   active: true
   AlsoCouldBeApply:
-    active: false
+    active: true
   BracesOnIfStatements:
-    active: false
+    active: true
     singleLine: 'never'
     multiLine: 'always'
   BracesOnWhenStatements:
-    active: false
-    singleLine: 'necessary'
-    multiLine: 'consistent'
+    active: true
+    singleLine: 'never'
+#    multiLine: 'consistent'
   CanBeNonNullable:
     active: false
   CascadingCallWrapping:

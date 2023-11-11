@@ -22,6 +22,7 @@ interface Node : Server {
         private const val DEFAULT_CONTROLLER_PORT = 10097
 
         @JvmStatic
+        @Suppress("InjectDispatcher")
         fun main(args: Array<String>) {
             val coroutineContext = Dispatchers.IO + SupervisorJob() + CoroutineName(TAG)
             val coroutineScope = CoroutineScope(coroutineContext)
@@ -30,7 +31,14 @@ interface Node : Server {
             val port = readIntWithDefault("Digite a porta do servidor", DEFAULT_PORT)
             val controllerHost = readWithDefault("Digite o endereço do Controller", "archlaptop")
             val controllerPort = readIntWithDefault("Digite a porta do Controller", DEFAULT_CONTROLLER_PORT)
-            val node: Node = NodeImpl(port, controllerHost, controllerPort, debug, coroutineScope)
+            val node: Node = NodeImpl(
+                port = port,
+                controllerHost = controllerHost,
+                controllerPort = controllerPort,
+                debug = debug,
+                coroutineScope = coroutineScope
+            )
+
             log.isDebug = debug
             log.d("Starting node...")
             node.start()
