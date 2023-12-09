@@ -40,3 +40,12 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+## LaTeX
+**/docs/**/*.aux
+**/docs/**/*.log
+**/docs/**/*.nav
+**/docs/**/*.snm
+**/docs/**/*.toc
+**/docs/**/*.vrb
+**/docs/**/*.out
