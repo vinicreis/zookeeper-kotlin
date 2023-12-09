@@ -148,6 +148,9 @@
     stringstyle={\color{ForestGreen}\ttfamily},
 }
 
+% Adicionando diretório de imagens
+\graphicspath{{./figs/}}
+
 \titlegraphic{\includegraphics[height=1.5cm]{figs/logo.png}}
 \author{Vinícius de Oliveira Campos dos Reis}
 \title[Classificação e análise de defeitos]{Classificação e análise de defeitos comuns em softwares e como mitigá-los utilizando diferentes práticas de desenvolvimento}
@@ -161,7 +164,7 @@
     \titlepage
 \end{frame}
 
-\logo{\includegraphics[height=1.0cm]{figs/logo.png}~}
+\logo{\includegraphics[height=1.0cm]{logo}~}
 
 \section{Contextualização}
 
@@ -1187,51 +1190,586 @@ class Program {
 \begin{frame}{Relatório exportado}
     \begin{itemize}
         \item Veja um trecho do relatório exportado em HTML, como exemplo:
-        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+        \centering
+        \includegraphics[width=10cm]{report_overview}
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Relatório exportado}
+    \centering
+    \includegraphics[height=7.5cm]{report_findings}
 \end{frame}
 
 \subsection{Resultados obtidos}
 
-\begin{frame}{Condicional complexa}
+\begin{frame}[fragile]{Condicional complexa}
     \begin{itemize}
         \item Código não conforme com a regra
-        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class KeyValueRepository {
+    ...
+    fun find(key: String, timestamp: Long?): Entry? {
+        val result = data.getOrDefault(key, null)
+
+        if (timestamp != null && timestamp > 0 && result != null && result.timestamp < timestamp)
+            throw OutdatedEntryException(key, result.timestamp)
+
+        return result
+    }
+    ...
+}
+            \end{lstlisting}
+            \caption{\textit{KeyValueRepository.kt} - Trecho não conforme com a regra de condicional complexa}
+            \label{fig:detekt_complex_condition_before_example}
+        \end{figure}
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Condicional complexa}
+\begin{frame}[fragile]{Condicional complexa}
     \begin{itemize}
         \item Código corrigido
-        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class KeyValueRepository {
+    ...
+    fun find(key: String, timestamp: Long?): Entry? {
+        return data.getOrDefault(key, null)?.also { entry ->
+            timestamp?.let {
+                if(entry.timestamp < it) error("Outdated entry found!")
+            } ?: entry
+        }
+    }
+    ...
+}
+            \end{lstlisting}
+            \caption{\textit{KeyValueRepository.kt} - Exemplo de não violação da regra de condicional complexa}
+            \label{fig:detekt_complex_condition_after_example}
+        \end{figure}
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Injeção do \textit{dispatcher} de corrotinas}
+\begin{frame}[fragile]{Injeção do \textit{dispatcher} de corrotinas}
     \begin{itemize}
         \item Código não conforme com a regra
-        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class ControllerImpl(
+    override val port: Int,
+    debug: Boolean
+) : Controller {
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    ...
+    override fun start() {
+        timestampJob = coroutineScope.launch { timestampRepository.run() }
+        dispatcherJob = coroutineScope.launch { dispatcher.run() }
+    }
+    ...
+}
+            \end{lstlisting}
+            \caption{\textit{ControllerImpl.kt} - Trecho não conforme com a regra de injeção de \textit{dispatcher} de corrotinas}
+            \label{fig:detekt_inject_dispatcher_before_example}
+        \end{figure}
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Injeção do \textit{dispatcher} de corrotinas}
+\begin{frame}[fragile]{Injeção do \textit{dispatcher} de corrotinas}
     \begin{itemize}
         \item Código corrigido
-        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+        \begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ControllerImpl(
+    override val port: Int,
+    debug: Boolean,
+    private val coroutineScope: CoroutineScope
+) : Controller {
+    ...
+    override fun start() {
+        timestampJob = coroutineScope.launch { timestampRepository.run() }
+        dispatcherJob = coroutineScope.launch { dispatcher.run() }
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ControllerImpl.kt} - Trecho conforme com a regra de injeção de \textit{dispatcher} de corrotinas}
+    \label{fig:detekt_inject_dispatcher_after_example}
+\end{figure}
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Captura de exceção genérica}
+\begin{frame}[fragile]{Captura de exceção genérica}
     \begin{itemize}
         \item Código não conforme com a regra
-        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+        \begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ControllerImpl(
+    override val port: Int,
+    debug: Boolean,
+    private val coroutineScope: CoroutineScope
+) : Controller {
+    ...
+    override fun put(request: PutRequest): PutResponse {
+        return try {
+            ...
+        } catch (e: Throwable) {
+            ...
+        }
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ControllerImpl.kt} - Exemplo de captura de exceção muito genérica na classe \textit{ControllerImpl}}
+    \label{fig:detekt_too_generic_exception_before_example}
+\end{figure}
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Captura de exceção genérica}
+\begin{frame}[fragile]{Captura de exceção genérica}
     \begin{itemize}
         \item Código corrigido
-        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+        \begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ControllerImpl(
+    override val port: Int,
+    debug: Boolean,
+    private val coroutineScope: CoroutineScope
+) : Controller {
+    ...
+    override fun put(request: PutRequest): PutResponse {
+        return try {
+            ...
+        } catch (e: IllegalStateException) {
+            ...
+        }
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ControllerImpl.kt} - Exemplo de captura de exceção específica na classe \textit{ControllerImpl}}
+    \label{fig:detekt_too_generic_exception_after_example}
+\end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Declaração de classe e nome de arquivo incompatíveis}
+    \begin{itemize}
+        \item A classe abaixo estava contida no arquivo \emph{Result.kt}
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+enum class OperationResult {
+    OK,
+    NOT_FOUND,
+    ERROR,
+    TRY_AGAIN_ON_OTHER_SERVER;
+}
+            \end{lstlisting}
+            \caption{\textit{Result.kt} - Exemplo de declaração de arquivo incompatível com a classe declarada}
+            \label{fig:detekt_matching_declaration_name_before_example}
+        \end{figure}
+        \item Isso gera uma imcompatibilidade entre a classe declarada e o nome de seu arquivo
+        \item Após renomear o arquivo para \emph{OperationResult.kt} o alerta não é mais disparada
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Chamada inegura a tipo anulável}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class ClientImpl(
+    private val port: Int,
+    private val serverHost: String,
+    private val serverPorts: List<Int>,
+    debug: Boolean
+) : Client {
+    ...
+    override fun get(key: String) {
+        try {
+            val serverPort = serverPorts.getAnyOrNull()!!
+            ...
+        } catch (e: IOException) {
+            log.e("Failed to process GET request", e)
+        }
+    }
+
+    private fun <T> List<T>.getAnyOrNull(): T? = when {
+        isEmpty() -> null
+        else -> get(kotlin.random.Random.nextInt(0, size))
+    }
+    ...
+}
+            \end{lstlisting}
+            \caption{\textit{ClientImpl.kt} - Exemplo de chamada insegura num objeto anulável}
+            \label{fig:detekt_unsafe_null_call_on_nullable_before_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Chamada inegura a tipo anulável}
+    \begin{itemize}
+        \item Código corrigido
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class ClientImpl(
+    private val port: Int,
+    private val serverHost: String,
+    private val serverPorts: List<Int>,
+    debug: Boolean
+) : Client {
+    ...
+    override fun get(key: String) {
+        try {
+            val serverPort = serverPorts.getAnyOrNull()
+            ...
+        } catch (e: IOException) {
+            log.e("Failed to process GET request", e)
+        } catch (e: IllegalStateException) {
+            log.e("No server port found to send requests", e)
+        }
+    }
+
+    private fun <T> List<T>.getAnyOrNull(): T = get(Random.nextInt(lastIndex))
+    ...
+}
+            \end{lstlisting}
+            \caption{\textit{ClientImpl.kt} - Segundo exemplo delegando o acesso ao elemento a função de extensão de \textit{List}}
+            \label{fig:detekt_unsafe_null_call_on_nullable_after_second_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Utilize funções \textit{check} ou \textit{error}}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class ClientImpl(
+    private val port: Int,
+    private val serverHost: String,
+    private val serverPorts: List<Int>,
+    debug: Boolean
+) : Client {
+    ...
+    override fun get(key: String) {
+        try {
+            val serverPort = serverPorts.getAnyOrNull() 
+                ?: throw IllegalStateException("No server port found to send request")
+            ...
+        } catch (e: IOException) {
+            log.e("Failed to process GET request", e)
+        } catch (e: IllegalStateException) {
+            log.e("No server port found to send requests", e)
+        }
+    }
+
+    private fun <T> List<T>.getAnyOrNull(): T? = when {
+        isEmpty() -> null
+        else -> get(Random.nextInt(0, lastIndex))
+    }
+    ...
+}
+            \end{lstlisting}
+            \caption{\textit{ClientImpl.kt} - Exemplo não conforme de lançamento ``manual`` de exceção para verificação de pré-condição}
+            \label{fig:detekt_use_error_or_check_before_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Utilize funções \textit{check} ou \textit{error}}
+    \begin{itemize}
+        \item Código corrigido
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class ClientImpl(
+    private val port: Int,
+    private val serverHost: String,
+    private val serverPorts: List<Int>,
+    debug: Boolean
+) : Client {
+    ...
+    override fun get(key: String) {
+        try {
+            val serverPort = serverPorts.getAnyOrNull()
+            
+            checkNotNull(serverPort) { "No server port found to send request" }
+            ...
+        } catch (e: IOException) {
+            log.e("Failed to process GET request", e)
+        } catch (e: IllegalStateException) {
+            log.e("No server port found to send requests", e)
+        }
+    }
+
+    private fun <T> List<T>.getAnyOrNull(): T? = when {
+        isEmpty() -> null
+        else -> get(Random.nextInt(0, lastIndex))
+    }
+    ...
+}
+            \end{lstlisting}
+            \caption{\textit{ClientImpl.kt} - Exemplo de tratamento de pré-condição utilizando \textit{checkNotNull}}
+            \label{fig:detekt_use_error_or_check_after_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Utilização de \textit{imports} globais}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+import kotlinx.coroutines.*
+            \end{lstlisting}
+            \caption{\textit{Dispatcher.kt} - Exemplo \textit{import} global no contexto do arquivo}
+            \label{fig:detekt_wildcard_imports_before_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Utilização de \textit{imports} globais}
+    \begin{itemize}
+        \item Código corrigido
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+            \end{lstlisting}
+            \caption{\textit{Dispatcher.kt} - Exemplo de \textit{imports} totalmente qualificados}
+            \label{fig:detekt_wildcard_imports_after_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Classe abstrata descenessária}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+abstract class Response(
+    val result: OperationResult,
+    val message: String?
+)
+            \end{lstlisting}
+            \caption{\textit{Response.kt} - Exemplo de classe abstrata que não possui membros concretos}
+            \label{fig:detekt_unnecessary_abstract_class_before_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Classe abstrata descenessária}
+    \begin{itemize}
+        \item Código corrigido
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+interface Response {
+    val result: OperationResult
+    val message: String?
+}
+            \end{lstlisting}
+            \caption{\textit{Response.kt} - Exemplo de interface equivalente a classe abstrata}
+            \label{fig:detekt_unnecessary_abstract_class_after_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exceção não utilizada}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class Worker(private val client: Client, debug: Boolean) {
+    ...
+    fun run() {
+        while (running) {
+            try {
+                ...
+            } catch (e: IllegalArgumentException) {
+                println("Opcao invalida! Tente novamente ou pressione Ctrl+D para finalizar.")
+            }
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{\textit{Worker.kt} - Exemplo de exceção ignorada dentro do bloco \textit{catch}}
+            \label{fig:detekt_swallowed_exception_before_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exceção não utilizada}
+    \begin{itemize}
+        \item Código corrigido
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class Worker(private val client: Client, debug: Boolean) {
+    ...
+    fun run() {
+        while (running) {
+            try {
+                ...
+            } catch (e: IllegalArgumentException) {
+                log.e("Invalid option entered!", e)
+                println("Opcao invalida! Tente novamente ou pressione Ctrl+D para finalizar.")
+            }
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{\textit{Worker.kt} - Exemplo de utilização de exceção capturada no bloco \textit{catch}}
+            \label{fig:detekt_swallowed_exception_after_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Números ``mágicos``}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+interface Controller {
+    ...
+    companion object {
+        private const val TAG = "ControllerMain"
+
+        @JvmStatic
+        fun main(args: Array<String>) {
+            try {
+                ...
+                val port = readIntWithDefault("Digite o valor da porta do servidor", 10097)
+                ...
+            } catch (e: Throwable) {
+                handleException(TAG, "Failed start Controller...", e)
+            }
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{\textit{Controller.kt} - Exemplo de utilização de \textit{magic number} (valores \textit{hard-coded})}
+            \label{fig:detekt_magic_number_before_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Números ``mágicos``}
+    \begin{itemize}
+        \item Código corrigido
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+interface Controller {
+    ...
+    companion object {
+        private const val TAG = "ControllerMain"
+        private const val DEFAULT_PORT = 10097
+
+        @JvmStatic
+        fun main(args: Array<String>) {
+            try {
+                ...
+                val port = readIntWithDefault("Digite o valor da porta do servidor", DEFAULT_PORT)
+                ...
+            } catch (e: Throwable) {
+                handleException(TAG, "Failed start Controller...", e)
+            }
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{\textit{Controller.kt} - Exemplo de alteração de um \textit{magic number} para uma variável constante mais descritiva}
+            \label{fig:detekt_magic_number_after_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variáveis mutáveis podem ser imutáveis}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class Dispatcher(private val server: Server) {
+    ...
+    private var running = true
+
+    suspend fun run() = withContext(Dispatchers.IO) {
+        try {
+            while (running) {
+                val socket = serverSocket.accept()
+                ...
+            }
+        } catch (e: SocketException) {
+            log.e("Socket closed!", e)
+        } finally {
+            serverSocket.close()
+        }
+    }
+
+    companion object {
+        private const val TAG = "DispatcherThread"
+    }
+}
+            \end{lstlisting}
+            \caption{\textit{Dispatcher.kt} - Exemplo de utilização de uma variável mutável que não tem seu valor alterado}
+            \label{fig:detekt_var_could_be_val_before_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variáveis mutáveis podem ser imutáveis}
+    \begin{itemize}
+        \item Código corrigido
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class Dispatcher(private val server: Server) {
+    ...
+    private val running = true
+    
+    suspend fun run() = withContext(Dispatchers.IO) {
+        try {
+            while (running) {
+                val socket = serverSocket.accept()
+                ...
+            }
+        } catch (e: SocketException) {
+            log.e("Socket closed!", e)
+        } finally {
+            serverSocket.close()
+        }
+    }
+
+    companion object {
+        private const val TAG = "DispatcherThread"
+    }
+}
+            \end{lstlisting}
+            \caption{\textit{Dispatcher.kt} - Exemplo da troca de variável mutável por valor apenas de leitura}
+            \label{fig:detekt_var_could_be_val_after_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusão}
+    \begin{itemize}
+        \item 
     \end{itemize}
 \end{frame}
 
