@@ -1,0 +1,1244 @@
+\documentclass[brazilian]{beamer}
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs, comment} 
+\usepackage[absolute, overlay]{textpos} 
+\usepackage{pgfpages}
+\usepackage{caption}
+\usepackage[font=footnotesize]{caption}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{blindtext}
+\usepackage{amsmath}
+\usepackage[makeroom]{cancel}
+\usepackage{textpos}
+\usepackage{tikz}
+\usepackage{csquotes}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{threeparttable}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{natbib}
+
+% ---------------------
+% Formatação de código Java
+% ---------------------
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{
+    frame=tb,
+    aboveskip=3mm,
+    belowskip=3mm,
+    showstringspaces=false,
+    columns=flexible,
+    basicstyle={\small\ttfamily},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{dkgreen},
+    stringstyle=\color{mauve},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4
+}
+
+% --------------------------
+% Formatação de código em Kotlin
+% Reference: https://github.com/cansik/kotlin-latex-listing
+% --------------------------
+\definecolor{BurntOrange}{rgb}{0.8, 0.33, 0.0}
+\definecolor{ForestGreen}{rgb}{0.0, 0.27, 0.13}
+\definecolor{OrangeRed}{rgb}{1.0, 0.27, 0.0}
+\definecolor{NavyBlue}{rgb}{0.0, 0.0, 0.5}
+
+\lstdefinelanguage{Kotlin}{
+    comment=[l]{//},
+    commentstyle={\color{gray}\ttfamily},
+    emph={filter, first, firstOrNull, forEach, lazy, map, mapNotNull, println},
+    emphstyle={\color{OrangeRed}},
+    identifierstyle=\color{black},
+    keywords={!in, !is, abstract, actual, annotation, as, as?, break, by, catch, class, companion, const, constructor, continue, crossinline, data, delegate, do, dynamic, else, enum, expect, external, false, field, file, final, finally, for, fun, get, if, import, in, infix, init, inline, inner, interface, internal, is, lateinit, noinline, null, object, open, operator, out, override, package, param, private, property, protected, public, receiveris, reified, return, return@, sealed, set, setparam, super, suspend, tailrec, this, throw, true, try, typealias, typeof, val, var, vararg, when, where, while},
+    keywordstyle={\color{NavyBlue}\bfseries},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]",
+    morestring=[s]{"""*}{*"""},
+    ndkeywords={@Deprecated, @JvmField, @JvmName, @JvmOverloads, @JvmStatic, @JvmSynthetic, Array, Byte, Double, Float, Int, Integer, Iterable, Long, Runnable, Short, String, Any, Unit, Nothing},
+    ndkeywordstyle={\color{BurntOrange}\bfseries},
+    sensitive=true,
+    stringstyle={\color{ForestGreen}\ttfamily},
+}
+
+% --------------------------
+% Formatação de arquivos .toml
+% --------------------------
+\lstdefinelanguage{toml}{
+    comment = [l]{\#},
+    keywords={libraries, versions, plugins, bundles},
+    ndkeywords={module, group, name, version, ref},
+    keywordstyle={\color{BurntOrange}\bfseries},
+    ndkeywordstyle={\color{BurntOrange}},
+    keywords = {true, false},
+    morestring = [b]",
+    stringstyle={\color{ForestGreen}\ttfamily},
+}
+
+\titlegraphic{\includegraphics[height=1.5cm]{figs/logo.png}}
+\author{Vinícius de Oliveira Campos dos Reis}
+\title[Classificação e análise de defeitos]{Classificação e análise de defeitos comuns em softwares e como mitigá-los utilizando diferentes práticas de desenvolvimento}
+\subtitle{Projeto de Graduação em Computação III}
+\institute{UFABC}
+\date{12 de dezembro de 2023}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\logo{\includegraphics[height=1.0cm]{figs/logo.png}~}
+
+\section{Contextualização}
+
+\begin{frame}{Introdução}
+    \begin{itemize}
+        \item Softwares de inúmeros tipos tem feito cada vez mais parte da vida das pessoas
+        \item Desenvolvimento de software continua sendo um processo muito dependente do fator humano
+        \item Tomamos falha ou defeito como uma condição anormal de um componente. No caso de software, seriam erros de lógica presentes na aplicação
+        \item Já erros seriam qualquer diferença entre o comportamento especificado e o real
+        \item Ter clareza e entendimento das regras de negócio e o comportamento esperado para um software é apenas uma etapa para atingir uma entrega final totalmente funcional
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Objetivos}
+    \begin{itemize}
+        \item Compreender quais os tipos de defeitos mais comuns em aplicações em produção
+        \item Correlacionar estes defeitos com a pilha de tecnologias escolhida
+        \item Explorar outras abordagens que possam ser adotadas para mitigar o risco de ocorrência destes defeitos
+        \item Procurar outras ferramentas quem possam minimizar ainda mais as vulnerabilidades da aplicação sem interferir na arquitetura da solução
+    \end{itemize}
+\end{frame}
+
+\section{Revisão da literatura científica}
+
+\begin{frame}{Objetivos}
+    \begin{itemize}
+        \item Visando compreender quais defeitos mais ocorrem em aplicações em produção, buscamos na literatura científica um tipo de classificação consolidada no meio
+        \item Com isso, quando aplicamos esta taxonomia numa base de erros conhecida, pudemos classificar cada tipo pela quantidade de ocorrências de cada uma delas
+        \item Entendo bem quais são os erros mais frequentes, iniciamos a exploração de suas causas. Desta forma, podemos buscar abordagens que mitiguem estas ocorrências
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Etapas da revisão}
+    \begin{itemize}
+        \item Criação de uma \textit{string} de busca para pesquisa em ao menos um acervo digital
+        \item Classificação dos resultados por relevância para este trabalho\footnote{Note que esta classificação pode ser refinada entre qualquer um dos passos, conforme necessário}
+        \item Seleção dos resultados classificados através do título ou leitura rápida
+        \item Rotulação dos resultados pela classificação alcançada através da leitura do resumo
+        \item Leitura rápida dos artigos mais relevantes para reclassificação
+        \item Obter conclusões dos artigos mais relevantes como embasamento deste estudo
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{\textit{String} de busca}
+    \begin{itemize}
+        \item Iniciamos a construção da \textit{string} de busca pela área e subárea de pesquisa. 
+        \item Tomamos a área principal de pesquisa como \emph{software}
+        \item Partimos então para as subáreas, sendo elas
+        \begin{itemize}
+            \item \emph{development} (ou desenvolvimento) e \emph{engineering} (engenharia)
+            \item buscamos por \emph{defeito} ou \emph{defeitos}. Como eles são popularmente referidos como \emph{bugs}, essa será nossa segunda subárea
+            \item como nosso objetivo inicial é classificar as ocorrências encontradas, teremos \emph{classification} como terceira e última subárea
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{\textit{String} de busca}
+    \begin{itemize}
+        \item Logo, teremos a \textit{string} composta por:
+            \begin{table}[H]
+                \centering
+                \begin{threeparttable}
+                    \begin{tabular}{ c|c|c|c }
+                        \multirow{2}{*}{ Área de pesquisa } & \multicolumn{3}{ c }{ Subáreas } \\
+                        & 1 & 2 & 3 \\
+                        \hline
+                        software & development & bug* & classification \\
+                    & engineering & & \\
+                    \end{tabular}
+                    \caption{Divisão das áreas de pesquisa}
+                    \label{table:search_terms}
+                \end{threeparttable}
+            \end{table}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\textit{String} de busca}
+    \begin{itemize}
+        \item Para compor a \textit{string} final, relacionamos as colunas numa lógica \emph{E} e as linhas numa lógica \emph{OU}. Deste modo, temos a seguinte \textit{string}:
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[numbers = none]
+TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY ( engineering ) ) AND TITLE-ABS-KEY ( bug* ) AND TITLE-ABS-KEY ( classification )
+            \end{lstlisting}
+            \caption{\textit{String} de busca nos acervos científicos}
+            \label{fig:search_string}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Busca na literatura científica}
+    \begin{itemize}
+        \item Selecionamos o acervo digital Scopus como para realizar a pesquisa pela relevância que o acervo possui
+        \item Foram obtidos 368 artigos. Destes, analisando os títulos de todos os resultados obtidos, selecionamos 57 deles para classificação por relevância para este artigo
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Refinamento da classificação}
+    \begin{itemize}
+        \item Para separar estes casos que dificultam a classificação, teremos uma nova relevância de valor 2, sendo de \emph{média relevância}, veja:
+    \end{itemize}
+    \begin{table}[H]
+        \centering
+        \begin{tabularx}{\textwidth}{ c l|X }
+            \multicolumn{2}{ l| }{Relevância} & Critério \\
+            \hline
+            0 & Não relevante & Não deveria ser considerado na pré-análise \\
+            1 & Pouco relevante & Faz algum tipo de análise da causa raiz ou predição de defeitos \\
+            2 & Relevante & Faz alguma classificação entre tipos de defeitos \\
+            3 & Muito relevante & Classifica e ordena os defeitos encontrados com mais frequência \\
+        \end{tabularx}
+        \caption{Relevâncias utilizadas para classificação dos artigos}
+        \label{table:refined_relevance_and_criteria}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Classificação dos resultados}
+    \begin{itemize}
+        \item Dos 57 artigos que selecionamos através da análise do resumo, classificando-os pela sua relevância demonstradas anteriormente, tivemos:
+            \begin{itemize}
+                \item 18 artigos pouco relevantes
+                \item 39 possuem alguma relevância para o estudo, porém, em alguns destes artigos não fica evidente o quão relevante este pode ser
+                \item Aparentemente, a maioria dos artigos fazem algum tipo de classificação. Entretanto, o tipo de classificação realizado não acrescenta a este trabalho 
+                \item Por exemplo, classificação por severidade, tipo ou diversificando entre defeitos de impacto oculto ou não, não embasam o objetivo deste trabalho
+            \end{itemize}
+        \item Por conta disso, se faz necessário refinar nossa classificação
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Classificação dos resultados obtidos}
+    \begin{itemize}
+        \item Tomando como base a classificação da \cite{automated_tests_javascript}, criamos definimos a relevância dos resultados para este estudo de acordo com os critérios listados abaixo:
+    \end{itemize}
+    \begin{table}[H]
+        \centering
+        \begin{tabularx}{\textwidth}{ c l|X }
+            \multicolumn{2}{ l| }{Relevância} & Critério \\
+            \hline
+            0 & Não relevante & Não deveria ser considerado na pré-análise \\
+            1 & Pouco relevante & Faz algum tipo de análise da causa raiz ou predição de defeitos \\
+            2 & Média relevância & Classifica defeitos de qualquer forma que não seja do ponto de vista de desenvolvimento de software \\
+            3 & Relevante & Faz alguma classificação entre tipos de defeitos do ponto de vista de desenvolvimento \\
+            4 & Muito relevante & Classifica e ordena os defeitos encontrados do ponto de vista de desenvolvimento ranqueando-os pela frequência \\
+        \end{tabularx}
+        \caption{Relevâncias utilizadas para classificação dos artigos}
+        \label{table:refined_relevance_and_criteria}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Reclassificação dos artigos}
+    \begin{itemize}
+        \item Através da leitura do resumo, aplicando a nova definição de relevância que definimos para cada artigo, tivemos:
+        \begin{itemize}
+            \item 15 artigos de pouca relevância
+            \item 7 artigos de média relevância
+            \item 17 artigos com alta relevância
+        \end{itemize}
+        \item Após leitura rápida dos artigos relevantes, temos que:
+        \begin{itemize}
+            \item 4 não puderam ser lidos, pois, não foi obtido acesso a estes
+            \item 11 não tiveram relevância para este estudo
+            \item 2 se mostraram muito relevantes para o contexto deste trabalho
+            \begin{itemize}
+                \item Além disso, um outro artigo citado demonstrou muita relevância para este contexto
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Reclassificação dos artigos}
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ l|c }
+            Descrição & Total de artigos \\
+            \hline
+            Artigos encontrados & 368 \\
+            \hline
+            Serão analisados pelo título & 57 \\
+            \hline
+            Pouco relevantes & 18 \\
+            Relevantes & 39 \\
+            \hline
+            \multicolumn{2}{c}{\textit{Após reclassificação dos relevantes}}\\
+            \hline
+            Pouco relevantes & 15 \\
+            Médio relevantes & 7 \\
+            Relevantes & 17 \\
+            \hline
+            \multicolumn{2}{c}{\textit{Após leitura rápida dos relevantes}}\\
+            \hline
+            Não puderam ser acessados & -4 \\
+            Sem relevância significativa & 11 \\
+            Se mostraram relevantes & 2 \\
+            \hline
+            Adicionado via \textit{snowballing} & +1 \\
+        \end{tabular}
+        \caption{Classificações dos artigos e suas quantidades}
+        \label{table:reading_results}
+    \end{table}
+    \begin{itemize}
+        \item Por fim, os 3 artigos restantes que foram classificados como relevantes foram analisados de forma detalhada
+    \end{itemize}
+\end{frame}
+
+\section{Análise dos artigos relevantes}
+
+\begin{frame}{Classificação ODC}
+    \begin{itemize}
+        \item O primeiro artigo analisado \cite{automatic_odc_using_ml} consiste na criação de um modelo de \emph{Machine Learning} que classifique defeitos através da classificação ODC
+        \item A classificação ODC (\textit{Orthogonal Defect Classification}) é um \textit{framework} muito popular para classificação que considera vários atributos
+        \item Estes atributos estão divididos entre relatório aberto e fechado. 
+        \item Atributos de relatório aberto são aqueles referentes às informações disponíveis no momento da ocorrência do erro. Sendo elas:
+        \begin{itemize}
+            \item Atividade: atividade sendo executada no momento em que o defeito ocorre, por exemplo, testes unitários
+            \item Gatilho: causador do defeito, como um teste bloqueado, por exemplo
+            \item Impacto: impacto causado ao usuário quando o defeito ocorreu
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Classificação ODC}
+    \begin{itemize}
+        \item O primeiro artigo analisado \cite{automatic_odc_using_ml} consiste na criação de um modelo de \emph{Machine Learning} que classifique defeitos através da classificação ODC
+        \item O artigo introduz a classificação ODC (\textit{Orthogonal Defect Classification}) como um \textit{framework} muito popular para classificação que considera vários atributos
+        \item Estes atributos estão divididos entre relatório aberto e fechado. 
+        \item Atributos de relatório aberto são aqueles referentes às informações disponíveis no momento da ocorrência do erro. Sendo elas:
+        \begin{itemize}
+            \item Atividade: atividade sendo executada no momento em que o defeito ocorre
+            \item Gatilho: causador do defeito
+            \item Impacto: impacto causado ao usuário quando o defeito ocorreu
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Classificação ODC}
+    \begin{itemize}
+        \item Já os atributos de relatório fechado estão relacionados com a correção aplicada aos defeitos, que são:
+        \begin{itemize}
+            \item Alvo: objeto que foi alvo da correção
+            \item Tipo: tipo de alteração realizada no código
+            \item Qualificador: característica do código anterior a alteração
+            \item Idade: intervalo de tempo entre o surgimento do defeito e a correção
+            \item Origem: origem do defeito
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Classificação ODC}
+    \begin{itemize}
+        \item Note que o tipo é o atributo mais importante para estudo, pois, é o impacto do ponto de vista de desenvolvimento que analisaremos neste trabalho
+        \item As possibilidades deste atributos são sete tipos, agrupados em duas categorias:
+        \begin{itemize}
+            \item Defeitos de fluxo e controle de dados
+            \begin{itemize}
+                \item Atribuição ou inicialização (A/I)
+                \item Verificação (C)
+                \item Algoritmo ou método (A/M)
+                \item Temporização ou serialização (T/S)
+            \end{itemize}
+            \item Defeitos estruturais
+            \begin{itemize}
+                \item Função, classe ou objeto (F/C/O)
+                \item Interface ou mensagens O-O (I/OOM)
+                \item Relacionamento (R)
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Classificação ODC}
+    \begin{itemize}
+        \item Note que o tipo é o atributo mais importante para estudo, pois, é o impacto do ponto de vista de desenvolvimento que analisaremos neste trabalho
+        \item As possibilidades deste atributos são sete tipos, agrupados em duas categorias:
+        \begin{itemize}
+            \item Defeitos de fluxo e controle de dados
+            \begin{itemize}
+                \item Atribuição ou inicialização (A/I)
+                \item Verificação (C)
+                \item Algoritmo ou método (A/M)
+                \item Temporização ou serialização (T/S)
+            \end{itemize}
+            \item Defeitos estruturais
+            \begin{itemize}
+                \item Função, classe ou objeto (F/C/O)
+                \item Interface ou mensagens O-O (I/OOM)
+                \item Relacionamento (R)
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Classificação ODC}
+    \begin{itemize}
+        \item Ainda neste mesmo artigo, uma base de dados para treinamento foi classificada manualmente, para treinamento do modelo de ML
+        \item Após a classificação, os tipos mais comuns de defeitos foram, em ordem decrescente:
+        \begin{itemize}
+            \item Algoritmo ou método (A/M): 829 (59,47\%)
+            \item Função, classe ou objeto (F/C/O): 221 (15,86\%)
+            \item Verificação (C): 146 (10,47\%)
+            \item Interface ou mensagens O-O (I/OOM): 116 (8,32\%)
+            \item Atribuição ou inicialização (A/I): 68 (4,88\%)
+            \item Temporização ou Serialização (T/S): 12 (0,86\%)
+            \item Relacionamento: 2 (0,14\%)
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Artigos remanescentes}
+    \begin{itemize}
+        \item O artigo de \cite{automatic_defect_categorization} também propõe uma classificação automática de defeitos utilizando a classificação ODC e modelos de \emph{Machine Learning}
+        \item Porém, os tipos de defeitos utilizados são apenas as duas categorias principais de tipos, que são defeitos de controle de controle e fluxo e de dados
+        \item A base utilizada para classificação também é menor, contando com apenas 500 \textit{issues} utilizadas para treinamento do modelo
+        \item Destas, 286 (57,2\%) foram classificadas como defeitos de controle e fluxo
+        \item Enquanto as outras 214 (42,8\%) foram classificadas como defeitos de dados 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Artigos remanescentes}
+    \begin{itemize}
+        \item O estudo de \cite{ast_based_aproach_to_classifying_defects} propõe uma classificação por tipos diferentes do ODC
+        \item A classificação proposta é entre os tipos:
+        \begin{itemize}
+            \item Dados
+            \item Computacionais
+            \item Interface
+            \item Controle/lógica
+        \end{itemize}
+        \item Esta classificação não atende tão bem ao propósito deste artigo, por isso, não foi levado em consideração durante os próximos passos
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusões}
+    \begin{itemize}
+        \item A classificação ODC é um ótimo meio de classificação de defeitos do ponto de vista de desenvolvimento de software
+        \item Principalmente, se utilizarmos os tipos de defeitos como parâmetro para classificação
+        \item Utilizando esta mesma taxonomia para classificar defeitos em outras aplicações, podemos validar se as ocorrências mais frequentes de defeitos encontradas em outras bases fazem sentido
+        \item Com isso, atuamos nos itens mais comuns buscando outras abordagens que eliminem a possibilidade destes erros ocorrerem
+    \end{itemize}
+\end{frame}
+
+\section{Classificando ocorrências em uma aplicação real}
+
+\begin{frame}{Introdução}
+    \begin{itemize}
+        \item Com uma classificação consistente do ponto de vista de desenvolvimento de software, a aplicamos em uma aplicação real
+        \item Esta aplicação é mobile, desenvolvida em Java e Kotlin e executada no Android 7.1.1 (API 25)
+        \item Esta aplicação conta com um serviço de monitoramento, o Crashlytics, que reporta falhas que podem ser ou não capturadas pela aplicação, assim como podem ou não ser fatais para sua execução
+        \item Analisar este tipo de dado facilita a aplicação da classificação ODC e definição do tipo de erro
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Dados coletados}
+    \begin{table}[H]
+        \centering
+        \begin{tabularx}{\textwidth}{ l|X|c|c }
+            \textbf{Tipo de erro} & \textbf{Ocorrências em classes} & \textbf{Ocorrências} & \textbf{Usuários} \\
+            \hline
+            Erro de comunicação com o servidor & 8 & 1.120.357 & 137,126 \\
+            Variável não inicializada & 25 & 16,104 & 6,914 \\
+            Acesso inválido a vetor & 4 & 15,898 & 5,363 \\
+            Erro de parseamento & 2 & 11,700 & 2,347 \\
+            Erro de fluxo & 8 & 1009 & 589 \\
+            Erro de tipo recebido & 1 & 499 & 434 \\
+            Erro em aplicação externa & 2 & 363 & 282 \
+        \end{tabularx}
+        \caption{Exceções lançadas classificadas por tipo e suas quantidades de ocorrências}
+        \label{table:exceptions_classification}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Dados coletados}
+    \begin{table}[H]
+        \centering
+        \begin{tabularx}{\textwidth}{ l|X|c|c }
+            \textbf{Tipo de erro} & \textbf{Ocorrências em classes} & \textbf{Ocorrências} & \textbf{Usuários} \\
+            \hline
+            Falha na leitura de arquivo & 1 & 135 & 135 \\
+            Erro na inicialização & 1 & 122 & 107 \\
+            Estouro de memória & 3 & 117 & 110 \\
+            Acesso inválido a variável & 3 & 86 & 73 \\
+            Erro de permissão & 1 & 35 & 4 \\
+            Erro de banco de dados & 1 & 25 & 16 \\
+        \end{tabularx}
+        \caption{Exceções lançadas classificadas por tipo e suas quantidades de ocorrências}
+        \label{table:exceptions_classification}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Considerações}
+    \begin{itemize}
+        \item Note que erros como de comunicação, \textit{parseamento}, fluxo e em aplicações externas podem ser tratados utilizando abordagens de controle de exceções ou eventos não esperados
+        \item Portanto, estes tipos de erros não tem relação direta com a pilha de tecnologias selecionada
+        \item O monitoramento de erros captura apenas o tipo de exceção lançada nestes casos. Logo, classificá-los através da ODC baseado no tipo de exceção capturada
+        \item Com isso, vamos comparar estas ocorrências com o que foi observado nos artigos pesquisados anteriormente
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Dados classificados}
+    \begin{itemize}
+        \item Note que erros como de comunicação, \textit{parseamento}, fluxo e em aplicações externas podem ser tratados utilizando abordagens de controle de exceções ou eventos não esperados
+        \item Portanto, estes tipos de erros não tem relação direta com a pilha de tecnologias selecionada
+        \item O monitoramento de erros captura apenas o tipo de exceção lançada nestes casos. Logo, classificá-los através da ODC baseado no tipo de exceção capturada
+        \item Com isso, vamos comparar estas ocorrências com o que foi observado nos artigos pesquisados anteriormente
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Dados classificados}
+    \begin{table}[H]
+        \centering
+        \begin{tabularx}{\linewidth}{ X|c|X|c|c|c }
+            \textbf{Tipo de defeito} & \textbf{ODC} & \textbf{Ocorrências em classes} & \textbf{\%} & \textbf{Ocorrências} & \textbf{\%} \\
+            \hline
+            Variável não inicializada & \multirow{3}{*}{ A/I } & 25 & \multirow{3}{*}{ 55,77\% } & 16,104 & 
+            \multirow{3}{*}{ 35,39\% } \\
+            Acesso inválido a variável & & 3 & & 86 & \\
+            Erro na inicialização & & 1 & & 122 & \\
+            \hline
+            Erro de fluxo & A/M & 8 & 15,38\% & 1009 & 2,19\% \\
+            \hline
+            Erro em aplicação externa & \multirow{2}{*}{I/OOM} & 2 & \multirow{2}{*}{5,77\%} & 363 & \multirow{2}{*}{0,84\%} \\
+            Erro de banco de dados & & 1 & & 25 \\
+            \hline
+            Erro de parseamento & T/S & 2 & 3,85\% & 11,700 & 25,38\% \\
+            \hline
+            Erro de tipo recebido & F/C/O & 1 & 1,92\% & 499 & 1,08\% \\
+            \hline
+            Falha na leitura de arquivo & R & 1 & 1,92\% & 135 & 0,29\% \\
+            \hline
+            Acesso inválido a vetor & \multirow{2}{*}{C} & 4 & \multirow{2}{*}{9,62\%} & 15,898 & \multirow{2}{*}{34,57\%} \\
+            Erro de permissão & & 1 & & 35 & \\
+            \hline
+            Estouro de memória & - & 3 & 5,77\% & 117 & 0,26\% \\
+            \hline
+            \multicolumn{2}{l|}{\textbf{Total}} & \textbf{52} & \textbf{100\%} & \textbf{46093} & \textbf{100\%} \\
+        \end{tabularx}
+        \caption{Parcela de cada tipo de defeito nas ocorrências analisadas}
+        \label{table:our_results_classified_by_odc}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Conclusões}
+    \begin{itemize}
+        \item Considerando as ocorrências em classes, a maior quantidade de ocorrências está concentrada nos tipos:
+            \begin{itemize}
+                \item Atribuição e inicialização (A/I) - 55,77\%
+                \item Algoritmo ou método (A/M) - 15,38\%
+                \item Interface ou mensageria (I/OOM) - 5,77\%
+            \end{itemize}
+        \item Estes tipos somam aproximadamente 70\% das ocorrências e todos podem ser tratados utilizando outras abordagens corretas, do ponto de vista de desenvolvimento
+        \item Isso reforça a hipótese deste trabalho, logo, nós analisamos a causa e formas de mitigação destes erros utilizando as linguagens de programação utilizadas nesta aplicação
+    \end{itemize}
+\end{frame}
+
+\section{Análise dos erros mais frequentes}
+
+\begin{frame}{Introdução}
+    \begin{itemize}
+        \item Nós analisamos algumas abordagens dos erros mais frequentes encontrados na aplicação aqui analisada
+        \item A ideia é demonstrar que, utilizando alguns recursos da própria linguagem, não é complexo construir códigos que eliminam ou mitigam a possibilidade de ocorrências destes defeitos
+        \item Vamos fazer uma comparação entre as versões utilizadas na aplicação, que são Java 8 e Kotlin 1.5.10
+        \item Existem muitas semelhanças entre as duas linguagens, inclusive, Kotlin possui interoperabilidade com Java, por isso a comparação entre elas
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variável não inicializada - Java}
+    \begin{itemize}
+        \item Este defeito consiste no acesso ao valor de uma variável antes da sua correta inicialização
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+class NullPointerExceptionSimulation {
+    public static void main(String[] args) {
+        Result test = null\;
+
+        System.out.print(test.data().toString())
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de código que lança uma exceção do tipo \textit{NullPointerException}}
+            \label{fig:java_npe_code}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variável não inicializada - Kotlin}
+    \begin{itemize}
+        \item Observe no código abaixo que, em Kotlin, não podemos declarar uma variável diretamente sem que seu valor seja atribuído
+        \item Então, este não é um código funcional
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=kotlin]
+class UninitializedVariableError {
+    private val nonChangeableValue: Int
+    private var changeableVariable: Int = null
+
+    fun execute(){
+        print("Non changeable value is $nonChangeableValue")
+        print("Changeable value is $changeableVariable")
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de código incorreto de variável não inicializada}
+            \label{fig:kotlin_not_init_variable}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variável não inicializada - Kotlin}
+    \begin{itemize}
+        \item Para que o código seja funcional, baste que inicializemos as duas variáveis
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=kotlin]
+class UninitializedVariableError {
+    private val nonChangeableValue: Int = 0
+    private var changeableVariable: Int = 1
+
+    fun execute(){
+        print("Non changeable value is $nonChangeableValue")
+        print("Changeable value is $changeableVariable")
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de código funcional após inicializar variáveis}
+            \label{fig:kotlin_init_variable}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variável não inicializada - Kotlin}
+    \begin{itemize}
+        \item Porém, este comportamento pode ser sobreposto
+        \item Existe um tipo de variável que é pode ser inicializada de forma tardia, utilizando o operador \emph{lateinit}
+        \item Este operador é aplicado apenas a variáveis mutáveis e permite que o valor seja atribuido em um momento após a declaração
+        \item O compilador espera que a variável estará inicializada quando seu valor for acessado
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class UninitializedVariableError {
+    private lateinit var lateInitVariable: List<Int>
+
+    fun execute(){
+        lateInitVariable = listOf(0, 1, 2)
+        
+        print("Non nullable value is ${lateInitVariable.first()}")
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de variável do tipo \textit{lateinit} utilizada de forma válida}
+            \label{fig:kotlin_lateinit_variable_initialized}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Variável não inicializada - Kotlin}
+    \begin{itemize}
+        \item Até o momento, todos os tipos de variáveis analisados requeriam um valor não-nulo
+        \item Ainda assim, esta regra também pode ser sobreposta
+        \item Utilizando o operador \emph{?}, quando precedido de uma classe, ele indica que este tipo pode ser anulável, isto é, pode adotar um valor nulo
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variável não inicializada - Kotlin}
+    \begin{itemize}
+        \item De todo modo, mesmo numa variável, o compilador tem maneiras de tentar garantir que um valor inválido seja acessado
+        \item Não é permitido que o acesso a uma variável anulável seja feita diretamente
+        \item Precisamos fazer uma chamada segura (\textit{safe call}) a estes valores, agora, utilizando o operado \emph{?} após a variável acessada
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class UninitializedVariableError {
+    private val nullableValue: Int? = null
+    private var nonNullableVariable: Int = 0
+
+    fun execute(){
+        print("Non nullable value is ${nullableValue?.toFloat()}")
+        print("Nullable value is $nonNullableVariable")
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de chamada de uma variável nula com \textit{safe call}}
+            \label{fig:kotlin_null_variable_with_safe_call}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variável não inicializada - Kotlin}
+    \begin{itemize}
+        \item Entretanto, este é mais um exemplo de regra que pode ser ignorada
+        \item Existe em Kotlin o operador \emph{!!}, que indica ao compilador que o desenvolvedor garante que a variável ou valor que precede este operador não será nulo no momento do seu acesso
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class UninitializedVariableError {
+    private var nullableVariable: Int? = null
+    private var nonNullableVariable: Int = 0
+
+    fun execute(){
+        nullableVariable = Random(1000).nextInt()
+        
+        print("Non nullable value is ${nullableVariable!!.toFloat()}")
+        print("Nullable value is $nonNullableVariable")
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de chamada válida de uma variável anulável com \textit{null assert}}
+            \label{fig:kotlin_not_init_variable_valid_null_assert}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Variável não inicializada - Kotlin}
+    \begin{itemize}
+        \item O Kotlin tem o propósito de eliminar erros causados pela leitura inválida de um valor nulo
+        \item Portanto, o uso dos recursos de sobreposição demonstrados anteriormente é recomendado apenas quando se faz necessário
+        \item Como por exemplo, durante a utilização de uma dependência externa que não garante o retorno de um valor válido
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Acesso inválido a vetor - Java}
+    \begin{itemize}
+        \item Em Java, teremos um erro de acesso ao item de um vetor se tentarmos acessar um índice de valor maior ou igual ao tamanho do vetor
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+public class ArrayOutOfBoundsError {
+    public static void execute(){
+        int[] list = new int[] { 0, 1, 2 };
+
+        System.console().printf("%d", list[4]);
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de um acesso inválido ao vetor em Java}
+            \label{fig:java_invalid_array_access}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Acesso inválido a vetor - Kotlin}
+    \begin{itemize}
+        \item Quando utilizamos Kotlin, estamos sujeitos ao mesmo erro, caso acessemos o valor da mesma forma que em Java
+        \item Utilizando o operador \emph{get} (\emph{[indice]}) em um índice inválido
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class ArrayOutOfBoundsError {
+    fun execute(){
+        val array = arrayOf(0, 1, 2)
+
+        System.console().printf(array[4].toString())
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de um acesso inválido ao vetor em Kotlin}
+            \label{fig:kotlin_invalid_array_access}
+        \end{figure}
+        \item Porém, o Kotlin também dispõe algumas funções que tratam os casos onde um índice inválido é acessado
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Acesso inválido a vetor - Kotlin}
+    \begin{itemize}
+        \item Com o uso da função \emph{getOrNull}, caso um indíce inválido seja acessado, o valor nulo é retornado
+        \item Porém, como a melhor prática é evitar a utilização de valores nulos, existe uma outra opção
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Acesso inválido a vetor - Kotlin}
+    \begin{itemize}
+        \item A função \emph{getOrElse} recebe uma função \textit{lambda} de que 
+        tem um valor inteiro como entrada, referente ao índice acessado, e deve retornar o tipo dos itens da lista acessada
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class Fibonacci {
+    fun preCalculated(i: Int): Int = 
+        intArrayOf(1, 1, 2, 3, 5, 8, 13, 21).getOrElse(i) { calculate(it) }
+
+    companion object {
+        fun calculate(i: Int): Int = 
+            if (i <= 2) 1 else calculate(i - 1) + calculate(i - 2)
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de um utilização da função \textit{getOrElse} em Kotlin}
+            \label{fig:kotlin_get_or_else_array_access}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Erros de fluxo}
+    \begin{itemize}
+        \item Erros de fluxo podem ser causados por erros na implementação das regras de negócio
+        \item Ou no tratamento indevido de falhas que podem desviar o fluxo conforme o esperado para a aplicação
+        \item Fatores externos podem interferir no fluxo planejado para aplicação, como uma falha física no hardware ou falha em algum serviço externo a aplicação, entre outros
+        \item Nós exploramos a seguir algumas formas de tratar estes eventos inesperados
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Exceções}
+    \begin{itemize}
+        \item Tanto em Java quanto em Kotlin, exceções são eventos que ocorrem durante a execução de uma aplicação por conta da disrupção do fluxo normal ou esperado de suas instruções
+        \item Existem três tipos de exceções
+        \begin{itemize}
+            \item \textit{Checked exceptions}: eventos excepcionais das quais uma aplicação bem escrita deveria ser capaz de se recuperar
+            \item Erros \textit{errors}: eventos \emph{externos} a qual a aplicação pode não se antecipar ou se recuperar
+            \item \textit{Runtime Exceptions}: eventos \emph{internos} a qual a aplicação pode não se antecipar ou se recuperar
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Exceções}
+    \begin{itemize}
+        \item Em Java, existe um princípio chamado \textit{Catch or Specify Requirement}
+        \item Este princípio exige um dos dois seguintes pontos
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exceções}
+    \begin{itemize}
+        \item Deve haver um bloco \emph{try} que capture este tipo de exceção em torno da chamada
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+public class CatchingExample {
+    public static void catching() {
+        try {
+            throwsException();
+        } catch(Exception e) {
+            // Do something with the exception
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo da captura de exceção Java lançada por um método}
+            \label{fig:java_catching_exception}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exceções}
+    \begin{itemize}
+        \item Deve declarar que agora, o método onde a chamada é realizada pode disparar este tipo de exceção
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+public class SpecifyingExample {
+    public static void specified() throws IOException {
+        if (true) throw new IOException();
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de declaração de exceção em Java}
+            \label{fig:java_declaring_exception}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos}
+    \begin{itemize}
+        \item Existe uma outra abordagem utilizando Orientação a Objetos e orientação a tipos que pode ser utilizada para garantir, em tempo de compilação, que todos os cenários previstos serão cobertos
+        \item Tome como exemplo a interface \emph{Result}
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+public interface Result {
+    boolean isSuccess();
+}
+            \end{lstlisting}
+            \caption{Exemplo de interface de resultados em Java}
+            \label{fig:java_result_interface}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos}
+    \begin{itemize}
+        \item Observe também, duas implementações diferentes desta interface
+        \item Uma que representa um resultado de sucesso
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+public class Success<T> implements Result {
+    private final T data;
+
+    public Success(T data) {
+        this.data = data;
+    }
+
+    @Override
+    public boolean isSuccess() {
+        return true;
+    }
+
+    public T getData() {
+        return data;
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de implementação de uma interface de resultado que representa o resultado de sucesso}
+            \label{fig:java_success_result_implementation}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos}
+    \begin{itemize}
+        \item Outra que representa um resultado de falha
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+public class Fail implements Result {
+    private final Error error;
+    
+    public Fail(Error error) {
+        this.error = error;
+    }
+    
+    @Override
+    public boolean isSuccess() {
+        return false;
+    }
+
+    public Error getError() {
+        return error;
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de declaração de exceção em Java}
+            \label{fig:java_fail_result_implementation}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Resultados orientado a tipos}
+    \begin{itemize}
+        \item Note que é simples verificarmos se o resultado de uma operação é sucesso ou falha verificando de qual classe um resultado é uma instância
+        \item Porém, em Java, não existe um meio de garantir que todos os casos sejam cobertos
+        \item Imagine que um novo tipo \emph{NetworkFail} que implementa \emph{Result}, mas contendo outros dados sobre a falha
+        \item o compilador do Java não obriga o desenvolvedor a tratar este novo tipo de resultado
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos}
+    \begin{itemize}
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+public class Main {
+    public static void main(String[] args) {
+        Result result = SomeComplexOperation.execute();
+        
+        if(result instanceof Success<Data>) {
+            // Do something with the success result
+        } else if(result instanceof Fail) {
+            // Do something with the error
+        } else {
+            throw new IllegalStateException("Result type not implemented")
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de como tratar implementações de \emph{Result} em Java}
+            \label{fig:java_fail_result_implementation}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos}
+    \begin{figure}[H]
+        \centering
+        \begin{lstlisting}[language=Java]
+public class Main {
+    public static void main(String[] args) {
+        Result result = SomeComplexOperation.execute();
+        
+        if(result instanceof Success<Data>) {
+            // Do something with the success result
+        } else if(result instanceof NetworkFail) {
+            // Do something with the error
+        } else if(result instanceof Fail) {
+            // Do something with the error
+        } else {
+            throw new IllegalStateException("Result type not implemented")
+        }
+    }
+}
+        \end{lstlisting}
+        \caption{Exemplo de como tratar implementações de \emph{Result} em Java}
+        \label{fig:java_fail_result_implementation}
+    \end{figure}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
+    \begin{itemize}
+        \item Em Kotlin, utilizando um tipo específico de classes (ou interfaces, em versões mais novas) chamadas \textit{sealed}, é possível que o compilador saiba quais são todas as implementações possíveis de uma classe (ou interface)
+        \item Utilizando a expressão \emph{when}, é possível implementar uma espécie de pattern matching, que nos obriga é a cobrir todas as implementações possíveis de um determinado valor
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
+    \begin{itemize}
+        \item Tome exemplo a \emph{sealed class} chamada \textit{Result}
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+sealed class Result {
+    data class Success<T>(val data: T) : Result()
+    data class Fail(val exception: Exception) : Result()
+}
+            \end{lstlisting}
+            \caption{Exemplo de implementação de classe \textit{sealed} em Kotlin como resultado}
+            \label{fig:kotlin_result_sealed_type}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
+    \begin{itemize}
+        \item Note como, ao salvarmos o resultado de uma operação que retorna uma instância de resultado, utilizando uma expressâo when, o compilador nos obriga é verificar todos os cenários
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class Program {
+    fun main(args: String[]) {
+        val result = SomeComplexOperation.execute()
+
+        when(result) {
+            is Result.Success<*> -> {
+                /* Do something with the data inside the success object */
+            }
+            is Result.Error -> {
+                /* Do something with the error */
+            }
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de utilização de classes de resultado em Kotlin}
+            \label{fig:kotlin_result_class_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
+    \begin{itemize}
+        \item Num exemplo como demonstrado em Java, onde um novo tipo de erro é adicionado, o código não compila até que este novo tipo de resultado seja implementado nas expressões \emph{when}
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class Program {
+    fun main(args: String[]) {
+        val result = SomeComplexOperation.execute()
+
+        when(result) {
+            is Result.Success<*> -> {
+                /* Do something with the data inside the success object */
+            }
+            is Result.Error -> {
+                /* Do something with the error */
+            }
+            is Result.NetworkFail -> {
+                /* We have to handle the new type here */
+            }
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de adição de um novo tipo de falha como um resultado}
+            \label{fig:kotlin_result_class_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Resultados orientado a tipos + Pattern Matching}
+    \begin{itemize}
+        \item Utilizar este tipo de implementação amplia nossas possibilidades pra além do uso do controle de fluxo de exceções
+        \item Podemos mesclar as duas abordagens, onde, ao lançar uma exceção de erro, um resultado de falha por exceção é retornado
+        \item Podemos encapsular chamadas a métodos que falham comumente em um resultado de erro
+        \item Podemos encadear operações que podem alterar o estado da aplicação de tal forma, que, ao ocorrer uma falha, nenhuma outra chamada é realizada
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusões}
+    \begin{itemize}
+        \item As abordagens propostas não solucionam nenhum tipo defeito de forma direta
+        \item São abordagens que mitigam a possibilidade de não captura ou tratamento de eventos inesperados, propagação de resultados errôneos, e assim por diante
+        \item Em algumas destas, o retorno da aplicação deste tipo de melhoria não é imediato, mas, em termos de manutenibilidade e curva de aprendizado ao tratar com o código as primeiras vezes, pode ser ser significativo
+    \end{itemize}
+\end{frame}
+
+\section{Ferramentas de detecção de erros}
+
+\begin{frame}{Contextualização}
+    \begin{itemize}
+        \item Linters, como são comumente conhecidas estas ferramentas, fazem uma análise estática do código fonte da aplicação em busca de possíveis erros, adoção de má práticas de programação, problemas de formatação, entre outros
+        \item Estas ferramentas estão integradas diretamente em grande parte das IDEs, ou, podem ser executadas como plugins do gerenciadores de \textit{build} das aplicações
+        \item Possui um conjunto de regras de análise de código para avaliar diferentes segmentos de vulnerabilidades
+        \item Costumam ser altamente configuráveis e personalizáveis
+        \item Vão além da detecção de erros, mantendo também a qualidade do código em si
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Implementação}
+    \begin{itemize}
+        \item Para realizar a implementação do \textit{linter}, precisamos de um projeto em Kotlin
+        \item Utilizamos um projeto inicialmente desenvolvido em Java, baseado no funcionamento da ferramenta Apache ZooKeeper
+        \item O propósito é que, durante a conversão do projeto para Kotlin, muitos dos padrões inseguros de Java se mantenham e sejam detectados pela ferramenta
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Implementação}
+    \begin{itemize}
+        \item A versão do Kotlin será a mais recente, até o momento da conversão, a 1.9.20 e a versão do Gradle a 8.4
+        \item Implementamos a versão 1.23.3 do plugin do linter \emph{detekt}, como prova de conceito
+        \item Com o plugin configurado, executamos a primeira vez para coletar um relatório de todas os alertas de código fora das regras configuradas
+        \item É importante destacar que a execução da análise passa a ser dependência de comandos de verificação, testes e \textit{build} do pacote executável da aplicação
+        \item O ganho disto é a implementação desta análise em fluxos de CI/CD, por exemplo
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Relatório exportado}
+    \begin{itemize}
+        \item Veja um trecho do relatório exportado em HTML, como exemplo:
+        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+    \end{itemize}
+\end{frame}
+
+\subsection{Resultados obtidos}
+
+\begin{frame}{Condicional complexa}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Condicional complexa}
+    \begin{itemize}
+        \item Código corrigido
+        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Injeção do \textit{dispatcher} de corrotinas}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Injeção do \textit{dispatcher} de corrotinas}
+    \begin{itemize}
+        \item Código corrigido
+        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Captura de exceção genérica}
+    \begin{itemize}
+        \item Código não conforme com a regra
+        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Captura de exceção genérica}
+    \begin{itemize}
+        \item Código corrigido
+        \\ \color{red} \huge{FALTA O EXEMPLO DO RELATÓRIO}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+    \frametitle{Referências}
+    \bibliographystyle{apalike}
+    \bibliography{bibliografia}
+\end{frame}
+
+\end{document}
