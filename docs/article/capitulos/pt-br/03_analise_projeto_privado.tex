@@ -1,0 +1,72 @@
+\chapter{Classificando erros mais comuns numa aplicação real}\label{cap:classification_on_real_world_app}
+
+Como precisamos de uma classificação de erros mais próxima do ponto de vista de desenvolvimento de software, analisamos erros coletados através de uma ferramenta de monitoramento em um projeto privado de média/grande escala, a fim de analisar quais são as exceções mais frequentes num período de trinta (30) dias. Deste modo, podemos ter uma ideia melhor se estes erros poderiam ser evitados de acordo com a adoção de diferentes abordagens de desenvolvimento.
+
+As ocorrências foram coletadas em uma aplicação Android, compilada utilizando o SDK do Android 8.1 (API 28), dando suporte a versão 5.0 (API 21) do Android como versão mínima. Foi desenvolvida em Java (JDK 8) e Kotlin (versão 1.5.10). O app é executado majoritariamente em um modelo de dispositivo próprio de uma companhia privada rodando o Android 7.1.1 (API 25) e alguns modelos executando o Android 6.0 (API 23). Porém, sua versão mínima é a 5.0 por motivos de retrocompatibilidade com outros dispositivos legados. O app importa diversas bibliotecas como dependências, sendo algumas destas públicas e outras privadas.
+
+Nesta aplicação, temos implementada uma ferramenta BaaS (Backend as a Service) \cite{okta_backend_as_a_service} de monitoramento chamada Crashlytics \cite{crashlytics_home}, oferecida como um produto dentro do serviço Firebase, do Google. Esta é capaz de registrar ocorrências de exceções que foram ou não capturadas durante a execução do app, além de registros de logs ``não fatais``, isto é, que não comprometem a execução do app. Ainda que nem todas as falhas aqui capturadas sejam fatais, levamos em consideração que todas elas podem ter um impacto na visão do cliente, seja na experiência de usabilidade, quanto no que é esperado de alguma funcionalidade, ainda que alguns dos erros não interrompam o fluxo da aplicação. A \Cref{table:exceptions_classification} mostra os tipos e quantidades de ocorrências das exceções lançadas.
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{ l|X|c|c }
+        \textbf{Tipo de erro} & \textbf{Ocorrências em classes} & \textbf{Ocorrências} & \textbf{Usuários} \\
+        \hline
+        Erro de comunicação com o servidor & 8 & 1.120.357 & 137,126 \\
+        Variável não inicializada & 25 & 16,104 & 6,914 \\
+        Acesso inválido a vetor & 4 & 15,898 & 5,363 \\
+        Erro de parseamento & 2 & 11,700 & 2,347 \\
+        Erro de fluxo & 8 & 1009 & 589 \\
+        Erro de tipo recebido & 1 & 499 & 434 \\
+        Erro em aplicação externa & 2 & 363 & 282 \\
+        Falha na leitura de arquivo & 1 & 135 & 135 \\
+        Erro na inicialização & 1 & 122 & 107 \\
+        Estouro de memória & 3 & 117 & 110 \\
+        Acesso inválido a variável & 3 & 86 & 73 \\
+        Erro de permissão & 1 & 35 & 4 \\
+        Erro de banco de dados & 1 & 25 & 16 \\
+    \end{tabularx}
+    \caption{Exceções lançadas classificadas por tipo e suas quantidades de ocorrências}
+    \label{table:exceptions_classification}
+\end{table}
+
+Podemos observar pela tabela \Cref{table:exceptions_classification}, que se encontra ordenada de forma decrescente pela quantidade de ocorrências em classes, que a maior quantidade de erros se deu pela falha de comunicação com o servidor. Isto é compreensível, por se tratar de uma aplicação móvel, onde muita oscilações de rede ocorrem. Porém, nas ocorrências seguintes, podemos observar um relevante número de falhas relacionadas a falhas de programação, sendo o caso dos defeitos de ``variável não inicializada`` e ``acesso inválido a vetor``, por exemplo. Os dois primeiros exemplos tiveram grande relevância entre os erros capturados e inclusive podem ser evitados através da adoção de diferentes práticas durante a fase de desenvolvimento.
+
+Apesar de termos erros de todos os tipos de relevância em termos de quantidade de ocorrências, erros como de \textit{parseamento}, aplicação externa ou de conexão com o banco de dados, podem ser evitados mediante outras abordagens de tratamento de erros e coordenação do fluxo da aplicação, por exemplo. Portanto, a escolha da pilha de tecnologias adotada durante o planejamento, desenvolvimento e sustentação da aplicação demonstra uma relação direta com as ocorrências de defeitos nela observada.
+
+Tendo em mente que a classificação dos defeitos do nosso repositório privado foi realizada apenas conforme o tipo de exceção lançada pela aplicação e não baseado na correção realizada para sanar os defeitos, podemos comparar o ranking dos erros mais comuns apenas como referência. Vejamos as ocorrências encontradas classificadas pelo ODC (veja o \Cref{cap:cientific_library_research}), na \cref{table:our_results_classified_by_odc}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\linewidth}{ X|c|X|c|c|c }
+        \textbf{Tipo de defeito} & \textbf{ODC} & \textbf{Ocorrências em classes} & \textbf{\%} & \textbf{Ocorrências} & \textbf{\%} \\
+        \hline
+        Variável não inicializada & \multirow{3}{*}{ A/I } & 25 & \multirow{3}{*}{ 55,77\% } & 16,104 & 
+        \multirow{3}{*}{ 35,39\% } \\
+        Acesso inválido a variável & & 3 & & 86 & \\
+        Erro na inicialização & & 1 & & 122 & \\
+        \hline
+        Erro de fluxo & A/M & 8 & 15,38\% & 1009 & 2,19\% \\
+        \hline
+        Erro em aplicação externa & \multirow{2}{*}{I/OOM} & 2 & \multirow{2}{*}{5,77\%} & 363 & \multirow{2}{*}{0,84\%} \\
+        Erro de banco de dados & & 1 & & 25 \\
+        \hline
+        Erro de parseamento & T/S & 2 & 3,85\% & 11,700 & 25,38\% \\
+        \hline
+        Erro de tipo recebido & F/C/O & 1 & 1,92\% & 499 & 1,08\% \\
+        \hline
+        Falha na leitura de arquivo & R & 1 & 1,92\% & 135 & 0,29\% \\
+        \hline
+        Acesso inválido a vetor & \multirow{2}{*}{C} & 4 & \multirow{2}{*}{9,62\%} & 15,898 & \multirow{2}{*}{34,57\%} \\
+        Erro de permissão & & 1 & & 35 & \\
+        \hline
+        Estouro de memória & - & 3 & 5,77\% & 117 & 0,26\% \\
+        \hline
+        \multicolumn{2}{l|}{\textbf{Total}} & \textbf{52} & \textbf{100\%} & \textbf{46093} & \textbf{100\%} \\
+    \end{tabularx}
+    \caption{Parcela de cada tipo de defeito nas ocorrências analisadas}
+    \label{table:our_results_classified_by_odc}
+\end{table}
+
+Pode-se notar na \Cref{table:our_results_classified_by_odc} que os defeitos mais frequentes foram de atribuição ou inicialização (A/I), seguido do algoritmo ou método, tipo A/M (algoritmo ou método), e, por fim, temos os erros de interface ou mensageria (tipo I/OOM).
+
+De qualquer forma, erros de tipos como de algoritmo ou método, função, classe ou objeto, verificação, atribuição ou inicialização, por exemplo, podem ser mitigados com a adoção de diferentes abordagens, paradigmas de programação ou ferramentas de verificação (conforme detalharemos nas seções seguintes deste estudo). Tanto nos conjuntos de dados da pesquisa preliminar, quando nos dados analisados neste capítulo, estes tipos de defeito somam mais de 80\% das ocorrências. Isto reforça a hipótese deste trabalho de que adotar diferentes práticas de programação podem ser úteis para mitigar o risco de defeitos durante o processo de desenvolvimento.

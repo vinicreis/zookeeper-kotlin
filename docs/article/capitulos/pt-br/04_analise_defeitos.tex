@@ -1,0 +1,469 @@
+\chapter{Análise dos erros mais frequentes numa aplicação real}\label{cap:most_common_errors_analysis}
+
+Baseado nos erros mais comuns levantados no \Cref{cap:classification_on_real_world_app}, vejamos quais erros podem ser sanados primeiramente através da utilização de diferentes linguagens ou paradigmas de programação. Tenhamos em mente que os erros classificados foram coletados através do monitoramento de uma aplicação desenvolvida para Android, utilizando Kotlin na maioria do seu código-fonte e Java em algumas classes legadas. Com isso, analisamos se utilizando uma dessas linguagens existem meios de evitar ou conter estes erros que podem ser comumente evitados por desenvolvedores.
+
+É importante destacar também que esta aplicação é executada em dispositivos móveis. Logo, alguns dos erros não partem de erros na fase de desenvolvimento, mas sim de fatores externos, como ``Erro de comunicação com o servidor``, por exemplo. Estes tipos de defeitos não serão analisados nesta etapa do projeto.
+
+\section{Variável não inicializada}
+
+\subsection{Java}
+
+O erro de variável não inicializada consiste no acesso do conteúdo de uma variável antes que ela tenha sido devidamente inicializada, isto é, antes que um conteúdo válido seja atribuído a ela. Observe um exemplo abaixo utilizando Java para simular o erro na \Cref{fig:java_npe_code}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Java]
+class NullPointerExceptionSimulation {
+    public static void main(String[] args) {
+        Result test = null;
+
+        System.out.print(test.data().toString())
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de código que lança uma exceção do tipo \textit{NullPointerException}}
+    \label{fig:java_npe_code}
+\end{figure}
+
+Note que durante a execução deste código uma exceção do tipo \textit{NullPointerException} seria lançada na linha 5. Pois durante a chamada da função \textit{data()} do objeto de tipo \textit{Result}, nenhum conteúdo foi atribuído a variável que o contém.
+
+Algumas linguagens possuem mecanismos para impedir este tipo de erro em tempo de compilação, para evitar que o desenvolvedor possa executar a aplicação com o risco de uma variável referenciada sem que seja atribuído um valor a mesma.
+
+\subsection{Kotlin}\label{subsec:most_common_error_uninit_variable_kotlin}
+
+Kotlin é uma linguagem de programação de código aberto \cite{kotlin_source} que possui interoperabilidade com a linguagem Java \cite{kotlin_get_started}, porém, conta com diversas melhorias e novas funcionalidades. Nela, por padrão, todos os tipos não são anuláveis, ou seja, não podem receber um valor nulo \cite{kotlin_nullable_types}. A linguagem tem o objetivo de eliminar o NPE (\textit{NullPointerException}) \cite{kotlin_null_safety} por completo. Além disto, seu compilador possui suporte a utilização de variáveis imutáveis, isto é, propriedades apenas com acesso de leitura que devem ter seu valor atribuído em sua inicialização \cite{kotlin_variables}.
+
+Note que, no exemplo da \Cref{fig:kotlin_not_init_variable}, são utilizados dois tipos de variáveis, variáveis do tipo \textit{val} e \textit{var}. O primeiro possui a característica de imutabilidade, citado anteriormente. Já tipo \textit{var} pode ter seu conteúdo alterado a qualquer momento. Utilizando qualquer um dos dois tipos, o programador não consegue, sem sobrepor este comportamento com abordagens que veremos a seguir, não inicializar uma variável no momento da criação e nem mesmo atribuir a ela um valor nulo direta e explicitamente. Dito isso, o código na \Cref{fig:kotlin_not_init_variable} não compila por conta de erros nas linhas 2 e 3.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=kotlin]
+class UninitializedVariableError {
+    private val nonChangeableValue: Int
+    private var changeableVariable: Int = null
+
+    fun execute(){
+        print("Non changeable value is $nonChangeableValue")
+        print("Changeable value is $changeableVariable")
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de código incorreto de variável não inicializada}
+    \label{fig:kotlin_not_init_variable}
+\end{figure}
+
+Já o código na \Cref{fig:kotlin_init_variable} compila normalmente e pode ser executado sem problemas.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=kotlin]
+class UninitializedVariableError {
+    private val nonChangeableValue: Int = 0
+    private var changeableVariable: Int = 1
+
+    fun execute(){
+        print("Non changeable value is $nonChangeableValue")
+        print("Changeable value is $changeableVariable")
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de código funcional após inicializar variáveis}
+    \label{fig:kotlin_init_variable}
+\end{figure}
+
+Entretanto, este comportamento do compilador pode ser sobreposto utilizando o operador \textit{?}. Quando utilizado na definição explícita de tipos, indica que determinado tipo também será anulável. Porém, ao acessarmos o valor de variáveis anuláveis, o compilador requererá uma entre duas das verificações.
+
+\textbf{chamada segura (\textit{safe call}):} utilizando o operador \textit{?} após a leitura da variável, se caso o valor da variável for nulo a chamada não será feita. Veremos exemplos deste caso na \Cref{fig:kotlin_null_variable_without_safe_call}, que não é aceito pelo compilador.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class UninitializedVariableError {
+    private val nullableValue: Int? = null
+    private var nonNullableVariable: Int = 0
+
+    fun execute(){
+        print("Non nullable value is ${nullableValue.toFloat()}")
+        print("Nullable value is $nonNullableVariable")
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de chamada de uma variável nula sem \textit{safe call}}
+    \label{fig:kotlin_null_variable_without_safe_call}
+\end{figure}
+
+Já na \Cref{fig:kotlin_null_variable_with_safe_call}, temos um exemplo aceito pelo compilador.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class UninitializedVariableError {
+    private val nullableValue: Int? = null
+    private var nonNullableVariable: Int = 0
+
+    fun execute(){
+        print("Non nullable value is ${nullableValue?.toFloat()}")
+        print("Nullable value is $nonNullableVariable")
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de chamada de uma variável nula com \textit{safe call}}
+    \label{fig:kotlin_null_variable_with_safe_call}
+\end{figure}
+
+Note que se a variável \textit{nullableValue} estiver atribuído o valor nulo, \textit{toFloat} não será executado e o valor \textit{null} será passado para ser convertido para \textit{String?} (String anulável).
+
+\textbf{assegurar que a variável não é nula (operador \textit{!!})}: este operador indica que o programador garante que a variável não terá valor nulo no momento da chamada e então, uma chamada segura não será necessária. Porém, se este contrato não for cumprido, uma exceção do tipo \textit{NullPointerException} (que chamaremos de NPE, por conveniência) será lançada. Vejamos alguns exemplos de sua utilização e de códigos que lançariam ou não uma NPE.
+
+Note que o código na \Cref{fig:kotlin_not_init_variable_invalid_null_assert} dispara uma NPE quando executado na linha 6, uma vez que \textit{nullableValue} possui valor nulo quando \textit{toFloat} é chamada.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class UninitializedVariableError {
+    private val nullableValue: Int? = null
+    private var nonNullableVariable: Int = 0
+
+    fun execute(){
+        print("Non nullable value is ${nullableValue!!.toFloat()}")
+        print("Nullable value is $nonNullableVariable")
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de chamada de uma variável nula com \textit{null assert}, que dispara exceção}
+    \label{fig:kotlin_not_init_variable_invalid_null_assert}
+\end{figure}
+
+Já no código da figura \ref{fig:kotlin_not_init_variable_valid_null_assert}, nenhuma exceção é lançada, já que a variável \textit{nullableValue} possui um valor diferente de nulo.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class UninitializedVariableError {
+    private var nullableVariable: Int? = null
+    private var nonNullableVariable: Int = 0
+
+    fun execute(){
+        nullableVariable = Random(1000).nextInt()
+        
+        print("Non nullable value is ${nullableVariable!!.toFloat()}")
+        print("Nullable value is $nonNullableVariable")
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de chamada válida de uma variável anulável com \textit{null assert}}
+    \label{fig:kotlin_not_init_variable_valid_null_assert}
+\end{figure}
+
+Existe ainda uma outra forma de sobrepor a verificação de atribuição durante a declaração de variáveis não anuláveis, que são as variáveis de inicialização posterior (ou \textit{lateinit variables}, em inglês). Sua utilização é permitida apenas para variáveis mutáveis (definidas utilizando a palavra \textit{var}), onde pode-se adicionar a palavra reservada \textit{lateinit} antes e indicar que esta variável será inicializada posteriormente.
+
+A leitura de uma variável do tipo \textit{lateinit var} que ainda não foi inicializada dispara uma exceção do tipo \textit{UninitializedPropertyAccessException}. Veremos dois exemplos onde o primeiro (\Cref{fig:kotlin_uninitialized_lateinit_var}) dispara a exceção anterior e, o segundo (\Cref{fig:kotlin_lateinit_variable_initialized}), não:
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class UninitializedVariableError {
+    private lateinit var lateInitVariable: List<Int>
+
+    fun execute(){
+        print("Non nullable value is ${lateInitVariable.first()}")
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de variável do tipo \textit{lateinit} é lida antes de ser inicializada}
+    \label{fig:kotlin_uninitialized_lateinit_var}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class UninitializedVariableError {
+    private lateinit var lateInitVariable: List<Int>
+
+    fun execute(){
+        lateInitVariable = listOf(0, 1, 2)
+        
+        print("Non nullable value is ${lateInitVariable.first()}")
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de variável do tipo \textit{lateinit} utilizada de forma válida}
+    \label{fig:kotlin_lateinit_variable_initialized}
+\end{figure}
+
+Repare que a implementação dos dois métodos que garantem uma segurança em relação a valores nulos, sem requerer muito esforço para termos uma boa prática de implementação.
+
+\section{Acesso inválido a vetor}
+
+\subsection{Java}
+
+O erro de acesso inválido a um vetor é lançado quando, em um vetor de tamanho \textit{x}, tentamos acessar qualquer posição maior ou igual a \textit{x} (assumindo que as posições do vetor começam em zero). Vejamos um exemplo simples em Java na \Cref{fig:java_invalid_array_access}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Java]
+public class ArrayOutOfBoundsError {
+    public static void execute(){
+        int[] list = new int[] { 0, 1, 2 };
+
+        System.console().printf("%d", list[4]);
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de um acesso inválido ao vetor em Java}
+    \label{fig:java_invalid_array_access}
+\end{figure}
+
+Vejamos quais recursos temos a disposição utilizando outras linguagens de programação sem a utilização de nenhum tipo de \textit{plugin} dessas linguagens para mitigarmos o risco do tipo de exceção \textit{ArrayOutOfBoundsException}.
+
+\subsection{Kotlin}
+
+Em Kotlin, por padrão, os vetores são invariantes. Isto é, todo o vetor precisa ter um tipo para que ele possa somente receber elementos daquele tipo específico \cite{kotlin_arrays}. Logo, ao criarmos um vetor de números inteiros, podemos adicionar somente elementos que sejam números inteiros ao vetor. 
+
+Considerando o suporte nativo da linguagem, assim como Java, Kotlin não dispõe de nenhum mecanismo adicional que impeça o programador de tentar realizar um acesso inválido a um vetor. Existem validações realizadas pela IDE, mas ainda assim, um código ou lógica errôneos ainda podem ser compilados e executados. Veja um exemplo na \Cref{fig:kotlin_invalid_array_access}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ArrayOutOfBoundsError {
+    fun execute(){
+        val array = arrayOf(0, 1, 2)
+
+        System.console().printf(array[4].toString())
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de um acesso inválido ao vetor em Kotlin}
+    \label{fig:kotlin_invalid_array_access}
+\end{figure}
+
+ Porém, a linguagem oferece algumas funções extras nativas para facilitar a verificação da validade do índice acessado. Como vimos anteriormente, o operador \textit{[]} ainda é utilizado para acessar um índice específico do vetor. Este operador é análogo à função \textit{get} de elementos do tipo \textit{Array}. 
+ 
+ Apesar disso, esta função possui duas variantes chamadas \textit{getOrNull} \cite{kotlin_get_or_null} e \textit{getOrElse} \cite{kotlin_get_or_null}. A primeira recebe um parâmetro, que é o índice desejado. Caso o índice seja inválido, o valor nulo é retornado, para que possa ser tratado de uma das formas relatadas no capítulo anterior.
+
+ Já a função \textit{getOrElse} recebe dois parâmetros: o primeiro também é o índice que deve ser acessado, enquanto o segundo é uma função lambda que recebe um valor inteiro, que corresponde ao índice que tentou ser acessado. Ela retorna um valor do mesmo tipo do vetor, para que seja utilizado caso o índice acessado inicialmente seja inválido.
+
+ Vejamos um exemplo simples da última função na \Cref{fig:kotlin_get_or_else_array_access}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class Fibonacci {
+    fun preCalculated(i: Int): Int = 
+        intArrayOf(1, 1, 2, 3, 5, 8, 13, 21).getOrElse(i) { calculate(it) }
+
+    companion object {
+        fun calculate(i: Int): Int = 
+            if (i <= 2) 1 else calculate(i - 1) + calculate(i - 2)
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de um utilização da função \textit{getOrElse} em Kotlin}
+    \label{fig:kotlin_get_or_else_array_access}
+\end{figure}
+
+ A função anterior serve para retornamos valores da série de Fibonacci. Suponhamos que os 6 valores iniciais sejam os mais utilizados. Com isso, podemos ter estes valores pré-calculados, e, caso nossa lista de \textit{cache} não contenha o valor acessado, podemos utilizar o índice para calculá-lo em tempo de execução. Não temos ganhos significativos neste exemplo, mas, se tratássemos de um cálculo mais complexo, este tipo de abordagem poderia ser útil.
+
+\section{Erros de fluxo de algoritmos}
+
+Erros de algoritmo ou método são defeitos causados durante a aplicação errônea das regras de negócio na aplicação. Isto é, alguma falha no tratamento de algum cenário pode gerar uma falha no funcionamento do algoritmo que o impede de continuar ou dispara uma série de comportamentos inesperados na aplicação.
+
+Entretanto, este tipo de defeito não fica limitado a este cenário. Fatores externos também podem ocasionar este tipo de falha, ainda que todas as regras de negócio estejam cobertas e tratadas da forma correta. Quando algum evento fora do esperado ocorre, a aplicação pode demonstrar um comportamento não esperado ou até mesmo não ser capaz de continuar executando.
+
+Vejamos dois métodos de tratamento destes cenários a seguir.
+
+\section{Exceções}
+
+No primeiro caso, onde a instrução atual interrompe a execução da aplicação, temos o que é chamado de exceção. Uma exceção é um evento que ocorre durante a execução de um programa por conta da disrupção do fluxo normal ou esperado de suas instruções \cite{java_exception_definition}.
+
+A linguagem Java possui três tipos de exceções, são elas:
+
+\begin{itemize}
+    \item \textit{Checked exceptions}: são exceções criadas para representar eventos excepcionais dos quais uma aplicação bem escrita ainda consegue se recuperar e seguir a execução. Por exemplo, durante a busca por um arquivo por um dado caminho (\textit{path}), há possibilidade do mesmo não ser encontrado. Neste caso, uma exceção do tipo \textit{FileNotFoundException} é lançada e qualquer aplicação bem escrita deve antecipar este cenário;
+    \item Erros (\textit{errors}): erros normalmente representam eventos \textbf{externos} a aplicação das quais ela não pode antecipar ou se recuperar. Imagine que ao abrir um arquivo, o hardware sofre uma falha repentina e o arquivo não pode mais ser acessado durante a leitura. Então, um erro do tipo \textit{java.io.IOError} seria lançada;
+    \item \textit{Runtime exceptions}: são exceções \textbf{internas} a aplicação que representam algum evento inesperado e irrecuperável. Normalmente, representam alguma falha na lógica ou fluxo da aplicação. Exceções do tipo \textit{NullPointerException} podem ser um exemplo deste tipo.
+\end{itemize}
+
+Nesta linguagem existe também um princípio chamado \textit{Catch or Specify Requirement} \cite{java_catch_or_specify_requirement}. Este é implementado no compilador e exige a aplicação de dois conceitos para a chamada de um método que pode explicitamente lançar uma exceção, que são:
+
+\begin{itemize}
+    \item um bloco \textit{try} em torno o método que pode lançar a exceção que capture e trate aquela exceção (\Cref{fig:java_catching_exception});
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+public class CatchingExample {
+    public static void catching() {
+        try {
+            throwsException();
+        } catch(Exception e) {
+            // Do something with the exception
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo da captura de exceção Java lançada por um método}
+            \label{fig:java_catching_exception}
+        \end{figure}
+    \item o método que cerca a possível exceção precisa declarar que aquele tipo de exceção pode ser lançado (\Cref{fig:java_declaring_exception});
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Java]
+public class SpecifyingExample {
+    public static void specified() throws IOException {
+        if (true) throw new IOException();
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de declaração de exceção em Java}
+            \label{fig:java_declaring_exception}
+        \end{figure}
+\end{itemize}
+
+Porém, apenas as exceções do tipo \textit{checked exceptions} são contempladas pelo princípio acima. Ainda assim, exceções podem ser um caminho útil para controlar o fluxo de aplicações. Porém, não é a única maneira de ter controles sobre eventos esperados ou não durante a execução da aplicação.
+
+Apesar da utilização de exceções serem uma boa alternativa para controlar eventos não esperados numa aplicação, existe a possibilidade de optar por algoritmos que não disparam exceções de forma esperada.
+
+\section{Utilização de classes do tipo \textit{Result}}
+
+Utilizando orientação a objetos como base de exemplo, tome como exemplo a interface do tipo \textit{Result}, que representa um resultado de uma determinada operação, na \Cref{fig:java_result_interface}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Java]
+public interface Result {
+    boolean isSuccess();
+}
+    \end{lstlisting}
+    \caption{Exemplo de interface de resultados em Java}
+    \label{fig:java_result_interface}
+\end{figure}
+
+Esta interface possui um único método que indica se o resultado é de sucesso ou de falha. Logo, implementaremos esta interface de duas formas que representem cada um dos casos (\Cref{fig:java_success_result_implementation}).
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Java]
+public class Success<T> implements Result {
+    private final T data;
+
+    public Success(T data) {
+        this.data = data;
+    }
+
+    @Override
+    public boolean isSuccess() {
+        return true;
+    }
+
+    public T getData() {
+        return data;
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de implementação de uma interface de resultado que representa o resultado de sucesso}
+    \label{fig:java_success_result_implementation}
+\end{figure}
+
+Note que \textit{Success} é uma classe que carrega um tipo genérico que indica o tipo de dados que carrega o resultado de sucesso, dentro da propriedade \textit{data}. E, sendo um resultado de sucesso, o método \textit{isSuccess} sempre returna o valor verdadeiro.
+
+Já a implementação do tipo \textit{Fail}, na \Cref{fig:java_fail_result_implementation}, carrega uma propriedade \textit{error} que representa o erro capturado na execução de terminada tarefa.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Java]
+public class Fail implements Result {
+    private final Error error;
+    
+    public Fail(Error error) {
+        this.error = error;
+    }
+    
+    @Override
+    public boolean isSuccess() {
+        return false;
+    }
+
+    public Error getError() {
+        return error;
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de declaração de exceção em Java}
+    \label{fig:java_fail_result_implementation}
+\end{figure}
+
+Este tipo de implementação é inspirada nos \textit{Monads} que são comumente encontrados em linguagens funcionais. \textit{Monads} são, basicamente, uma forma de estruturar uma sequência de computações e valores utilizando valores fortemente tipados \cite{haskell_monads}.
+
+Quando utilizamos resultados que são fortemente tipados, o compilador pode se encarregar de garantir que um tratamento para todos os tipos possíveis sejam implementados nos algoritmos. Com isso, fica mais difícil de termos eventos inesperados em tempo de execução que não foram tratados durante a implementação do algoritmo.
+
+\subsection{Explorando tipo Result utilizando pattern matching}
+
+A linguagem Kotlin possui uma expressão chamada \textit{when} que define uma expressão condicional de múltiplas ramificações. Dentre estas ramificações, a versão atual de seu compilador é capaz de garantir que todas as suas possibilidades sejam cobertas. Para isso, esta expressão requer uma das ramificações tenha o valor \textit{else}, quando nenhuma outra possibilidade listada é atendida \cite{kotlin_when_expression}.
+
+Porém, se a expressão em questão tem um valor passado a ela e sendo este valor de uma classe do tipo \textit{sealed} ou \textit{enum}, então o compilador é capaz de avaliar se todas as possibilidades foram cobertas em tempo de compilação do tratamento das ramificações da expressão \textit{when}.
+
+Por exemplo, tome a classe da \Cref{fig:kotlin_result_implementation} que executa uma determinada operação.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+object SomeComplexOperation {
+    fun execute(): Result {
+        return try {
+            /* A series of complex operations */
+            Result.Success(true)
+        } catch (e: Exception) {
+            Result.Fail(e)
+        }
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de utilização da classe de resultado em Kotlin}
+    \label{fig:kotlin_result_implementation}
+\end{figure}
+
+Tome também uma outra abordagem de classes de resultado, na \Cref{fig:kotlin_result_sealed_type}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+sealed class Result {
+    data class Success<T>(val data: T) : Result()
+    data class Fail(val exception: Exception) : Result()
+}
+    \end{lstlisting}
+    \caption{Exemplo de implementação de classe \textit{sealed} em Kotlin como resultado}
+    \label{fig:kotlin_result_sealed_type}
+\end{figure}
+
+Note que o resultado da execução da operação acima pode ser um resultado de sucesso ou de erro. Utilizando uma expressão \textit{when} o compilador é capaz de garantir que os dois processos são cobertos, sem a necessidade da utilização de uma ramificação de tipo \textit{else}. Veja \Cref{fig:kotlin_result_class_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class Program {
+    fun main(args: String[]) {
+        val result = SomeComplexOperation.execute()
+
+        when(result) {
+            is Result.Success<*> -> {
+                /* Do something with the data inside the success object */
+            }
+            is Result.Error -> {
+                /* Do something with the error */
+            }
+        }
+    }
+}
+    \end{lstlisting}
+    \caption{Exemplo de utilização de classes de resultado em Kotlin}
+    \label{fig:kotlin_result_class_example}
+\end{figure}
+
+Desta forma, podemos construir algoritmos que não lançam exceções, mas sim devolvem resultados de qualquer que seja o tipo. Observe que a implementação da classe \textit{Result} não está limitada a tipos genéricos de sucesso ou falha. Pode-se implementar inúmeros tipos de resultados e garantir que todos eles sejam tratados utilizando este tipo de abordagem.
+
+É evidente que as abordagens descritas neste capítulo podem não sanar defeitos em softwares de forma direta. Porém, algumas delas previnem que eventos não esperados ou comportamentos errôneos não sejam tratados da forma correta pela aplicação. Algumas delas ainda impedem que um comportamento errático seja propagado adiante durante a execução.
+
+Ainda que algumas delas adicionem uma certa complexidade ao desenvolvimento, o propósito final é impedir que outros desenvolvedores que contribuem para estas aplicações possam empregar menos esforços prevendo e tratando todos os casos de erro. Conforme estas práticas se tornam comuns, a própria estrutura da aplicação torna inevitável que resultados diferentes do esperado sejam previstos ou devidamente tratados.
+
+Por estes motivos, o ganho obtido com algumas abordagens não pode ser esperado a curto prazo. Mas se este é o objetivo, existem outras ferramentas que podem realizar uma análise imediata da aplicação. E, dependendo de como utilizada, tem uma ação semelhante as estratégias abordadas aqui. Sendo ela de garantir que o código-fonte atual siga determinadas regras e que nenhum incremento não conforme seja feito a aplicação. 

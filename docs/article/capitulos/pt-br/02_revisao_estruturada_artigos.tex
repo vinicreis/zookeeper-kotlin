@@ -1,0 +1,214 @@
+\chapter{Revisão estruturada da literatura científica}\label{cap:cientific_library_research}
+
+Para que pudéssemos iniciar nossa análise, precisávamos encontrar uma classificação consolidada de defeitos de software. Com isso, tivemos uma visão concreta da definição dos erros que buscamos evitar relacionados com a etapa de seu desenvolvimento e execução. Portanto, iniciamos buscando na literatura científica referências de autores que possam ter criado algum tipo de classificação de defeitos que possa ajudar neste processo.
+
+Esta etapa consistiu nos seguintes passos:
+
+\begin{itemize}
+    \item Criação de uma \textit{string} de busca que será utilizada em ao menos um acervo digital de artigos científicos;
+    \item Refinamento de uma classificação existente dos resultados por relevância;
+    \item Seleção dos resultados que serão classificados através do título ou uma leitura rápida do resumo;
+    \item Rotulação dos resultados pela classificação alcançada através da leitura do resumo;
+    \item Leitura rápida dos artigos mais relevantes para reclassificação;
+    \item Obter conclusões através dos artigos mais relevantes para embasar este estudo;
+\end{itemize}
+
+\section{\textit{String} de busca}
+
+Para obter os resultados iniciais, construímos uma \textit{string} de busca considerando os principais termos deste estudo. Esta precisa conter a área e subáreas de pesquisa conforme a relevância. Sendo a área de pesquisa engenharia de software, no geral. O que buscamos são dados sobre defeitos que ocorram não apenas na fase de desenvolvimento, mas durante a execução da aplicação pelo usuário final. Em outras palavras, buscamos o que são comumente chamados de \textit{bugs}. Então, nossa área será ``software``, nossa primeira sub-área será ``engenharia`` ou ``desenvolvimento``, em referência a desenvolvimento ou engenharia de software. Depois teremos a sub-área dos defeitos, então ``\textit{bug}`` ou ``\textit{bugs}`` serão nossos próximos termos de pesquisa. 
+
+Por fim, a última camada da pesquisa se trata da classificação dos defeitos. Então, teremos ``classificação`` como nossa última sub-área, uma vez que esta tem como fim encontrar os defeitos mais recorrentes. Logo, na \Cref{table:search_terms}, têm-se os termos relacionados.
+
+\begin{table}[H]
+    \centering
+    \begin{threeparttable}
+        \begin{tabular}{ c|c|c|c }
+            \multirow{2}{*}{ Área de pesquisa } & \multicolumn{3}{ c }{ Subáreas } \\
+            & 1 & 2 & 3 \\
+            \hline
+            software & development & bug* & classification \\
+            & engineering & & \\
+        \end{tabular}
+        \caption{Divisão das áreas de pesquisa}
+        \label{table:search_terms}
+    \end{threeparttable}
+\end{table}
+
+As colunas da tabela estão conectadas numa lógica E e as linhas estão conectadas formando uma lógica OU. Então, teremos a seguinte \textit{string} para busca situada na \Cref{fig:search_string}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[numbers = none]
+    TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY ( engineering ) ) AND TITLE-ABS-KEY ( bug* ) AND TITLE-ABS-KEY ( classification )
+    \end{lstlisting}
+    \caption{\textit{String} de busca nos acervos científicos}
+    \label{fig:search_string}
+\end{figure}
+
+Com a \textit{string} de busca pronta, a utilizamos para busca dos artigos que atendam nossos critérios.
+
+\section{Classificação dos resultados obtidos}
+
+Antes da busca ser realizada, será utilizada a metodologia do estudo de \cite{automated_tests_javascript} como base para classificação inicial dos resultados. Os critérios serão criados levando em consideração o objetivo deste estudo. Logo, teremos inicialmente o seguinte método de classificação por relevância demonstrado na \Cref{table:initial_relevance_and_criteria}
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{ c l|l }
+        \multicolumn{2}{ l| }{Relevância} & Critério \\
+        \hline
+        0 & Não relevante & Não deveria ser considerado na pré-análise \\
+        1 & Pouco relevante & Faz algum tipo de análise da causa raiz de defeitos \\
+        2 & Relevante & Faz alguma classificação entre tipos de defeitos \\
+        3 & Muito relevante & Classifica e ordena os defeitos encontrados com maior frequência \\
+    \end{tabularx}
+    \caption{Relevâncias utilizadas para classificação dos artigos}
+    \label{table:initial_relevance_and_criteria}
+\end{table}
+
+O próximo passo consiste na execução da busca para uma seleção binária, isto é, definir se determinado artigo será ou não analisado com maior profundidade, baseada nos títulos e uma rápida análise do resumo.
+
+\section{Seleção dos resultados obtidos para classificação}
+
+Após a execução da busca, utilizando a \textit{string} de busca criada anteriormente, na biblioteca Scopus \cite{scopus}, no dia 27 de março de 2023, foram obtidos 368 resultados.
+
+Dos artigos encontrados, analisando o título de cada um deles, selecionamos 57 artigos que tinham potencial relevância para estudo para serem classificados através da metodologia criada no passo anterior. Com isso, já temos 311 artigos que serão rotulados com relevância 0 (não relevante).
+
+\section{Classificação através da leitura dos resumos}
+
+Analisando de forma rápida o resumo destes 57 artigos, 18 artigos se mostraram pouco relevantes. Enquanto 39 tiveram alguma relevância para o estudo, pois, além do estudo da causa raiz dos defeitos, algum tipo de classificação parecia ser feita, seja por severidade, tipo, \textit{Hidden Impact Bugs} (HIBs) ou defeitos comuns, reportes duplicados, entre outros.
+
+É possível notar um grande volume de artigos que fazem algum tipo de classificação de defeitos. Porém, como a maioria das linhas de classificação não tem grande contribuição para este estudo, refinamos a classificação os artigos que se mostram relevantes.
+
+Portanto, teremos a seguinte classificação representada na \Cref{table:refined_relevance_and_criteria}
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{ c l|X }
+        \multicolumn{2}{ l| }{Relevância} & Critério \\
+        \hline
+        0 & Não relevante & Não deveria ser considerado na pré-análise \\
+        1 & Pouco relevante & Faz algum tipo de análise da causa raiz ou predição de defeitos \\
+        2 & Média relevância & Classifica defeitos de qualquer forma que não seja do ponto de vista de desenvolvimento de software \\
+        3 & Relevante & Faz alguma classificação entre tipos de defeitos do ponto de vista de desenvolvimento \\
+        4 & Muito relevante & Classifica e ordena os defeitos encontrados do ponto de vista de desenvolvimento ranqueando-os pela frequência \\
+    \end{tabularx}
+    \caption{Relevâncias utilizadas para classificação dos artigos}
+    \label{table:refined_relevance_and_criteria}
+\end{table}
+
+Analisando os resumos de cada artigos novamente, considerando este novo formato de classificação, apenas com os artigos considerados relevantes, tivemos 15, 7 e 17 artigos classificados com pouca, média e alta relevância, respectivamente.
+
+Ao iniciar a leitura dos 17 artigos relevantes, 4 não puderam ser lidos, pois não foi obtido acesso aos mesmos, 11 não tinham relevância para este estudo e 2 artigos se mostraram relevantes para este contexto. Durante a leitura de um deles, um artigo citado também se mostra relevante.
+
+Portanto, veja um resumo dos resultados na \Cref{table:reading_results}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ l|c }
+        Descrição & Total de artigos \\
+        \hline
+        Artigos encontrados & 368 \\
+        \hline
+        Serão analisados pelo título & 57 \\
+        \hline
+        Pouco relevantes & 18 \\
+        Relevantes & 39 \\
+        \hline
+        \multicolumn{2}{c}{\textit{Após reclassificação dos relevantes}}\\
+        \hline
+        Pouco relevantes & 15 \\
+        Médio relevantes & 7 \\
+        Relevantes & 17 \\
+        \hline
+        \multicolumn{2}{c}{\textit{Após leitura rápida dos relevantes}}\\
+        \hline
+        Não puderam ser acessados & -4 \\
+        Sem relevância significativa & 11 \\
+        Se mostraram relevantes & 2 \\
+        \hline
+        Adicionado via \textit{snowballing} & +1 \\
+    \end{tabular}
+    \caption{Classificações dos artigos e suas quantidades}
+    \label{table:reading_results}
+\end{table}
+
+Resta agora analisar as conclusões que foram obtidas a partir de cada um destes três artigos.
+
+\section{Análise dos artigos relevantes}
+
+Apesar dos artigos selecionados não serem diretamente focados na classificação de defeitos ou busca de tipos de defeitos mais comuns, todos eles enfatizam a utilização de algoritmos de \textit{Machine Learning} para realizar a classificação automática de defeitos de software. Porém, a relevância destes para este estudo está relacionada a classificação utilizada, onde neles todos foi a classificação ortogonal de defeitos (ODC - \textit{Orthogonal Defect Classification}).
+
+As conclusões a seguir terão foco neste segmento destes artigos. Porém, apenas no primeiro, analisamos a fundo a definição e conceitos que envolvem a ODC. Deste modo, concentramos nossos esforços no tema que mais fundamenta os resultados obtidos neste trabalho.
+
+Como introduzido por \cite{automatic_odc_using_ml}, a classificação ortogonal de defeitos (ODC) é um \textit{framework} muito popular para classificação de defeitos de software. Ela considera diversos atributos de cada defeito para classificá-los. Outros estudos, que buscaram classificar defeitos de forma automatizada, levaram em consideração apenas um ou dois destes atributos, como tipo e impacto, por exemplo. Apesar de alguns deles estarem muito relacionados às ações tomadas pelos desenvolvedores para corrigir determinados defeitos, como os atributos qualificador e tipo de defeito, o modelo de \textit{machine learning} proposto no artigo considera sua maioria, como atividade, gatilho, impacto, alvo, tipo de defeito e qualificador. Por este motivo, esta classificação será utilizada ao longo deste trabalho.
+
+A seção II do artigo fala sobre um \textit{background} do tema e trabalhos relacionados. Nela, a classificação ODC é definida como um processo analítico usado em desenvolvimento de software e análise do processo de testes para caracterizar defeitos de software. Ela permite extrair informações valiosas sobre os defeitos, além de fornecer \textit{insights} e diagnósticos de remediação no processo de engenharia de software.
+
+A classificação é composta por oito atributos agrupados em duas seções: relatório aberto e fechado. Aqueles de relatório aberto se referem aos que se baseiam em informações disponíveis no momento de descoberta de um defeito, que são:
+
+\begin{itemize}
+    \item Atividade: se refere a atividade sendo executada no momento que o defeito surgiu, como, por exemplo, testes unitários;
+    \item Gatilho: indica o que causou a manifestação do defeito, por exemplo, teste bloqueado;
+    \item Impacto: o impacto causado a um usuário quando o defeito surgiu
+\end{itemize}
+
+Já os de relatório fechado, estão relacionados com a correção de determinados defeitos, pois dependem destas informações. Estes são:
+
+\begin{itemize}
+    \item Alvo: o objeto que foi o alvo da correção, por exemplo, uma classe ou conjunto de \textit{scripts} de \textit{build};
+    \item Tipo de defeito: o tipo de alteração realizada para corrigir o problema, como a alteração da cláusula de um \textit{if}, por exemplo;
+    \item Qualificador: descreve a característica do código anterior ao defeito antes da correção, por exemplo, se o código estava faltando, incorreto ou não deveria estar presente;
+    \item Idade: o intervalo de tempo desde o momento em que o defeito surgiu;
+    \item Origem: se refere a origem do defeito, se era um código pertencente uma dependência externa, ou um código do próprio projeto;
+\end{itemize}
+
+Como ponto central do nosso estudo é classificação dos erros já ocorridos em softwares, o principal atributo aqui observado é o tipo de defeito. Segundo a classificação ODC \cite{ibm_odc}, têm-se sete tipos de defeitos agrupados em duas categorias, que são:
+
+\begin{itemize}
+    \item Defeitos de fluxo e controle de dados
+    \begin{itemize}
+        \item Atribuição ou inicialização (A/I): valores atribuídos de forma incorreta ou não atribuídos;
+        \item Verificação (C): validação incorreta ou faltante em condicionais que afetam o funcionamento do software;
+        \item Algoritmo ou método (A/M): eficiência ou corretude de algoritmos que podem impactar o funcionamento, necessitando de uma reimplementação ou uma nova implementação distinta;
+        \item Temporização ou serialização (T/S): a serialização de um objeto compartilhado foi feita de forma errônea ou não foi feita corretamente;
+    \end{itemize}
+    \item Defeitos estruturais
+    \begin{itemize}
+        \item Função, classe ou objeto (F/C/O): um erro que requer uma mudança mais drástica no design das classes que envolvem o software, sejam elas interfaces ou classes abstratas;
+        \item Interface ou mensagens O-O (I/OOM): problemas de comunicação entre módulos, processos, objetos, sistemas, etc.;
+        \item Relacionamento (R): problemas relacionados a associações entre procedimentos, estrutura de dados ou objetos.
+    \end{itemize}
+\end{itemize}
+
+Enquanto isso, outros autores propõem classificações diferentes, como feito por \cite{ast_based_aproach_to_classifying_defects}, onde os erros são categorizados como erros de dados, computacionais, de interface e de controle/lógica. Porém, estas classificações não atendem tão bem aos objetivos deste trabalho, uma vez que estas não partem do ponto de vista de desenvolvimento de software.
+
+A seção seguinte do artigo detalha os passos realizados durante o estudo. O mais importante para este trabalho é o passo inicial, de criação manual e pré-processamento do conjunto de dados. Isto porque tem certa semelhança com nossa fase de análise e coleta de dados e seus dados podem ser comparados com os classificados em nossa plataforma de monitoramento privada no \Cref{cap:classification_on_real_world_app}.
+
+Os autores utilizaram três projetos \textit{open-source} de bancos de dados NoSQL, MongoDB, Cassandra e HBase. Destes projetos, foram extraídas 4096 \textit{issues} aleatoriamente, e foram manualmente classificadas por três pesquisadores. Veja na \Cref{table:occurrences_sum_classified_in_article} os resultados somados da verificação na tabela abaixo, onde as linhas representam os resultados originalmente obtidos pelo respectivo pesquisador, e as colunas são os tipos de defeitos obtidos durante a verificação.
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{ X|c|c|c|c|c|c|c }
+        \textbf{Tipo de defeito} & \textbf{A/M} & \textbf{F/C/O} & \textbf{C} & \textbf{I/OOM} & \textbf{A/I} & \textbf{T/S} & \textbf{R} \\
+        \hline
+        Algoritmo ou método (A/M) & 829 & 18 & 6 & 4 & 9 & 1 & \\
+        \hline
+        Função, classe ou objeto (F/C/O) & 17 & 221 &  & 1 &  &  & 1 \\
+        \hline
+        Verificação (C) & 17 &  & 146 &  &  & & \\
+        \hline
+        Interface ou mensagens O-O (I/OOM) & 6 & 4 & 2 & 116 & 1 &  & 1 \\
+        \hline
+        Atribuição ou inicialização (A/I) & 14 &  &  & 9 & 68 & & \\
+        \hline
+        Temporização ou Serialização (T/S) & 2 &  &  &  &  & 12 & \\
+        \hline
+        Relacionamento (R) & & & & & & & 2 \\
+    \end{tabularx}
+    \caption{Tabela com a soma das ocorrências classificadas no artigo}
+    \label{table:occurrences_sum_classified_in_article}
+\end{table}
+
+Na \Cref{table:occurrences_sum_classified_in_article} dada, a diagonal principal representa os verdadeiros positivos. Destes tipos, de um total de 1394, o que se destacam são A/M (829 - 59\%), F/C/O (221 - 16\%), C (146 - 10\%) e I/OOM (81\%). A importância da análise destes dados para este trabalho é que as comparamos com as ocorrências de defeitos em outros projetos, para entendermos se há um padrão na frequência e volume de cada um de seus tipos.
+
+O artigo de \cite{automatic_defect_categorization} também propõe um modelo de classificação de defeitos através da ODC e por isso tem sua relevância para este estudo. Apesar do conjunto de dados classificados manualmente que foi utilizado para treinamento do modelo ser relativamente pequeno, contando com 500 \textit{issues} apenas. Destas, 286 (57.2\%) são da família de defeitos de controle e fluxo de dados. Esta quantidade é consistente com o que foi encontrado nos outros conjuntos de dados neste e em outros estudos.

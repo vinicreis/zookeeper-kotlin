@@ -1,0 +1,836 @@
+\chapter{Ferramentas de detecção de erros}\label{cap:linters}
+
+ Além das funcionalidades dispostas em linguagens e paradigmas de programação, existem outras ferramentas que podem nos ajudar a melhorar a qualidade do código, indicando possíveis erros e vulnerabilidades.
+ 
+ Os \textit{linters} são ferramentas de análise estáticas que apoiam os desenvolvedores detectando possíveis erros de código, má práticas de programação, violação da convenção de determinadas linguagens e problemas de formatação do código ao mesmo tempo que oferece dicas práticas de melhorias nas implementações para mitigar a ocorrência de erros e inconsistências durante o desenvolvimento \cite{analysing_linter_usage_and_warning}.
+
+Estas ferramentas estão integradas diretamente nas IDEs mais utilizadas, outras podem ser adicionadas manualmente via \textit{plugins} ou com algum gerenciador de \textit{build}, como no caso do \textit{detekt}, para Kotlin \cite{detekt_gettint_stated_gradle}.
+
+Os \textit{linters} possuem conjuntos de regras da qual a análise irá apontar violações das mesmas. Estas regras estão relacionadas com os erros ou pontos de atenção mais comuns de determinada linguagem. O detekt, por exemplo, foi criado para aplicações em Kotlin e conta com alguns conjuntos de regras, como:
+
+\begin{itemize}
+    \item regras de comentários;
+    \item regras de complexidade;
+    \item regras de corrotinas (rotinas assíncronas utilizadas na linguagem Kotlin \cite{kotlin_coroutines});
+    \item regras de blocos vazios;
+    \item regras de exceções;
+    \item regras de formatação;
+    \item regras de bibliotecas (dependências);
+    \item regras de nomenclatura;
+    \item regras de desempenho;
+    \item regras de potenciais defeitos (\textit{bugs});
+    \item regras de criação de regras;
+    \item regras de estilo de código;
+\end{itemize}
+
+Estes conjuntos de regras podem ser suprimidos ou customizados, através da criação de novas regras, inclusive \cite{detekt_config}. Estas ferramentas exportam relatórios com o resultado das análises realizadas seguindo a configuração realizada para determinado projeto para correção e melhoria contínua do software.
+
+Além disso, os \textit{linters} se integram bem com o processo de desenvolvimento e implementação contínua (CI/CD), uma vez que sua execução pode ser implementada em esteiras de validação e publicação, a fim de validar que o código alterado atende os requisitos previamente definidos.
+
+\textit{Linters} não estão relacionados apenas a erros e vulnerabilidades, mas também em relação à qualidade do código em si, uma vez que estes podem receber regras que visam apenas a qualidade visual do código a fim de tornar o código mais legível.
+
+Sendo assim, cada projeto pode ter seu próprio conjunto de regras que ajudará a manter a qualidade do código, visando manter a qualidade, segurança, facilidade de manutenção e mitigação da possibilidade de erros em produção.
+
+Dentro das regras que é possível definir utilizando o \textit{detekt}, por exemplo, podemos definir a partir de qual severidade de violação encontrada no código pode fazer com que a construção de um artefato falhe. Desta forma, podemos impedir que uma publicação automatizada falhe, por exemplo, em caso de violação de alguma das regras. Logo, através deste processo, podemos mitigar ainda mais o risco de ocorrências de falhas em produção.
+
+Vejamos um exemplo prátivo da implementação deste tipo de ferramenta.
+
+\section{Implementação de um linter em um projeto em Kotlin}\label{sec:linter_implementation}
+
+Como uma prova de conceito, analisamos como pode ser feita a implementação de um \textit{linter} em um projeto existente em Kotlin. Garantimos também que a execução do processo esteja vinculado e seja dependência para que um artefato executável do projeto seja criado.
+
+O projeto utilizado será uma implementação básica da ferramenta ZooKeeper\footnote{\url{https://github.com/vinicreis/zookeeper-kotlin}}, da Apache. Esta ferramenta disponibiliza um servidor de código aberto que tenha alta disponibilidade através de um serviço distribuído e sincronizado, que pode conter informações de configuração, nomenclatura, entre outras, distribuída entre várias instâncias que pode ser utilizadas em aplicações distribuídas \cite{apache_zookeeper_home}.
+
+O projeto utilizado está implementado completamente em Kotlin \cite{kotlin_home} (1.9.20) e conta com o Gradle \cite{gradle_home} como ferramenta de \textit{build} (8.4). Inicialmente implementado em Java, o projeto foi convertido para Kotlin para tirar proveito do \textit{linter} na busca de melhorias e possíveis vulnerabilidades na implementação inicial.
+
+A arquitetura conta com uma implementação de múltiplos módulos, sendo estes módulo de domínio de toda a aplicação \textit{model}\footnote{\url{https://github.com/vinicreis/zookeeper-kotlin/tree/main/model}}, um controlador (\textit{controller}\footnote{\url{https://github.com/vinicreis/zookeeper-kotlin/tree/main/client}}) - que seria o servidor central que coordena a sincronização entre os nós do serviço, o nó (\textit{node}\footnote{\url{https://github.com/vinicreis/zookeeper-kotlin/tree/main/client}}), que hospedam os dados para ampliar a disponibilidade dos dados e um cliente (\textit{client}) - que é capaz de realizar consultas e operações de salvamentos de dados no formato chave/valor.
+
+Existe também um módulo \textit{buildSrc}\footnote{\url{https://github.com/vinicreis/zookeeper-kotlin/tree/main/buildSrc}} que contem a configuração de \textit{build} que pode ser compartilhada entre todos os módulos do projeto, como grupo, nome e versão do pacote, dependências compartilhadas, configuração de \textit{plugins} em comum, entre outras configurações. A fim de centralizar as dependências em comum ao longo de todos os módulos, o Gradle também oferece uma funcionalidade chamada de catálogo de versões. Desta forma, todas as dependências são declaradas em um único arquivo, localizada no caminho \textit{/gradle/libs.versions.toml}. Neste arquivo estão declaradas todas as dependências do projeto e suas versões.
+
+\subsection{Importação do plugin detekt nas configurações do Gradle}
+
+Como a implementação do linter \textit{detekt} deve ser feita como um \textit{plugin} para todos os projetos, então, iniciamos o importando pelo Gradle ao módulo \textit{buildSrc} e adicionando o detekt no catálogo de versões, conforme a \Cref{fig:detekt_adding_on_version_catalog}.
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=toml,numbers = none]
+[versions]
+...
+detekt = "1.23.3"
+
+[libraries]
+...
+detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+    \end{lstlisting}
+    \caption{Adicionando o \textit{detekt} no catálogo de versões}
+    \label{fig:detekt_adding_on_version_catalog}
+\end{figure}
+
+Note que fizemos sua declaração no formato de dependência ao invés de \textit{plugin}, pois estamos utilizando \textit{scripts} pré-compilados para compartilhar a lógica de \textit{build} entre módulos e este formato ainda não suporta a importação no formato de \textit{plugins} via catálogo de versões.
+
+Com isso, podemos importar o \textit{plugin} no arquivo de \textit{build} na raiz do módulo \textit{buildSrc} através do catálogo de versões, exibido na \Cref{fig:add_plugin_as_dependency}.
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=Kotlin,numbers = none]
+dependencies {
+    ...
+    implementation(libs.detekt)
+}
+    \end{lstlisting}   
+    \caption{Adicionando o plugin \textit{detekt} nas dependências do projeto de lógica de \textit{build}}
+    \label{fig:add_plugin_as_dependency}
+\end{figure}
+
+Então, criamos o \textit{script} \textit{zookeeper.detekt.gradle.kts}, que conterá todas as configurações do \textit{detekt} para cada módulo que o importar. 
+
+No primeiro bloco do arquivo, precisamos declarar quais \textit{plugins} serão importados para este \textit{script}. Veja na \Cref{fig:add_plugin_script}, que como o \textit{detekt} já foi declarado como dependência do projeto, basta declaramos seu identificador no bloco de plugins para importá-lo.
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=Kotlin,numbers = none]
+plugins {
+    id("io.gitlab.arturbosch.detekt")
+}
+    \end{lstlisting}
+    \caption{Importando o plugin no script de configuração do \textit{detekt}}
+    \label{fig:add_plugin_script}
+\end{figure}
+
+Em seguida, declaramos nossas variáveis principais necessárias para configuração, como diretório do projeto, caminho dos arquivos de configuração, arquivo de configuração da análise de \textit{code smell} - que seria uma análise de possíveis vulnerabilidades mais profundas no funcionamento do código \cite{coodesh_code_smell}, arquivos fonte que devem ser avaliados e arquivos de artefatos e recursos (\textit{resources}) que devem ser ignorados.
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=Kotlin,numbers = none]
+val projectSource = file(projectDir)
+val configFile = files("$rootDir/config/detekt.yml")
+val baselineFile = file("$rootDir/config/baseline.xml")
+val kotlinFiles = "**/*.kt"
+val resourceFiles = "**/resources/**"
+val buildFiles = "**/build/**"
+    \end{lstlisting}
+    \caption{Definição das variáveis de configuração do \textit{detekt}}
+    \label{fig:add_config_variables_on_script}
+\end{figure}
+
+Feito isso, através da importação do plugin do \textit{detekt}, a IDE já nos dá acesso a DSL (\textit{domain specific language} - linguagem específica de domínio) disposta pelo \textit{detekt}, para configuração do próprio \textit{plugin}, das tarefas de execução da análise, entre outros. Neste primeiro bloco, acessamos a função da DSL de configuração do \textit{plugin}:
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=Kotlin,numbers = none]
+detekt {
+    // Define se seguimos a configuracao como base e aplicar apenas as que definirmos explicitamente
+    buildUponDefaultConfig = true
+    // Define se todas as regras serao habilitadas por padrao
+    allRules = false
+    // Define o diretorio do codigo fonte a ser analisado
+    source.setFrom(projectSource)
+    // Define o diretorio de configuracoes do plugin
+    config.setFrom(configFile)
+    // Define o arquivo de baseline utilizado para a analise de Code Smell
+    baseline = baselineFile
+}
+    \end{lstlisting}
+    \caption{Definindo os valores de configuração do plugin \textit{detekt}}
+\end{figure}
+
+Assim que importamos o \textit{plugin} Gradle do \textit{detekt}, uma nova tarefa Gradle é criada, que será automaticamente atrelada a outras tarefas como de \textit{build}, teste, verificação, etc., para garantir que o projeto segue todas as configurações especificadas pelo \textit{plugin}. Porém, precisamos atribuir a esta tarefa algumas configurações:
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=Kotlin,numbers = none]
+tasks.withType<Detekt>().configureEach {
+    // Define se a tarefa continua executando em caso de falha (mantendo seu resultado)
+    gradle.startParameter.isContinueOnFailure = true
+
+    // Inclui os arquivos em Kotlin na analise
+    include(kotlinFiles)
+    // Exclui os arquivos de resources e build na analise
+    exclude(resourceFiles, buildFiles)
+
+    // Configura quais relatorios devem ser gerados:
+    reports {
+        // Habilita a geracao do relatorio em HTML
+        html.required.set(true)
+        // e configura o caminho onde o arquivo sera salvo
+        html.outputLocation.set(file("build/reports/detekt.html"))
+        // Habilita a geracao do relatorio em Markdown
+        md.required.set(true)
+        // e configura o caminho onde o arquivo sera salvo
+        md.outputLocation.set(file("build/reports/detekt.md"))
+    }
+}
+    \end{lstlisting}
+    \caption{Definindo as configurações das \textit{tasks} do Gradle}
+    \label{fig:set_detekt_tasks_config}
+\end{figure}
+
+Note que precisamos definir que esta tarefa irá continuar em caso de falha mantendo seu resultado, para termos a análise de todos os módulos. Ainda que a análise de um deles falhe, queremos que todos os relatórios sejam gerados, para que o desenvolvedor que tenta submeter seu código tenha a oportunidade de sanar todas as inconsistências após apenas uma execução.
+
+Por fim, resta apenas configuramos a versão da JVM (\textit{Java Virtual Machine}) onde o \textit{plugin} será executado.
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=Kotlin,numbers = none,numbers = none]
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "17"
+}
+
+tasks.withType<DetektCreateBaselineTask>().configureEach {
+    jvmTarget = "17"
+}
+    \end{lstlisting}
+    \caption{Setando a versão da JVM para as \textit{tasks} do \textit{detekt}}
+    \label{fig:set_jvm_version}
+\end{figure}
+
+Após a criação deste \textit{script}, o Gradle irá compilá-lo durante a sincronização e a utilização deste poderá feita adicionando-o como \textit{plugin} em cada módulo onde for necessário. Para isso, basta adicionar o trecho abaixo no bloco de \textit{plugins} do Gradle em cada um dos módulos cabíveis:
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=Kotlin,numbers = none]
+plugins {
+    id("zookeeper.detekt")
+}
+    \end{lstlisting}
+    \caption{Importando a configuração do \textit{detekt} como \textit{plugin}}
+    \label{fig:importing_detekt_config}
+\end{figure}
+
+Note que o identificador que importamos se trata do nome do \textit{script} antes do trecho \textit{.gradle.kts} no módulo \textit{buildSrc}.
+
+\subsection{Geração e configuração das regras de lint}
+
+O \textit{detekt} possui a funcionalidade de gerar um arquivo de configuração preenchido com os valores padrão da qual podemos usar como base para realizar os ajustes necessários. Para isso, baste executarmos o comando abaixo na raiz do projeto:
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=Bash,numbers = none]
+./gradlew detektGenerateConfig
+    \end{lstlisting}
+    \caption{Executando a geração dos arquivos de configuração do \textit{detekt}}
+    \label{fig:generating_detekt_config}
+\end{figure}
+
+Feito isso, temos o arquivo \textit{/config/detekt.yml} criado. Das regras que vimos no capítulo anterior, podemos configurá-las neste arquivo, para que elas sejam aplicadas a execução da análise do \textit{detekt}.
+
+\subsection{Execução da verificação via detekt}
+
+Após toda a configuração finalizada, basta executarmos o comando abaixo:
+
+\begin{figure}[H]
+    \begin{lstlisting}[language=Bash,numbers = none]
+./gradlew detektMain
+    \end{lstlisting}
+    \caption{Executando verificação do \textit{detekt}}
+    \label{fig:running_detekt}
+\end{figure}
+
+Este comando analisa todo o código-fonte existe no diretório \textit{**/src/main/} de todos os módulos, mostrando os possíveis resultados no console, de acordo com a configuração realizada. Note que, caso exista algum erro apontado pelo processo, além de exibir o tipo e o local do problema detectado, a execução da tarefa também retorna falha.
+
+Como a tarefa de análise do \textit{detekt} se torna dependência de \textit{build} e executarmos os comandos Gradle \textit{check}, \textit{test} ou mesmo \textit{build}, o comando \textit{detekt} será executado. Então o processo pode ser facilmente incorporado em esteiras de CI/CD, verificando se o código-fonte está complacente com os padrões de projeto antes mesmo do processo de \textit{merge}.
+
+\section{Resultados obtidos}
+
+Com o projeto ZooKeeper migrado para Kotlin \footnote{Vide repositório \href{https://github.com/vinicreis/zookeeper-kotlin/tree/46fffa9bf96b8e13da71dfdf6a47ae5dc876c758}{vinicreis/zookeeper-kotlin no commit 46fffa9}}, executamos o processo de \textit{lint} (utilizando o \textit{detekt}) de acordo com a implementação de configuração detalhada na \Cref{sec:linter_implementation}.
+
+Para demonstrar os resultados obtidos, detalhamos cada um dos alertas disparados, comparando com o código não conforme a cada regra apontado pela ferramenta (no commit \textit{46fffa9}) com o resultado final (no commit final - \textit{HEAD}).
+
+\subsection{Condicional complexa (\textit{ComplexCondition})}
+
+A regra de condicional complexa faz parte do conjunto de regras de complexidade e é definida por uma quantidade alta de verificações encadeadas para formar uma condicional que dispare determinado comportamento. A regra visa melhorar a legibilidade e entendimento do código, aconselhando o usuário a mover essas condições para funções ou variáveis nomeadas de forma clara, demonstrando o que a regra em questão representa\cite{detekt_complex_condition_rule}.
+
+O trecho de código onde o \textit{linter} apontou a regra de condicional complexa pode ser visualizado na \Cref{fig:detekt_complex_condition_before_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class KeyValueRepository {
+    ...
+    fun find(key: String, timestamp: Long?): Entry? {
+        val result = data.getOrDefault(key, null)
+
+        if (timestamp != null && timestamp > 0 && result != null && result.timestamp < timestamp)
+            throw OutdatedEntryException(key, result.timestamp)
+
+        return result
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{KeyValueRepository.kt} - Trecho não conforme com a regra de condicional complexa}
+    \label{fig:detekt_complex_condition_before_example}
+\end{figure}
+
+Já na \Cref{fig:detekt_complex_condition_after_example} podemos observar a mesma lógica aplicada de forma a não violar a conformidade em relação à regra em questão.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class KeyValueRepository {
+    ...
+    fun find(key: String, timestamp: Long?): Entry? {
+        return data.getOrDefault(key, null)?.also { entry ->
+            timestamp?.let {
+                if(entry.timestamp < it) error("Outdated entry found!")
+            } ?: entry
+        }
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{KeyValueRepository.kt} - Exemplo de não violação da regra de condicional complexa}
+    \label{fig:detekt_complex_condition_after_example}
+\end{figure}
+
+\subsection{Injeção de \textit{dispatcher} de corrotinas (\textit{InjectDispatcher})}
+
+A regra em questão pertence ao conjunto de regras de corrotinas e estabelece que os \textit{dispatchers} de corrotinas devem ser injetados nas classes através de seus construtores para facilitar os testes unitários. Isto, pois, é uma boa prática definida pelo Google utilizar \textit{dispatchers} de teste em testes unitários e de integração para tornar o teste mais determinístico\cite{android_corroutines_test_best_practices}.
+
+Observe a definição inicial da classe onde o erro foi apontado na \Cref{fig:detekt_inject_dispatcher_before_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ControllerImpl(
+    override val port: Int,
+    debug: Boolean
+) : Controller {
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    ...
+    override fun start() {
+        timestampJob = coroutineScope.launch { timestampRepository.run() }
+        dispatcherJob = coroutineScope.launch { dispatcher.run() }
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ControllerImpl.kt} - Trecho não conforme com a regra de injeção de \textit{dispatcher} de corrotinas}
+    \label{fig:detekt_inject_dispatcher_before_example}
+\end{figure}
+
+Já na \Cref{fig:detekt_inject_dispatcher_after_example}, note que o \textit{dispatcher} passa a ser injetado através do construtor da classe \textit{ControllerImpl}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ControllerImpl(
+    override val port: Int,
+    debug: Boolean,
+    private val coroutineScope: CoroutineScope
+) : Controller {
+    ...
+    override fun start() {
+        timestampJob = coroutineScope.launch { timestampRepository.run() }
+        dispatcherJob = coroutineScope.launch { dispatcher.run() }
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ControllerImpl.kt} - Trecho conforme com a regra de injeção de \textit{dispatcher} de corrotinas}
+    \label{fig:detekt_inject_dispatcher_after_example}
+\end{figure}
+
+\subsection{Captura de exceção genérica (\textit{TooGenericExceptionCaught})}
+
+A regra de captura de exceção genérica pertence ao conjunto de regras de exceções. Ela reporta ocorrências onde blocos \textit{catch} esperam exceções de um tipo muito genérico. Por padrão, esta regra reporta a captura de exceções do tipo \textit{ArrayIndexOutOfBoundsException}, \textit{Error}, \textit{Exception}, \textit{IllegalMonitorStateException}, \textit{IndexOutOfBoundsException}, \textit{NullPointerException}, \textit{RuntimeException} e \textit{Throwable}.
+
+A ideia desta verificação é recomendar a captura de exceções específicas e que estejam relacionadas ou sejam esperadas no escopo da classe em questão\cite{detekt_too_generic_exception_caught_rule}. Do contrário, exceções não esperadas podem ser capturadas, e, então, ou um comportamento não esperado é mascarado ou o bloco \textit{catch} pode falhar e/ou não tratar da melhor forma a exceção capturada.
+
+Veja na \Cref{fig:detekt_too_generic_exception_before_example} um exemplo onde a regra foi disparada durante a análise.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ControllerImpl(
+    override val port: Int,
+    debug: Boolean,
+    private val coroutineScope: CoroutineScope
+) : Controller {
+    ...
+    override fun put(request: PutRequest): PutResponse {
+        return try {
+            ...
+        } catch (e: Throwable) {
+            ...
+        }
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ControllerImpl.kt} - Exemplo de captura de exceção muito genérica na classe \textit{ControllerImpl}}
+    \label{fig:detekt_too_generic_exception_before_example}
+\end{figure}
+
+Note que a exceção capturada neste caso era do tipo \textit{Throwable}, que é o tipo mais primitivo de exceção, isto é, da qual todas as exceções herdam. Observe um exemplo de código conforme a regra na \Cref{fig:detekt_too_generic_exception_after_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ControllerImpl(
+    override val port: Int,
+    debug: Boolean,
+    private val coroutineScope: CoroutineScope
+) : Controller {
+    ...
+    override fun put(request: PutRequest): PutResponse {
+        return try {
+            ...
+        } catch (e: IllegalStateException) {
+            ...
+        }
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ControllerImpl.kt} - Exemplo de captura de exceção específica na classe \textit{ControllerImpl}}
+    \label{fig:detekt_too_generic_exception_after_example}
+\end{figure}
+
+\subsection{Declaração de classe e nome do arquivo incompatíveis (\textit{MatchingDeclarationName})}
+
+De acordo com a convenção de código do Kotlin\cite{kotlin_code_conventions}, arquivos contendo apenas uma classe devem ser chamados com o nome da classe somado a sua extensão (``.kt``). Isto vale para todos os tipos de classes e interfaces. Se o arquivo contém múltiplas classes ou apenas declarações de alto nível, um nome que descreve o que arquivo contém deve ser utilizado. A nomenclatura do arquivo deve estar no formato \textit{upper camel case}, com a primeira letra maiúscula (\textit{Pascal case}).
+
+Durante o desenvolvimento do projeto, foi criada a classe \textit{Result} para atender a todas as operações que retornavam um resultado. Vide exemplo na \Cref{fig:detekt_matching_declaration_name_before_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+enum class Result {
+    OK,
+    NOT_FOUND,
+    ERROR,
+    TRY_AGAIN_ON_OTHER_SERVER;
+}
+    \end{lstlisting}
+    \caption{\textit{Result.kt} - Exemplo de declaração de arquivo incompatível com a classe declarada}
+    \label{fig:detekt_matching_declaration_name_before_example}
+\end{figure}
+
+Porém, esta classe foi renomeada para \textit{OperationResult} quando seu objetivo passou a ser representar os resultados retornados apenas em operações entre cliente e servidor. Por algum motivo, o arquivo não foi renomeado de acordo com o nome da classe e, por isso, a regra em questão foi disparada alertando que o código não segue a convenção do Kotlin.
+
+Após o arquivo ser renomeado para ``OperationResult.kt``, mesmo nome da classe, o alerta não é mais disparado.
+
+\subsection{Chamada insegura em um tipo anulável (\textit{UnsafeCallOnNullableType})}
+
+Esta regra faz parte do conjunto de regras de potenciais \textit{bugs}.
+
+Como já mencionado na \Cref{subsec:most_common_error_uninit_variable_kotlin}, quando utilizamos o operador \verb|!!| em Kotlin, estamos garantindo que uma variável anulável, no momento da chamada onde é utilizado, terá seu conteúdo devidamente preenchido. Porém, esta prática é considerada insegura, justamente pela quantidade de formas que a linguagem disponibiliza para lidar com variáveis anuláveis. Tendo isso em vista, o \textit{linter} nos alerta da utilização deste operador para que outras abordagens sejam utilizadas \cite{detekt_unsafe_call_on_nullable_rule}.
+
+Eis um exemplo de onde este tipo de chamada era realizado no projeto na \Cref{fig:detekt_unsafe_null_call_on_nullable_before_example}
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ClientImpl(
+    private val port: Int,
+    private val serverHost: String,
+    private val serverPorts: List<Int>,
+    debug: Boolean
+) : Client {
+    ...
+    override fun get(key: String) {
+        try {
+            val serverPort = serverPorts.getAnyOrNull()!!
+            ...
+        } catch (e: IOException) {
+            log.e("Failed to process GET request", e)
+        }
+    }
+
+    private fun <T> List<T>.getAnyOrNull(): T? = when {
+        isEmpty() -> null
+        else -> get(kotlin.random.Random.nextInt(0, size))
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ClientImpl.kt} - Exemplo de chamada insegura num objeto anulável}
+    \label{fig:detekt_unsafe_null_call_on_nullable_before_example}
+\end{figure}
+
+Podemos propor duas abordagens para remover este tipo de utilização da chamada insegura. Na primeira, podemos disparar um erro, indicando que a \textit{serverPorts} está vazia e nenhum elemento pode ser acessado. Veja um exemplo na \Cref{fig:detekt_unsafe_null_call_on_nullable_after_first_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ClientImpl(
+    private val port: Int,
+    private val serverHost: String,
+    private val serverPorts: List<Int>,
+    debug: Boolean
+) : Client {
+    ...
+    override fun get(key: String) {
+        try {
+            val serverPort = serverPorts.getAnyOrNull() ?: error("No server port found to send request")
+            ...
+        } catch (e: IOException) {
+            log.e("Failed to process GET request", e)
+        } catch (e: IllegalStateException) {
+            log.e("No server port found to send requests", e)
+        }
+    }
+
+    private fun <T> List<T>.getAnyOrNull(): T? = when {
+        isEmpty() -> null
+        else -> get(Random.nextInt(0, lastIndex))
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ClientImpl.kt} - Primeiro exemplo de tratamento pré-condição de variável nula utilizando \textit{error}}
+    \label{fig:detekt_unsafe_null_call_on_nullable_after_first_example}
+\end{figure}
+
+Outra alternativa seria alterar a função de extensão \textit{getAnyOrNull} para que ela busque um dos índices válidos da lista, como podemos observar na \Cref{fig:detekt_unsafe_null_call_on_nullable_after_second_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ClientImpl(
+    private val port: Int,
+    private val serverHost: String,
+    private val serverPorts: List<Int>,
+    debug: Boolean
+) : Client {
+    ...
+    override fun get(key: String) {
+        try {
+            val serverPort = serverPorts.getAnyOrNull()
+            ...
+        } catch (e: IOException) {
+            log.e("Failed to process GET request", e)
+        } catch (e: IllegalStateException) {
+            log.e("No server port found to send requests", e)
+        }
+    }
+
+    private fun <T> List<T>.getAnyOrNull(): T = get(Random.nextInt(lastIndex))
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ClientImpl.kt} - Segundo exemplo delegando o acesso ao elemento a função de extensão de \textit{List}}
+    \label{fig:detekt_unsafe_null_call_on_nullable_after_second_example}
+\end{figure}
+
+\subsection{Quebra de linha ao final do arquivo (\textit{NewLineAtEndOfFile})}
+
+Esta regra pertence ao grupo das regras de estilo \cite{detekt_new_line_at_end_of_file_rule} e alerta sobre a falta de uma quebra de linha ao final do arquivo, apenas para cumprir com a convenção de estilo do Kotlin.
+
+\subsection{Utilize as funções \textit{check} ou \textit{error} (\textit{UseCheckOrError})}
+
+Esta regra faz parte do conjunto de regras de estilo. Como o Kotlin dispõe formas concisas de verificar invariantes e condições (sejam elas necessárias para início de uma operação qualquer - pré-condições, ou requerimento ao fim de uma operação - pós-condições), não é necessário utilizar o lançamento de exceções comuns que indiquem um estado não esperado (por exemplo, lançamento de exceções do tipo \textit{IllegalStateException}).
+
+Baseado no exemplo da \Cref{fig:detekt_unsafe_null_call_on_nullable_before_example}, tome como exemplo o trecho da \Cref{fig:detekt_use_error_or_check_before_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ClientImpl(
+    private val port: Int,
+    private val serverHost: String,
+    private val serverPorts: List<Int>,
+    debug: Boolean
+) : Client {
+    ...
+    override fun get(key: String) {
+        try {
+            val serverPort = serverPorts.getAnyOrNull() 
+                ?: throw IllegalStateException("No server port found to send request")
+            ...
+        } catch (e: IOException) {
+            log.e("Failed to process GET request", e)
+        } catch (e: IllegalStateException) {
+            log.e("No server port found to send requests", e)
+        }
+    }
+
+    private fun <T> List<T>.getAnyOrNull(): T? = when {
+        isEmpty() -> null
+        else -> get(Random.nextInt(0, lastIndex))
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ClientImpl.kt} - Exemplo não conforme de lançamento ``manual`` de exceção para verificação de pré-condição}
+    \label{fig:detekt_use_error_or_check_before_example}
+\end{figure}
+
+A proposta da regra é que podemos utilizar a função \textit{error} (vide exemplo na \Cref{fig:detekt_unsafe_null_call_on_nullable_after_first_example}) ou \textit{check} (vide exemplo na \Cref{fig:detekt_use_error_or_check_after_example}).
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class ClientImpl(
+    private val port: Int,
+    private val serverHost: String,
+    private val serverPorts: List<Int>,
+    debug: Boolean
+) : Client {
+    ...
+    override fun get(key: String) {
+        try {
+            val serverPort = serverPorts.getAnyOrNull()
+            
+            checkNotNull(serverPort) { "No server port found to send request" }
+            ...
+        } catch (e: IOException) {
+            log.e("Failed to process GET request", e)
+        } catch (e: IllegalStateException) {
+            log.e("No server port found to send requests", e)
+        }
+    }
+
+    private fun <T> List<T>.getAnyOrNull(): T? = when {
+        isEmpty() -> null
+        else -> get(Random.nextInt(0, lastIndex))
+    }
+    ...
+}
+    \end{lstlisting}
+    \caption{\textit{ClientImpl.kt} - Exemplo de tratamento de pré-condição utilizando \textit{checkNotNull}}
+    \label{fig:detekt_use_error_or_check_after_example}
+\end{figure}
+
+\subsection{Utilização de \textit{imports} globais (\textit{WildcardImport})}
+
+Esta regra pertence ao conjunto de regras de estilo. Ela reporta a importação de objetos externos ao arquivo em questão de forma global. Evitar este tipo de prática deixa mais claro quais objetos foram importados de outros arquivos, além de prevenir conflitos de nomenclatura.
+
+No exemplo na \Cref{fig:detekt_wildcard_imports_before_example}, todas as classes, funções de alto-nível e variáveis publicas no pacote \textit{kotlinx.coroutines} se tornaram globais no contexto do arquivo de exemplo.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+import kotlinx.coroutines.*
+    \end{lstlisting}
+    \caption{\textit{Dispatcher.kt} - Exemplo \textit{import} global no contexto do arquivo}
+    \label{fig:detekt_wildcard_imports_before_example}
+\end{figure}
+
+Logo, como a função \textit{withContext}, por exemplo, está definida no pacote \textit{kotlinx.coroutines}, não seria possível criar uma função com a mesma assinatura dentro deste arquivo. Também não estaria explícito que é deste pacote que esta função está sendo importada. Para isso, é recomendável relizar a importação totalmente qualificada (isto é, utilizando todo o caminho do pacote e importanto membro individualmente). Vide exemplo na \Cref{fig:detekt_wildcard_imports_after_example}
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+    \end{lstlisting}
+    \caption{\textit{Dispatcher.kt} - Exemplo de \textit{imports} totalmente qualificados}
+    \label{fig:detekt_wildcard_imports_after_example}
+\end{figure}
+
+\subsection{Classe abstrata desnecessária (\textit{UnnecessaryAbstractClass})}
+
+Esta regra faz parte do conjunto de regras de estilo que valida se classes abstratas possuem algum membro concreto, isto é, alguma variável/método não abstratos que possuem algum valor/implementação já definidos na classe. Se alguma classe abstrata não satisfazer esta regra, ela pode ser uma interface.
+
+Por exemplo, veja que a classe da \Cref{fig:detekt_unnecessary_abstract_class_before_example} possui apenas propriedades não inicializadas.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+abstract class Response(
+    val result: OperationResult,
+    val message: String?
+)
+    \end{lstlisting}
+    \caption{\textit{Response.kt} - Exemplo de classe abstrata que não possui membros concretos}
+    \label{fig:detekt_unnecessary_abstract_class_before_example}
+\end{figure}
+
+Note que nenhuma definição é perdida se a convertemos para uma interface, como na \Cref{fig:detekt_unnecessary_abstract_class_after_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+interface Response {
+    val result: OperationResult
+    val message: String?
+}
+    \end{lstlisting}
+    \caption{\textit{Response.kt} - Exemplo de interface equivalente a classe abstrata}
+    \label{fig:detekt_unnecessary_abstract_class_after_example}
+\end{figure}
+
+\subsection{Exceção capturada não utilizada (\textit{SwallowedException})}
+
+A regra de exceção ``engolida`` pertence ao conjunto de regras de exceções. Ela reporta as ocorrências onde uma exceção capturada num bloco catch não é nem utilizada, nem passada adiante (como a causa, por exemplo) em uma possível nova exceção lançada.
+
+Observe o trecho na \Cref{fig:detekt_swallowed_exception_before_example}. Note que a exceção do tipo \textit{IllegalArgumentException} não é lançada numa nova exceção nem é lida para que seu valor seja utilizado.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class Worker(private val client: Client, debug: Boolean) {
+    ...
+    fun run() {
+        while (running) {
+            try {
+                ...
+            } catch (e: IllegalArgumentException) {
+                println("Opcao invalida! Tente novamente ou pressione Ctrl+D para finalizar.")
+            }
+        }
+    }
+}
+    \end{lstlisting}
+    \caption{\textit{Worker.kt} - Exemplo de exceção ignorada dentro do bloco \textit{catch}}
+    \label{fig:detekt_swallowed_exception_before_example}
+\end{figure}
+
+Agora, veja a implementação na \Cref{fig:detekt_swallowed_exception_after_example}. Perceba que a exceção é registrada no \textit{log} como um erro.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class Worker(private val client: Client, debug: Boolean) {
+    ...
+    fun run() {
+        while (running) {
+            try {
+                ...
+            } catch (e: IllegalArgumentException) {
+                log.e("Invalid option entered!", e)
+                println("Opcao invalida! Tente novamente ou pressione Ctrl+D para finalizar.")
+            }
+        }
+    }
+}
+    \end{lstlisting}
+    \caption{\textit{Worker.kt} - Exemplo de utilização de exceção capturada no bloco \textit{catch}}
+    \label{fig:detekt_swallowed_exception_after_example}
+\end{figure}
+
+Utilizar a exceção de qualquer forma já é suficiente para que ocorrências desta regra não sejam reportadas.
+
+\subsection{Números ``mágicos`` (\textit{MagicNumber})}
+
+A regra em questão faz parte do conjunto de regras de estilo e é definida pela detecção de valores constantes definidos diretamente no código (comumente referidos como ``hard-coded``). A proposta da regra é optar por definir estes valores como constantes bem nomeadas, de modo a deixar claro a que determinado valor se refere.
+
+Observe a classe demonstrada na \Cref{fig:detekt_magic_number_before_example}. Note que o valor padrão, caso nenhum seja lido no console, será passado como a porta do servidor \textit{Controller} é definido diretamente no código. Mas sem analisar a implementação com mais profundidade, não é trivial concluir o que o valor significa e como ele impacta o código.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+interface Controller {
+    ...
+    companion object {
+        private const val TAG = "ControllerMain"
+
+        @JvmStatic
+        fun main(args: Array<String>) {
+            try {
+                ...
+                val port = readIntWithDefault("Digite o valor da porta do servidor", 10097)
+                ...
+            } catch (e: Throwable) {
+                handleException(TAG, "Failed start Controller...", e)
+            }
+        }
+    }
+}
+    \end{lstlisting}
+    \caption{\textit{Controller.kt} - Exemplo de utilização de \textit{magic number} (valores \textit{hard-coded})}
+    \label{fig:detekt_magic_number_before_example}
+\end{figure}
+
+Tome como referência o trecho na \Cref{fig:detekt_magic_number_after_example}. Analisando a chamada da função \textit{readWithDefault}, fica mais fácil compreender que o segundo parâmetro é o valor padrão e que este se refere ao valor padrão da porta do servidor \textit{Controller}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+interface Controller {
+    ...
+    companion object {
+        private const val TAG = "ControllerMain"
+        private const val DEFAULT_PORT = 10097
+
+        @JvmStatic
+        fun main(args: Array<String>) {
+            try {
+                ...
+                val port = readIntWithDefault("Digite o valor da porta do servidor", DEFAULT_PORT)
+                ...
+            } catch (e: Throwable) {
+                handleException(TAG, "Failed start Controller...", e)
+            }
+        }
+    }
+}
+    \end{lstlisting}
+    \caption{\textit{Controller.kt} - Exemplo de alteração de um \textit{magic number} para uma variável constante mais descritiva}
+    \label{fig:detekt_magic_number_after_example}
+\end{figure}
+
+\subsection{Comprimento máximo de linha excedido (\textit{MaxLineLength})}
+
+Esta regra está contida no conjunto de regras de estilo e reporta quando alguma linha de código excede o limite definido nas configurações (onde o padrão é 120 caracteres). A motivação desta regra é que linhas longas prejudicam a legibilidade do código em telas menores e torna o código mais uniforme.
+
+A correção da regra é simples e apenas requer a quebra das linhas conforme a convenção da linguagem \cite{kotlin_code_conventions}.
+
+\subsection{Variáveis mutáveis podem se tornar valores apenas de leitura (\textit{VarCouldBeVal})}
+
+Alerta se variáveis ou propriedades de classes que são mutáveis não tiveram seu valor alterado, podendo, portanto, ser valores apenas de leitura. Esta regra está contida no conjunto de regras de estilo.
+
+Observe que, na \Cref{fig:detekt_var_could_be_val_before_example}, a variável \textit{running} não tem o valor alterado. Isso pois a corrotina é suspensa quando a chamada \textit{serverSocket.accept()} é executada, e, caso a chamada não obtenha resposta, uma exceção do tipo \textit{SocketTimeoutException} é lançada. Além disso, se a corrotina for cancelada, uma exceção do tipo \textit{CancellationException} será lançada. Logo, não é necessário interromper a execução através da troca do valor da variável \textit{running}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class Dispatcher(private val server: Server) {
+    ...
+    private var running = true
+
+    suspend fun run() = withContext(Dispatchers.IO) {
+        try {
+            while (running) {
+                val socket = serverSocket.accept()
+                ...
+            }
+        } catch (e: SocketException) {
+            log.e("Socket closed!", e)
+        } finally {
+            serverSocket.close()
+        }
+    }
+
+    companion object {
+        private const val TAG = "DispatcherThread"
+    }
+}
+    \end{lstlisting}
+    \caption{\textit{Dispatcher.kt} - Exemplo de utilização de uma variável mutável que não tem seu valor alterado}
+    \label{fig:detekt_var_could_be_val_before_example}
+\end{figure}
+
+Isso dito, o código pode ser modificado de tal modo que a variável \textit{running} seja um valor apenas de leitura definido como \textit{true}. Pois, veja que seu valor serve apenas para manter o bloco rodando enquanto o fluxo não for interrompido pelos casos citados anteriormente. Veja um exemplo na \Cref{fig:detekt_var_could_be_val_after_example}.
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=Kotlin]
+class Dispatcher(private val server: Server) {
+    ...
+    private val running = true
+    
+    suspend fun run() = withContext(Dispatchers.IO) {
+        try {
+            while (running) {
+                val socket = serverSocket.accept()
+                ...
+            }
+        } catch (e: SocketException) {
+            log.e("Socket closed!", e)
+        } finally {
+            serverSocket.close()
+        }
+    }
+
+    companion object {
+        private const val TAG = "DispatcherThread"
+    }
+}
+    \end{lstlisting}
+    \caption{\textit{Dispatcher.kt} - Exemplo da troca de variável mutável por valor apenas de leitura}
+    \label{fig:detekt_var_could_be_val_after_example}
+\end{figure}
+
+Note que se o valor \textit{running} fosse substituído pelo valor \textit{true}, de forma ``hard-coded``, não violamos nenhum tipo de regra de \textit{lint}, uma vez que o valor \textit{true} não se refere a nenhum significado específico para o contexto das regras de negócio da aplicação. O valor serve apenas para manter o bloco \textit{while} executando indefinidamente.
+
+Observe que muitos trechos não conforme com as regras configuradas pela tarefa de \textit{lint} ofereciam um risco claro ao funcionamento da aplicação. Durante o desenvolvimento, buscando atender a necessidade de negócio, fica claro o quanto é simples não adotar boas práticas de desenvolvimento, deixando de prever alguns cenários de erros e expondo a aplicação a vulnerabilidades.
+
+Além do ganho imediado obtido com a execução de ferramentas de \textit{lint} detectando potenciais problemas que não impactam o funcionamento da aplicação, temos melhorias das quais mensurar seu benefício não é tão trivial. Como, por exemplo, regras de formatação e estilo. Assim como é intuitivo focarmos na implementação do comportamento esperado, ficam de lado alguns pontos estéticos que possuem um valor não observável a curto prazo. 
+
+O risco imediato oferecido nestes casos não é alto. Mas quando pensamos na sustentação destes software ou emprego de novas funcionalidades, ter um código-fonte legível gera uma curva de aprendizado menor. Isso faz com que novos desenvolvedores tenham tanto mais facilidade em interagir com estas aplicações, quanto menor risco de gerar novos defeitos durante este processo.
+
+Note como também não é complexo manter uma constância na execução deste tipo de análise. Como vimos anteriormente, após implementada, executá-la é um processo simples e pouco custoso, permitindo empregar este tipo de análise em esteiras integração e publicação contínua.
