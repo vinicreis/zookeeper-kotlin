@@ -49,3 +49,7 @@ bin/
 **/docs/**/*.toc
 **/docs/**/*.vrb
 **/docs/**/*.out
+**/docs/**/*.bbl
+**/docs/**/*.blg
+**/docs/**/*.fdb_latexmk
+**/docs/**/*.fls
