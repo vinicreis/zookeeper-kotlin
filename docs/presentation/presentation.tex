@@ -152,8 +152,8 @@
 \graphicspath{{./figs/}}
 
 \titlegraphic{\includegraphics[height=1.5cm]{figs/logo.png}}
-\author{Vinícius de Oliveira Campos dos Reis}
-\title[Classificação e análise de defeitos]{Classificação e análise de defeitos comuns em softwares e como mitigá-los utilizando diferentes práticas de desenvolvimento}
+\author{Vinícius Reis}
+\title[PGC III]{Classificação e análise de defeitos comuns em softwares e como mitigá-los utilizando diferentes práticas de desenvolvimento}
 \subtitle{Projeto de Graduação em Computação III}
 \institute{UFABC}
 \date{12 de dezembro de 2023}
@@ -168,22 +168,30 @@
 
 \section{Contextualização}
 
+\AtBeginSection[]
+  {
+     \begin{frame}<beamer>
+     \frametitle{Conteúdos}
+     \tableofcontents[currentsection]
+     \end{frame}
+  }
+
 \begin{frame}{Introdução}
     \begin{itemize}
         \item Softwares de inúmeros tipos tem feito cada vez mais parte da vida das pessoas
         \item Desenvolvimento de software continua sendo um processo muito dependente do fator humano
+        \item Ter clareza e entendimento das regras de negócio e o comportamento esperado para um software é apenas uma etapa para atingir uma entrega final totalmente funcional
         \item Tomamos falha ou defeito como uma condição anormal de um componente. No caso de software, seriam erros de lógica presentes na aplicação
         \item Já erros seriam qualquer diferença entre o comportamento especificado e o real
-        \item Ter clareza e entendimento das regras de negócio e o comportamento esperado para um software é apenas uma etapa para atingir uma entrega final totalmente funcional
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Objetivos}
     \begin{itemize}
-        \item Compreender quais os tipos de defeitos mais comuns em aplicações em produção
-        \item Correlacionar estes defeitos com a pilha de tecnologias escolhida
+        \item Compreender quais são os tipos de defeitos mais comuns em aplicações em produção
+        \item Relacionar estes defeitos com o processo de desenvolvimento
         \item Explorar outras abordagens que possam ser adotadas para mitigar o risco de ocorrência destes defeitos
-        \item Procurar outras ferramentas quem possam minimizar ainda mais as vulnerabilidades da aplicação sem interferir na arquitetura da solução
+        \item Buscar ferramentas que possam minimizar ainda mais as vulnerabilidades da aplicação sem interferindo minimamente na arquitetura da solução
     \end{itemize}
 \end{frame}
 
@@ -191,20 +199,20 @@
 
 \begin{frame}{Objetivos}
     \begin{itemize}
-        \item Visando compreender quais defeitos mais ocorrem em aplicações em produção, buscamos na literatura científica um tipo de classificação consolidada no meio
-        \item Com isso, quando aplicamos esta taxonomia numa base de erros conhecida, pudemos classificar cada tipo pela quantidade de ocorrências de cada uma delas
-        \item Entendo bem quais são os erros mais frequentes, iniciamos a exploração de suas causas. Desta forma, podemos buscar abordagens que mitiguem estas ocorrências
+        \item Compreender quais defeitos mais ocorrem em aplicações em produção, buscamos na literatura científica um tipo de classificação consolidada no meio
+        \item Aplicar esta taxonomia numa base de erros conhecida, para classificar cada tipo pela quantidade de ocorrências de cada uma delas
+        \item Entender quais são os erros mais frequentes e explorar suas causas. 
+        \item Desta forma, podemos buscar abordagens que mitiguem estas ocorrências
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Etapas da revisão}
     \begin{itemize}
         \item Criação de uma \textit{string} de busca para pesquisa em ao menos um acervo digital
-        \item Classificação dos resultados por relevância para este trabalho\footnote{Note que esta classificação pode ser refinada entre qualquer um dos passos, conforme necessário}
-        \item Seleção dos resultados classificados através do título ou leitura rápida
-        \item Rotulação dos resultados pela classificação alcançada através da leitura do resumo
-        \item Leitura rápida dos artigos mais relevantes para reclassificação
-        \item Obter conclusões dos artigos mais relevantes como embasamento deste estudo
+        \item Classificação dos resultados por relevância para este trabalho\footnote{Note que esta classificação pode ser refinada entre qualquer um dos passos, conforme necessário} de acordo com o título
+        \item Leitura dos resumos dos artigos de maior relevância para reclassificação
+        \item Leitura rápida dos artigos de maior relevância para reclassificação
+        \item Compreensão mais detalhada dos artigos mais relevantes
     \end{itemize}
 \end{frame}
 
@@ -258,13 +266,13 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
 \begin{frame}{Busca na literatura científica}
     \begin{itemize}
         \item Selecionamos o acervo digital Scopus como para realizar a pesquisa pela relevância que o acervo possui
-        \item Foram obtidos 368 artigos. Destes, analisando os títulos de todos os resultados obtidos, selecionamos 57 deles para classificação por relevância para este artigo
+        \item Foram obtidos 368 artigos. Destes, analisando os títulos de todos os resultados obtidos, selecionamos 57 deles para classificação por relevância para este trabalho
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Refinamento da classificação}
+\begin{frame}{Classificação inicial}
     \begin{itemize}
-        \item Para separar estes casos que dificultam a classificação, teremos uma nova relevância de valor 2, sendo de \emph{média relevância}, veja:
+        \item Tomando como base a classificação da \cite{automated_tests_javascript}, criamos definimos a relevância dos resultados para este estudo de acordo com os critérios listados abaixo:
     \end{itemize}
     \begin{table}[H]
         \centering
@@ -277,7 +285,7 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
             3 & Muito relevante & Classifica e ordena os defeitos encontrados com mais frequência \\
         \end{tabularx}
         \caption{Relevâncias utilizadas para classificação dos artigos}
-        \label{table:refined_relevance_and_criteria}
+        \label{table:initial_relevance_and_criteria}
     \end{table}
 \end{frame}
 
@@ -296,7 +304,7 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
 
 \begin{frame}{Classificação dos resultados obtidos}
     \begin{itemize}
-        \item Tomando como base a classificação da \cite{automated_tests_javascript}, criamos definimos a relevância dos resultados para este estudo de acordo com os critérios listados abaixo:
+        \item Para separar estes casos que dificultam a classificação, teremos uma nova relevância de valor 2, sendo de \emph{média relevância}, veja:
     \end{itemize}
     \begin{table}[H]
         \centering
@@ -322,7 +330,7 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
             \item 7 artigos de média relevância
             \item 17 artigos com alta relevância
         \end{itemize}
-        \item Após leitura rápida dos artigos relevantes, temos que:
+        \item Após leitura rápida dos artigos mais relevantes, temos:
         \begin{itemize}
             \item 4 não puderam ser lidos, pois, não foi obtido acesso a estes
             \item 11 não tiveram relevância para este estudo
@@ -374,20 +382,6 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
 \begin{frame}{Classificação ODC}
     \begin{itemize}
         \item O primeiro artigo analisado \cite{automatic_odc_using_ml} consiste na criação de um modelo de \emph{Machine Learning} que classifique defeitos através da classificação ODC
-        \item A classificação ODC (\textit{Orthogonal Defect Classification}) é um \textit{framework} muito popular para classificação que considera vários atributos
-        \item Estes atributos estão divididos entre relatório aberto e fechado. 
-        \item Atributos de relatório aberto são aqueles referentes às informações disponíveis no momento da ocorrência do erro. Sendo elas:
-        \begin{itemize}
-            \item Atividade: atividade sendo executada no momento em que o defeito ocorre, por exemplo, testes unitários
-            \item Gatilho: causador do defeito, como um teste bloqueado, por exemplo
-            \item Impacto: impacto causado ao usuário quando o defeito ocorreu
-        \end{itemize}
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Classificação ODC}
-    \begin{itemize}
-        \item O primeiro artigo analisado \cite{automatic_odc_using_ml} consiste na criação de um modelo de \emph{Machine Learning} que classifique defeitos através da classificação ODC
         \item O artigo introduz a classificação ODC (\textit{Orthogonal Defect Classification}) como um \textit{framework} muito popular para classificação que considera vários atributos
         \item Estes atributos estão divididos entre relatório aberto e fechado. 
         \item Atributos de relatório aberto são aqueles referentes às informações disponíveis no momento da ocorrência do erro. Sendo elas:
@@ -408,28 +402,6 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
             \item Qualificador: característica do código anterior a alteração
             \item Idade: intervalo de tempo entre o surgimento do defeito e a correção
             \item Origem: origem do defeito
-        \end{itemize}
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Classificação ODC}
-    \begin{itemize}
-        \item Note que o tipo é o atributo mais importante para estudo, pois, é o impacto do ponto de vista de desenvolvimento que analisaremos neste trabalho
-        \item As possibilidades deste atributos são sete tipos, agrupados em duas categorias:
-        \begin{itemize}
-            \item Defeitos de fluxo e controle de dados
-            \begin{itemize}
-                \item Atribuição ou inicialização (A/I)
-                \item Verificação (C)
-                \item Algoritmo ou método (A/M)
-                \item Temporização ou serialização (T/S)
-            \end{itemize}
-            \item Defeitos estruturais
-            \begin{itemize}
-                \item Função, classe ou objeto (F/C/O)
-                \item Interface ou mensagens O-O (I/OOM)
-                \item Relacionamento (R)
-            \end{itemize}
         \end{itemize}
     \end{itemize}
 \end{frame}
@@ -509,9 +481,9 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
 
 \begin{frame}{Introdução}
     \begin{itemize}
-        \item Com uma classificação consistente do ponto de vista de desenvolvimento de software, a aplicamos em uma aplicação real
+        \item Com uma classificação consistente do ponto de vista de desenvolvimento de software, classificamos ocorrências de defeitos de uma aplicação real
         \item Esta aplicação é mobile, desenvolvida em Java e Kotlin e executada no Android 7.1.1 (API 25)
-        \item Esta aplicação conta com um serviço de monitoramento, o Crashlytics, que reporta falhas que podem ser ou não capturadas pela aplicação, assim como podem ou não ser fatais para sua execução
+        \item Conta com um serviço de monitoramento, o Crashlytics, que reporta falhas que podem ser ou não capturadas, assim como podem ou não ser fatais para a execução da aplicação
         \item Analisar este tipo de dado facilita a aplicação da classificação ODC e definição do tipo de erro
     \end{itemize}
 \end{frame}
@@ -519,8 +491,9 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
 \begin{frame}{Dados coletados}
     \begin{table}[H]
         \centering
-        \begin{tabularx}{\textwidth}{ l|X|c|c }
-            \textbf{Tipo de erro} & \textbf{Ocorrências em classes} & \textbf{Ocorrências} & \textbf{Usuários} \\
+        \begin{tabularx}{\textwidth}{ l|X|l|l }
+            \multirow{2}{*}{\textbf{Tipo}} & \multicolumn{2}{c|}{\textbf{Ocorrências}} & \multirow{2}{*}{\textbf{Usuários}} \\
+            & Classes & Únicas & \\
             \hline
             Erro de comunicação com o servidor & 8 & 1.120.357 & 137,126 \\
             Variável não inicializada & 25 & 16,104 & 6,914 \\
@@ -531,15 +504,16 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
             Erro em aplicação externa & 2 & 363 & 282 \
         \end{tabularx}
         \caption{Exceções lançadas classificadas por tipo e suas quantidades de ocorrências}
-        \label{table:exceptions_classification}
+        \label{table:exceptions_classification_1}
     \end{table}
 \end{frame}
 
 \begin{frame}{Dados coletados}
     \begin{table}[H]
         \centering
-        \begin{tabularx}{\textwidth}{ l|X|c|c }
-            \textbf{Tipo de erro} & \textbf{Ocorrências em classes} & \textbf{Ocorrências} & \textbf{Usuários} \\
+        \begin{tabularx}{\textwidth}{ l|X|l|l }
+            \multirow{2}{*}{\textbf{Tipo}} & \multicolumn{2}{c|}{\textbf{Ocorrências}} & \multirow{2}{*}{\textbf{Usuários}} \\
+            & Classes & Únicas & \\
             \hline
             Falha na leitura de arquivo & 1 & 135 & 135 \\
             Erro na inicialização & 1 & 122 & 107 \\
@@ -549,7 +523,7 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
             Erro de banco de dados & 1 & 25 & 16 \\
         \end{tabularx}
         \caption{Exceções lançadas classificadas por tipo e suas quantidades de ocorrências}
-        \label{table:exceptions_classification}
+        \label{table:exceptions_classification_2}
     \end{table}
 \end{frame}
 
@@ -558,50 +532,73 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
         \item Note que erros como de comunicação, \textit{parseamento}, fluxo e em aplicações externas podem ser tratados utilizando abordagens de controle de exceções ou eventos não esperados
         \item Portanto, estes tipos de erros não tem relação direta com a pilha de tecnologias selecionada
         \item O monitoramento de erros captura apenas o tipo de exceção lançada nestes casos. Logo, classificá-los através da ODC baseado no tipo de exceção capturada
-        \item Com isso, vamos comparar estas ocorrências com o que foi observado nos artigos pesquisados anteriormente
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Dados classificados}
-    \begin{itemize}
-        \item Note que erros como de comunicação, \textit{parseamento}, fluxo e em aplicações externas podem ser tratados utilizando abordagens de controle de exceções ou eventos não esperados
-        \item Portanto, estes tipos de erros não tem relação direta com a pilha de tecnologias selecionada
-        \item O monitoramento de erros captura apenas o tipo de exceção lançada nestes casos. Logo, classificá-los através da ODC baseado no tipo de exceção capturada
-        \item Com isso, vamos comparar estas ocorrências com o que foi observado nos artigos pesquisados anteriormente
+        \item Com isso, comparamos estas ocorrências com o que foi observado nos artigos pesquisados anteriormente
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Dados classificados}
     \begin{table}[H]
         \centering
-        \begin{tabularx}{\linewidth}{ X|c|X|c|c|c }
-            \textbf{Tipo de defeito} & \textbf{ODC} & \textbf{Ocorrências em classes} & \textbf{\%} & \textbf{Ocorrências} & \textbf{\%} \\
+        \begin{tabularx}{\linewidth}{ l|l|l|l }
+            \textbf{Tipo} & \textbf{ODC} & \textbf{Classes} & \textbf{\%} \\
             \hline
-            Variável não inicializada & \multirow{3}{*}{ A/I } & 25 & \multirow{3}{*}{ 55,77\% } & 16,104 & 
-            \multirow{3}{*}{ 35,39\% } \\
-            Acesso inválido a variável & & 3 & & 86 & \\
-            Erro na inicialização & & 1 & & 122 & \\
+            Variável não inicializada & \multirow{3}{*}{ A/I } & 25 & \multirow{3}{*}{ 55,77\% } \\
+            Acesso inválido a variável & & 3 & \\
+            Erro na inicialização & & 1 & \\
             \hline
-            Erro de fluxo & A/M & 8 & 15,38\% & 1009 & 2,19\% \\
+            Erro de fluxo & A/M & 8 & 15,38\% \\
             \hline
-            Erro em aplicação externa & \multirow{2}{*}{I/OOM} & 2 & \multirow{2}{*}{5,77\%} & 363 & \multirow{2}{*}{0,84\%} \\
-            Erro de banco de dados & & 1 & & 25 \\
+            Erro em aplicação externa & \multirow{2}{*}{I/OOM} & 2 & \multirow{2}{*}{5,77\%} \\
+            Erro de banco de dados & & 1 \\
             \hline
-            Erro de parseamento & T/S & 2 & 3,85\% & 11,700 & 25,38\% \\
+            Erro de parseamento & T/S & 2 & 3,85\% \\
             \hline
-            Erro de tipo recebido & F/C/O & 1 & 1,92\% & 499 & 1,08\% \\
+            Erro de tipo recebido & F/C/O & 1 & 1,92\% \\
             \hline
-            Falha na leitura de arquivo & R & 1 & 1,92\% & 135 & 0,29\% \\
+            Falha na leitura de arquivo & R & 1 & 1,92\% \\
             \hline
-            Acesso inválido a vetor & \multirow{2}{*}{C} & 4 & \multirow{2}{*}{9,62\%} & 15,898 & \multirow{2}{*}{34,57\%} \\
-            Erro de permissão & & 1 & & 35 & \\
+            Acesso inválido a vetor & \multirow{2}{*}{C} & 4 & \multirow{2}{*}{9,62\%} \\
+            Erro de permissão & & 1 & \\
             \hline
-            Estouro de memória & - & 3 & 5,77\% & 117 & 0,26\% \\
+            Estouro de memória & - & 3 & 5,77\% \\
             \hline
-            \multicolumn{2}{l|}{\textbf{Total}} & \textbf{52} & \textbf{100\%} & \textbf{46093} & \textbf{100\%} \\
+            \multicolumn{2}{l|}{\textbf{Total}} & \textbf{52} & \textbf{100\%} \\
         \end{tabularx}
         \caption{Parcela de cada tipo de defeito nas ocorrências analisadas}
         \label{table:our_results_classified_by_odc}
+    \end{table}
+\end{frame}
+
+\begin{frame}{Dados classificados}
+    \begin{table}[H]
+        \centering
+        \begin{tabularx}{\linewidth}{ l|l|l|l }
+            \textbf{Tipo} & \textbf{ODC} & \textbf{Ocorrências} & \textbf{\%} \\
+            \hline
+            Variável não inicializada & \multirow{3}{*}{ A/I } & 16,104 & \multirow{3}{*}{ 35,39\% } \\
+            Acesso inválido a variável & & 86 & \\
+            Erro na inicialização & & 122 & \\
+            \hline
+            Acesso inválido a vetor & \multirow{2}{*}{C} & 15,898 & \multirow{2}{*}{34,57\%} \\
+            Erro de permissão & & 35 & \\
+            \hline
+            Erro de parseamento & T/S & 11,700 & 25,38\% \\
+            \hline
+            Erro de fluxo & A/M & 1009 & 2,19\% \\
+            \hline
+            Erro de tipo recebido & F/C/O & 499 & 1,08\% \\
+            \hline
+            Erro em aplicação externa & \multirow{2}{*}{I/OOM} & 363 & \multirow{2}{*}{0,84\%} \\
+            Erro de banco de dados & & 25 \\
+            \hline
+            Falha na leitura de arquivo & R & 135 & 0,29\% \\
+            \hline
+            Estouro de memória & - & 117 & 0,26\% \\
+            \hline
+            \multicolumn{2}{l|}{\textbf{Total}} & \textbf{46093} & \textbf{100\%} \\
+        \end{tabularx}
+        \caption{Parcela de cada tipo de defeito nas ocorrências analisadas}
+        \label{table:our_results_classified_by_odc_2}
     \end{table}
 \end{frame}
 
@@ -614,7 +611,7 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
                 \item Interface ou mensageria (I/OOM) - 5,77\%
             \end{itemize}
         \item Estes tipos somam aproximadamente 70\% das ocorrências e todos podem ser tratados utilizando outras abordagens corretas, do ponto de vista de desenvolvimento
-        \item Isso reforça a hipótese deste trabalho, logo, nós analisamos a causa e formas de mitigação destes erros utilizando as linguagens de programação utilizadas nesta aplicação
+        \item Isso reforça a hipótese deste trabalho, portanto, analisamos a causa e formas de mitigação destes erros utilizando as linguagens de programação utilizadas nesta aplicação
     \end{itemize}
 \end{frame}
 
@@ -622,7 +619,7 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
 
 \begin{frame}{Introdução}
     \begin{itemize}
-        \item Nós analisamos algumas abordagens dos erros mais frequentes encontrados na aplicação aqui analisada
+        \item Analisamos algumas abordagens dos erros mais frequentes encontrados na aplicação aqui analisada
         \item A ideia é demonstrar que, utilizando alguns recursos da própria linguagem, não é complexo construir códigos que eliminam ou mitigam a possibilidade de ocorrências destes defeitos
         \item Vamos fazer uma comparação entre as versões utilizadas na aplicação, que são Java 8 e Kotlin 1.5.10
         \item Existem muitas semelhanças entre as duas linguagens, inclusive, Kotlin possui interoperabilidade com Java, por isso a comparação entre elas
@@ -637,7 +634,7 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
             \begin{lstlisting}[language=Java]
 class NullPointerExceptionSimulation {
     public static void main(String[] args) {
-        Result test = null\;
+        Result test = null;
 
         System.out.print(test.data().toString())
     }
@@ -697,7 +694,7 @@ class UninitializedVariableError {
 \begin{frame}[fragile]{Variável não inicializada - Kotlin}
     \begin{itemize}
         \item Porém, este comportamento pode ser sobreposto
-        \item Existe um tipo de variável que é pode ser inicializada de forma tardia, utilizando o operador \emph{lateinit}
+        \item Existe um tipo de variável que pode ser inicializada de forma tardia, utilizando o operador \emph{lateinit}
         \item Este operador é aplicado apenas a variáveis mutáveis e permite que o valor seja atribuido em um momento após a declaração
         \item O compilador espera que a variável estará inicializada quando seu valor for acessado
         \begin{figure}[H]
@@ -729,9 +726,9 @@ class UninitializedVariableError {
 
 \begin{frame}[fragile]{Variável não inicializada - Kotlin}
     \begin{itemize}
-        \item De todo modo, mesmo numa variável, o compilador tem maneiras de tentar garantir que um valor inválido seja acessado
+        \item De todo modo, mesmo numa variável, o compilador tem maneiras de tentar garantir que um valor inválido não seja acessado
         \item Não é permitido que o acesso a uma variável anulável seja feita diretamente
-        \item Precisamos fazer uma chamada segura (\textit{safe call}) a estes valores, agora, utilizando o operado \emph{?} após a variável acessada
+        \item Precisamos fazer uma chamada segura (\textit{safe call}) a estes valores, utilizando o operador \emph{?} após a variável acessada
         \begin{figure}[H]
             \centering
             \begin{lstlisting}[language=Kotlin]
@@ -779,7 +776,7 @@ class UninitializedVariableError {
 \begin{frame}{Variável não inicializada - Kotlin}
     \begin{itemize}
         \item O Kotlin tem o propósito de eliminar erros causados pela leitura inválida de um valor nulo
-        \item Portanto, o uso dos recursos de sobreposição demonstrados anteriormente é recomendado apenas quando se faz necessário
+        \item Portanto, o uso dos recursos de sobreposição demonstrados anteriormente é recomendado apenas quando se faz extremamente necessário
         \item Como por exemplo, durante a utilização de uma dependência externa que não garante o retorno de um valor válido
     \end{itemize}
 \end{frame}
@@ -861,7 +858,7 @@ class Fibonacci {
         \item Erros de fluxo podem ser causados por erros na implementação das regras de negócio
         \item Ou no tratamento indevido de falhas que podem desviar o fluxo conforme o esperado para a aplicação
         \item Fatores externos podem interferir no fluxo planejado para aplicação, como uma falha física no hardware ou falha em algum serviço externo a aplicação, entre outros
-        \item Nós exploramos a seguir algumas formas de tratar estes eventos inesperados
+        \item Exploramos a seguir algumas formas de tratar estes eventos inesperados
     \end{itemize}
 \end{frame}
 
@@ -908,7 +905,7 @@ public class CatchingExample {
 
 \begin{frame}[fragile]{Exceções}
     \begin{itemize}
-        \item Deve declarar que agora, o método onde a chamada é realizada pode disparar este tipo de exceção
+        \item Deve declarar que agora, o método onde a chamada é realizada pode lançar este tipo de exceção
         \begin{figure}[H]
             \centering
             \begin{lstlisting}[language=Java]
@@ -1010,10 +1007,9 @@ public class Fail implements Result {
 \end{frame}
 
 \begin{frame}[fragile]{Resultados orientado a tipos}
-    \begin{itemize}
-        \begin{figure}[H]
-            \centering
-            \begin{lstlisting}[language=Java]
+    \begin{figure}[H]
+        \centering
+        \begin{lstlisting}[language=Java]
 public class Main {
     public static void main(String[] args) {
         Result result = SomeComplexOperation.execute();
@@ -1027,11 +1023,10 @@ public class Main {
         }
     }
 }
-            \end{lstlisting}
-            \caption{Exemplo de como tratar implementações de \emph{Result} em Java}
-            \label{fig:java_fail_result_implementation}
-        \end{figure}
-    \end{itemize}
+        \end{lstlisting}
+        \caption{Exemplo de como tratar implementações de \emph{Result} em Java}
+        \label{fig:java_if_else_statements}
+    \end{figure}
 \end{frame}
 
 \begin{frame}[fragile]{Resultados orientado a tipos}
@@ -1055,7 +1050,7 @@ public class Main {
 }
         \end{lstlisting}
         \caption{Exemplo de como tratar implementações de \emph{Result} em Java}
-        \label{fig:java_fail_result_implementation}
+        \label{fig:java_if_else_statements_with_new_type}
     \end{figure}
 \end{frame}
 
@@ -1135,7 +1130,7 @@ class Program {
 }
             \end{lstlisting}
             \caption{Exemplo de adição de um novo tipo de falha como um resultado}
-            \label{fig:kotlin_result_class_example}
+            \label{fig:kotlin_result_class_example_with_new_type}
         \end{figure}
     \end{itemize}
 \end{frame}
@@ -1199,8 +1194,6 @@ class Program {
     \centering
     \includegraphics[height=7.5cm]{report_findings}
 \end{frame}
-
-\subsection{Resultados obtidos}
 
 \begin{frame}[fragile]{Condicional complexa}
     \begin{itemize}
@@ -1769,7 +1762,44 @@ class Dispatcher(private val server: Server) {
 
 \begin{frame}{Conclusão}
     \begin{itemize}
-        \item 
+        \item A execução do processo de \textit{lint} dectectou vulnerabilidades não apenas no funcionamento de aplicação, mas na observação de práticas de risco, má formatação ou estilo de código, entre outros
+        \item Alguns deles não oferecem risco imediado para o funcionamento aplicação, mas, podem dificultar o entendimento e a leitura do código
+        \item Além disso, algumas práticas poderiam impactar testes unitários
+        \item Logo, as melhorias sugeridas cumprem a sua proposta de encontrar vulnerabilidades a curto, médio e longo prazo
+        \item Este processo também é facilmente emprego no ciclo de vida do desenvolvimento da aplicação, integrando-se no processo de testes, \textit{build} e deploy de aplicações que utilizam o Gradle
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Considerações finais}
+    \begin{itemize}
+        \item Com uma revisão estruturada na literatura, encontramos um tipo de classificação consolidada e popular de defeitos em softwares, a classificação ODC
+        \item Aplicamos esta classificação numa base de dados de ocorrências de erros em uma aplicação real
+        \item O propósito disso foi analisar quais eram os erros em ambiente produtivo com maior taxa de ocorrência e qual sua relação com o processo de desenvolvimento de software
+        \item Confirmamos que grande parte dos erros são provenientes do processo de desenvolvimento
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Considerações finais}
+    \begin{itemize}
+        \item Visto isso, analisamos quais práticas podem causar cada um dos tipos de erros e quais podem mitigá-los
+        \item Por fim, exploramos outra opção de ferramenta externa que pode analisar o código fonte de uma aplicação em busva de vulnerabilidades de inúmeros tipos
+        \item Aplicamos e detalhamos o processo de implementação e execução destas ferramentas
+        \item Exploramos as vulnerabilidades apontadas demonstrando exemplos de melhorias que este tipo de ferramenta pode sugerir baseado numa pilha mais moderna de desenvolvimento
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Próximos passos}
+    \begin{itemize}
+        \item Ampliar a pesquisa para busca em repositórios públicos de quais são defeitos mais comuns nestas aplicações e quais os tipos de correções aplicadas
+        \item Com isso, consolidamos a hipótese do trabalho sobre a relação dos defeitos mais comuns com o processo de desenvolvimento
+        \item Podemos propor outras abordagens de controle de defeitos, inclusive utilizando outros paradigmas de programação, explorando opções como linguagens de programação puramente funcionais ou desenvolvimento orientado a tipos
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Fim}
+    \begin{itemize}
+        \centering
+        \item Dúvidas ou sugestões?
     \end{itemize}
 \end{frame}
 
