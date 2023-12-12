@@ -168,8 +168,6 @@
 
 \logo{\includegraphics[height=1.0cm]{logo}~}
 
-\section{Contextualização}
-
 \AtBeginSection[]
   {
      \begin{frame}<beamer>
@@ -215,21 +213,13 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Classificação dos resultados}
+\begin{frame}{Reclassificação dos artigos}
     \begin{itemize}
         \item Dos 57 artigos que selecionamos através da análise do resumo, classificando-os pela sua relevância demonstradas anteriormente, tivemos:
             \begin{itemize}
                 \item 18 artigos pouco relevantes
                 \item 39 possuem alguma relevância para o estudo, porém, em alguns destes artigos não fica evidente o quão relevante este pode ser
-                \item Aparentemente, a maioria dos artigos fazem algum tipo de classificação. Entretanto, o tipo de classificação realizado não acrescenta a este trabalho 
-                \item Por exemplo, classificação por severidade, tipo ou diversificando entre defeitos de impacto oculto ou não, não embasam o objetivo deste trabalho
             \end{itemize}
-        \item Por conta disso, foi necessário refinar nossa classificação
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Reclassificação dos artigos}
-    \begin{itemize}
         \item Através da leitura do resumo, aplicando a nova definição de relevância que definimos para cada artigo, tivemos:
         \begin{itemize}
             \item 15 artigos de pouca relevância
@@ -287,7 +277,7 @@
 
 \begin{frame}{Classificação ODC}
     \begin{itemize}
-        \item O primeiro artigo analisado\cite{automatic_odc_using_ml} consiste na criação de um modelo de \emph{Machine Learning} que classifique defeitos através da classificação ODC
+        \item O primeiro artigo analisado \cite{automatic_odc_using_ml} consiste na criação de um modelo de \emph{Machine Learning} que classifique defeitos através da classificação ODC
         \item O artigo introduz a classificação ODC (\textit{Orthogonal Defect Classification}) como um \textit{framework} muito popular para classificação que considera vários atributos
         \item Estes atributos estão divididos entre relatório aberto e fechado.
         \begin{itemize}
@@ -307,7 +297,7 @@
             \item Função, classe ou objeto (F/C/O): 221 (15,86\%)
             \item Verificação (C): 146 (10,47\%)
         \end{itemize}
-        \item Já no artigo de\cite{automatic_defect_categorization}, que também trata da criação de modelo de classificação, de 500 defeitos:
+        \item Já no artigo de \cite{automatic_defect_categorization}, que também trata da criação de modelo de classificação, de 500 defeitos:
         \begin{itemize}
             \item 286 (57,2\%) foram classificadas como defeitos do tipo de controle e fluxo
             \item 214 (42,8\%) foram classificadas como defeitos de dados 
@@ -363,26 +353,6 @@
     \end{table}
 \end{frame}
 
-\begin{frame}{Dados classificados}
-    \begin{table}[H]
-        \centering
-        \begin{tabularx}{\linewidth}{ l|l|l|l }
-            \textbf{Tipo} & \textbf{ODC} & \textbf{Ocorrências} & \textbf{\%} \\
-            \hline
-            Variável não inicializada & \multirow{3}{*}{ A/I } & 16,104 & \multirow{3}{*}{ 35,39\% } \\
-            Acesso inválido a variável & & 86 & \\
-            Erro na inicialização & & 122 & \\
-            \hline
-            Acesso inválido a vetor & \multirow{2}{*}{C} & 15,898 & \multirow{2}{*}{34,57\%} \\
-            Erro de permissão & & 35 & \\
-            \hline
-            Erro de parseamento & T/S & 11,700 & 25,38\% \\
-        \end{tabularx}
-        \caption{Três tipos de erros mais frequentes em ocorrências}
-        \label{table:our_results_classified_by_odc_2}
-    \end{table}
-\end{frame}
-
 \begin{frame}{Conclusões}
     \begin{itemize}
         \item Considerando as ocorrências em classes, a maior quantidade de ocorrências está concentrada nos tipos:
@@ -400,17 +370,17 @@
 
 \begin{frame}{Introdução}
     \begin{itemize}
-        \item Analisamos algumas abordagens dos erros mais frequentes encontrados na aplicação aqui analisada
+        \item Analisamos algumas abordagens dos erros mais frequentes encontrados em nossa aplicação
         \item A ideia é demonstrar que, utilizando alguns recursos da própria linguagem, não é complexo construir códigos que eliminam ou mitigam a possibilidade de ocorrências destes defeitos
         \item Vamos fazer uma comparação entre as versões utilizadas na aplicação, que são Java 8 e Kotlin 1.5.10
         \item Existem muitas semelhanças entre as duas linguagens, inclusive, Kotlin possui interoperabilidade com Java, por isso a comparação entre elas
+        \item Vamos exemplificar um dos tipos de erros mais comuns que fora encontrado
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Erros de fluxo}
     \begin{itemize}
-        \item Erros de fluxo podem ser causados por erros na implementação das regras de negócio
-        \item Ou no tratamento indevido de falhas que podem desviar o fluxo conforme o esperado para a aplicação
+        \item Erros de fluxo podem ser causados por erros na implementação das regras de negócio ou no tratamento indevido de falhas que podem desviar o fluxo conforme o esperado para a aplicação
         \item Fatores externos podem interferir no fluxo planejado para aplicação, como uma falha física no hardware ou falha em algum serviço externo a aplicação, entre outros
         \item Exploramos a seguir algumas formas de tratar estes eventos inesperados
     \end{itemize}
@@ -433,116 +403,27 @@
 
 \begin{frame}{Resultados orientado a tipos}
     \begin{itemize}
-        \item Porém, em Java, não existe um meio de garantir que todos os casos sejam cobertos
-        \item Imagine que um novo tipo \emph{NetworkFail} que implementa \emph{Result}, mas contendo outros dados sobre a falha
-        \item o compilador do Java não obriga o desenvolvedor a tratar este novo tipo de resultado
+        \item Imagine que um novo tipo \emph{NetworkFail} implementa \emph{Result}, mas contendo outros dados sobre a falha
+        \item Em Java, não existe um meio de garantir que todos os casos sejam cobertos
+        \item Seu compilador não obriga o desenvolvedor a tratar este novo tipo de resultado
     \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Resultados orientado a tipos}
-    \begin{figure}[H]
-        \centering
-        \begin{lstlisting}[language=Java]
-public class Main {
-    public static void main(String[] args) {
-        Result result = SomeComplexOperation.execute();
-        
-        if(result instanceof Success<Data>) {
-            // Do something with the success result
-        } else if(result instanceof NetworkFail) {
-            // Do something with the error
-        } else if(result instanceof Fail) {
-            // Do something with the error
-        } else {
-            throw new IllegalStateException("Result type not implemented")
-        }
-    }
-}
-        \end{lstlisting}
-        \caption{Exemplo de como tratar implementações de \emph{Result} em Java}
-        \label{fig:java_if_else_statements_with_new_type}
-    \end{figure}
 \end{frame}
 
 \begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
     \begin{itemize}
         \item Em Kotlin, utilizando um tipo específico de classes (ou interfaces, em versões mais novas) chamadas \textit{sealed}, é possível que o compilador saiba quais são todas as implementações possíveis de uma classe (ou interface)
-        \item Utilizando a expressão \emph{when}, é possível implementar uma espécie de pattern matching, que nos obriga é a cobrir todas as implementações possíveis de um determinado valor
-        \item Complementando o exemplo em Java, tome para um exemplo uma classe \emph{sealed} com as implementações que representam um resultado de sucesso e uma de erro
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
-    \begin{itemize}
-        \item Note como, ao salvarmos o resultado de uma operação que retorna uma instância de resultado, utilizando uma expressâo when, o compilador nos obriga é verificar todos os cenários
-        \begin{figure}[H]
-            \centering
-            \begin{lstlisting}[language=Kotlin]
-class Program {
-    fun main(args: String[]) {
-        val result = SomeComplexOperation.execute()
-
-        when(result) {
-            is Result.Success<*> -> {
-                /* Do something with the data inside the success object */
-            }
-            is Result.Error -> {
-                /* Do something with the error */
-            }
-        }
-    }
-}
-            \end{lstlisting}
-            \caption{Exemplo de utilização de classes de resultado em Kotlin}
-            \label{fig:kotlin_result_class_example}
-        \end{figure}
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
-    \begin{itemize}
-        \item Num exemplo como demonstrado em Java, onde um novo tipo de erro é adicionado, o código não compila até que este novo tipo de resultado seja implementado nas expressões \emph{when}
-        \begin{figure}[H]
-            \centering
-            \begin{lstlisting}[language=Kotlin]
-class Program {
-    fun main(args: String[]) {
-        val result = SomeComplexOperation.execute()
-
-        when(result) {
-            is Result.Success<*> -> {
-                /* Do something with the data inside the success object */
-            }
-            is Result.Error -> {
-                /* Do something with the error */
-            }
-            is Result.NetworkFail -> {
-                /* We have to handle the new type here */
-            }
-        }
-    }
-}
-            \end{lstlisting}
-            \caption{Exemplo de adição de um novo tipo de falha como um resultado}
-            \label{fig:kotlin_result_class_example_with_new_type}
-        \end{figure}
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Resultados orientado a tipos + Pattern Matching}
-    \begin{itemize}
-        \item Utilizar este tipo de implementação amplia nossas possibilidades pra além do uso do controle de fluxo de exceções
-        \item Podemos mesclar as duas abordagens, onde, ao lançar uma exceção de erro, um resultado de falha por exceção é retornado
-        \item Podemos encapsular chamadas a métodos que falham comumente em um resultado de erro
-        \item Podemos encadear operações que podem alterar o estado da aplicação de tal forma, que, ao ocorrer uma falha, nenhuma outra chamada é realizada
+        \item Utilizando a expressão \emph{when}, é possível implementar uma espécie de \textit{pattern matching}, que nos obriga é a cobrir todas as implementações possíveis de um determinado valor
+        \item Complementando o exemplo em Java, tome para um exemplo uma classe \emph{sealed} chanda \emph{Result} com as implementações que representam um resultado de sucesso e uma de erro
+        \item Quando uma nova implementação, o compilador falha em todas as verificações da expressão \emph{when}, pois, estas não serão exaustivas (isto é, não cobrem todas possibilidades)
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Conclusões}
     \begin{itemize}
-        \item As abordagens propostas não solucionam nenhum tipo defeito de forma direta
-        \item São abordagens que mitigam a possibilidade de não captura ou tratamento de eventos inesperados, propagação de resultados errôneos, e assim por diante
-        \item Em algumas destas, o retorno da aplicação deste tipo de melhoria não é imediato, mas, em termos de manutenibilidade e curva de aprendizado ao tratar com o código as primeiras vezes, pode ser ser significativo
+        \item Podemos detectar em tempo de compilação alguns erros mais triviais e de grande risco, como os erros de variável não inicializada
+        \item A possibilidade de não captura ou tratamento de eventos inesperados diminuem empregando alguns destes tipos de abordagens
+        \item Além disso, o risco de durante o ciclo de vida aplicação de se propagar novos erros é reduzido
+        \item Com isso, o custo de manutenção e incremento do software é reduzido
     \end{itemize}
 \end{frame}
 
@@ -550,44 +431,33 @@ class Program {
 
 \begin{frame}{Contextualização}
     \begin{itemize}
-        \item Linters, como são comumente conhecidas estas ferramentas, fazem uma análise estática do código fonte da aplicação em busca de possíveis erros, adoção de má práticas de programação, problemas de formatação, entre outros
+        \item \emph{Linters}, como são comumente conhecidas estas ferramentas, fazem uma análise estática do código fonte da aplicação em busca de possíveis erros, adoção de má práticas de programação, problemas de formatação, entre outros
         \item Estas ferramentas estão integradas diretamente em grande parte das IDEs, ou, podem ser executadas como plugins do gerenciadores de \textit{build} das aplicações
-        \item Possui um conjunto de regras de análise de código para avaliar diferentes segmentos de vulnerabilidades
-        \item Costumam ser altamente configuráveis e personalizáveis
-        \item Vão além da detecção de erros, mantendo também a qualidade do código em si
+        \item Possui um conjunto de regras de análise de código para avaliar diferentes segmentos de vulnerabilidades, sendo altamente configuráveis e personalizáveis
+        \item Vão além da detecção de erros, mantendo também a qualidade, estética e legibilidade do código em si
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Implementação}
     \begin{itemize}
-        \item Para realizar a implementação do \textit{linter}, precisamos de um projeto em Kotlin
-        \item Utilizamos um projeto inicialmente desenvolvido em Java, baseado no funcionamento da ferramenta Apache ZooKeeper
-        \item O propósito é que, durante a conversão do projeto para Kotlin, muitos dos padrões inseguros de Java se mantenham e sejam detectados pela ferramenta
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Implementação}
-    \begin{itemize}
-        \item A versão do Kotlin será a mais recente, até o momento da conversão, a 1.9.20 e a versão do Gradle a 8.4
-        \item Implementamos a versão 1.23.3 do plugin do linter \emph{detekt}, como prova de conceito
-        \item Com o plugin configurado, executamos a primeira vez para coletar um relatório de todas os alertas de código fora das regras configuradas
-        \item É importante destacar que a execução da análise passa a ser dependência de comandos de verificação, testes e \textit{build} do pacote executável da aplicação
-        \item O ganho disto é a implementação desta análise em fluxos de CI/CD, por exemplo
+        \item Para realizar a implementação de um \textit{linter}, utilizamos um projeto inicialmente desenvolvido em Java, baseado no funcionamento da ferramenta Apache ZooKeeper
+        \item Convertemos este projeto para Kotlin para possibilitar as melhorias 
+        \item Além disso, com a conversão, muitos dos padrões inseguros de Java se mantem e são detectados pela ferramenta
+        \item O plugin do \textit{linter detekt} foi implementado e a verificação foi executada no projeto como prova de conceito para este trabalho
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Relatório exportado}
     \begin{itemize}
-        \item Veja um trecho do relatório exportado em HTML, como exemplo:
+        \item Veja um trecho do relatório exportado em HTML após a primeira execução da ferramente em um dos módulos, como exemplo:
         \centering
         \includegraphics[width=10cm]{report_findings}
-        \item Abordaremos um exemplo de alerta apontado durante a análise de um dos módulos do projeto
     \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{Injeção do \textit{dispatcher} de corrotinas}
     \begin{itemize}
-        \item Código não conforme com a regra
+        \item Abordaremos um exemplo de alerta apontado durante a análise de um dos módulos do projeto em código não conforme a regra:
         \begin{figure}[H]
             \centering
             \begin{lstlisting}[language=Kotlin]
@@ -604,7 +474,7 @@ class ControllerImpl(
     ...
 }
             \end{lstlisting}
-            \caption{\textit{ControllerImpl.kt} - Trecho não conforme com a regra de injeção de \textit{dispatcher} de corrotinas}
+            \caption{\textit{ControllerImpl.kt} --- Trecho não conforme com a regra de injeção de \textit{dispatcher} de corrotinas}
             \label{fig:detekt_inject_dispatcher_before_example}
         \end{figure}
     \end{itemize}
@@ -612,7 +482,7 @@ class ControllerImpl(
 
 \begin{frame}[fragile]{Injeção do \textit{dispatcher} de corrotinas}
     \begin{itemize}
-        \item Código corrigido
+        \item Código conforme a prática recomendada
         \begin{figure}[H]
     \centering
     \begin{lstlisting}[language=Kotlin]
@@ -629,7 +499,7 @@ class ControllerImpl(
     ...
 }
     \end{lstlisting}
-    \caption{\textit{ControllerImpl.kt} - Trecho conforme com a regra de injeção de \textit{dispatcher} de corrotinas}
+    \caption{\textit{ControllerImpl.kt} --- Trecho conforme com a regra de injeção de \textit{dispatcher} de corrotinas}
     \label{fig:detekt_inject_dispatcher_after_example}
 \end{figure}
     \end{itemize}
@@ -637,37 +507,27 @@ class ControllerImpl(
 
 \begin{frame}{Conclusão}
     \begin{itemize}
-        \item A execução do processo de \textit{lint} dectectou vulnerabilidades não apenas no funcionamento de aplicação, mas na observação de práticas de risco, má formatação ou estilo de código, entre outros
-        \item Alguns deles não oferecem risco imediato para o funcionamento aplicação, mas, podem dificultar o entendimento e a leitura do código
-        \item Além disso, algumas práticas poderiam impactar testes unitários
-        \item Logo, as melhorias sugeridas cumprem a sua proposta de encontrar vulnerabilidades a curto, médio e longo prazo
-        \item Este processo também é facilmente emprego no ciclo de vida do desenvolvimento da aplicação, integrando-se no processo de testes, \textit{build} e deploy de aplicações que utilizam o Gradle
+        \item A execução do processo de \textit{lint} dectectou vulnerabilidades não apenas no funcionamento de aplicação, mas na observação de práticas de risco ou desencorajadas, má formatação ou estilização de código, entre dificultade de criação e manutenção de teste e outros pontos
+        \item Note que este processo também é facilmente empregado no ciclo de vida do desenvolvimento da aplicação, integrando-se no processo de testes, \textit{build} e deploy de aplicações que utilizam o Gradle
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Considerações finais}
     \begin{itemize}
         \item Com uma revisão estruturada na literatura, encontramos um tipo de classificação consolidada e popular de defeitos em softwares, a classificação ODC
-        \item Aplicamos esta classificação numa base de dados de ocorrências de erros em uma aplicação real
-        \item O propósito disso foi analisar quais eram os erros em ambiente produtivo com maior taxa de ocorrência e qual sua relação com o processo de desenvolvimento de software
-        \item Confirmamos que grande parte dos erros são provenientes do processo de desenvolvimento
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Considerações finais}
-    \begin{itemize}
-        \item Visto isso, analisamos quais práticas podem causar cada um dos tipos de erros e quais podem mitigá-los
-        \item Por fim, exploramos outra opção de ferramenta externa que pode analisar o código fonte de uma aplicação em busca de vulnerabilidades de inúmeros tipos
-        \item Aplicamos e detalhamos o processo de implementação e execução destas ferramentas
-        \item Exploramos as vulnerabilidades apontadas demonstrando exemplos de melhorias que este tipo de ferramenta pode sugerir baseado numa pilha mais moderna de desenvolvimento
+        \item Aplicando esta classificação numa base conhecida, confirmamos que os erros mais comuns tem relação com o processo de desenvolvimento
+        \item Analisando estes erros, podemos diminuir ou eliminar as ocorrências destes erros a curto e médio prazo
+        \item Utilizando outras ferramentas como os \textit{linters}, podemos detectar e tratar vulnerabilidades de diversos tipos, através das regras nele empregadas
+        \item O ganho da implementação deste tipo de ferramenta se estende ao longo de todo o tempo de vida da aplicação, uma vez que o processo de \textit{lint} pode ser executado a cada passo do processo de integração e publicação contínua
     \end{itemize}
 \end{frame}
 
 \begin{frame}{Próximos passos}
     \begin{itemize}
         \item Ampliar a pesquisa para busca em repositórios públicos de quais são defeitos mais comuns nestas aplicações e quais os tipos de correções aplicadas
-        % SUBITEM DO PRIMEIRO
-        \item Com isso, consolidamos a hipótese do trabalho sobre a relação dos defeitos mais comuns com o processo de desenvolvimento
+        \begin{itemize}
+            \item Com isso, consolidamos a hipótese do trabalho sobre a relação dos defeitos mais comuns com o processo de desenvolvimento
+        \end{itemize}
         \item Podemos propor outras abordagens de controle de defeitos, inclusive utilizando outros paradigmas de programação, explorando opções como linguagens de programação puramente funcionais ou desenvolvimento orientado a tipos
     \end{itemize}
 \end{frame}
@@ -686,6 +546,9 @@ class ControllerImpl(
 \end{frame}
 
 \appendix
+
+\section{Revisão da literatura científica}
+
 \begin{frame}{\textit{String} de busca}
     \begin{itemize}
         \item Iniciamos a construção da \textit{string} de busca pela área e subárea de pesquisa. 
@@ -782,6 +645,8 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
     \end{table}
 \end{frame}
 
+\section{Análise dos artigos relevantes}
+
 \begin{frame}{Classificação ODC}
     \begin{itemize}
         \item O primeiro artigo analisado \cite{automatic_odc_using_ml} consiste na criação de um modelo de \emph{Machine Learning} que classifique defeitos através da classificação ODC
@@ -868,6 +733,8 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
     \end{itemize}
 \end{frame}
 
+\section{Classificando ocorrências em uma aplicação real}
+
 \begin{frame}{Dados coletados}
     \begin{table}[H]
         \centering
@@ -907,6 +774,26 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
     \end{table}
 \end{frame}
 
+\begin{frame}{Dados classificados}
+    \begin{table}[H]
+        \centering
+        \begin{tabularx}{\linewidth}{ l|l|l|l }
+            \textbf{Tipo} & \textbf{ODC} & \textbf{Ocorrências} & \textbf{\%} \\
+            \hline
+            Variável não inicializada & \multirow{3}{*}{ A/I } & 16,104 & \multirow{3}{*}{ 35,39\% } \\
+            Acesso inválido a variável & & 86 & \\
+            Erro na inicialização & & 122 & \\
+            \hline
+            Acesso inválido a vetor & \multirow{2}{*}{C} & 15,898 & \multirow{2}{*}{34,57\%} \\
+            Erro de permissão & & 35 & \\
+            \hline
+            Erro de parseamento & T/S & 11,700 & 25,38\% \\
+        \end{tabularx}
+        \caption{Três tipos de erros mais frequentes em ocorrências}
+        \label{table:our_results_classified_by_odc_2}
+    \end{table}
+\end{frame}
+
 \begin{frame}{Considerações}
     \begin{itemize}
         \item Note que erros como de comunicação, \textit{parseamento}, fluxo e em aplicações externas podem ser tratados utilizando abordagens de controle de exceções ou eventos não esperados
@@ -915,6 +802,8 @@ TITLE-ABS-KEY ( software ) AND ( TITLE-ABS-KEY ( development ) OR TITLE-ABS-KEY 
         \item Com isso, comparamos estas ocorrências com o que foi observado nos artigos pesquisados anteriormente
     \end{itemize}
 \end{frame}
+
+\section{Análise dos erros mais frequentes}
 
 \begin{frame}[fragile]{Variável não inicializada - Java}
     \begin{itemize}
@@ -1301,6 +1190,31 @@ public class Main {
     \end{figure}
 \end{frame}
 
+\begin{frame}[fragile]{Resultados orientado a tipos}
+    \begin{figure}[H]
+        \centering
+        \begin{lstlisting}[language=Java]
+public class Main {
+    public static void main(String[] args) {
+        Result result = SomeComplexOperation.execute();
+        
+        if(result instanceof Success<Data>) {
+            // Do something with the success result
+        } else if(result instanceof NetworkFail) {
+            // Do something with the error
+        } else if(result instanceof Fail) {
+            // Do something with the error
+        } else {
+            throw new IllegalStateException("Result type not implemented")
+        }
+    }
+}
+        \end{lstlisting}
+        \caption{Exemplo de como tratar implementações de \emph{Result} em Java}
+        \label{fig:java_if_else_statements_with_new_type}
+    \end{figure}
+\end{frame}
+
 \begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
     \begin{itemize}
         \item Tome exemplo a \emph{sealed class} chamada \textit{Result}
@@ -1315,6 +1229,75 @@ sealed class Result {
             \caption{Exemplo de implementação de classe \textit{sealed} em Kotlin como resultado}
             \label{fig:kotlin_result_sealed_type}
         \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
+    \begin{itemize}
+        \item Note como, ao salvarmos o resultado de uma operação que retorna uma instância de resultado, utilizando uma expressâo when, o compilador nos obriga é verificar todos os cenários
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class Program {
+    fun main(args: String[]) {
+        val result = SomeComplexOperation.execute()
+
+        when(result) {
+            is Result.Success<*> -> {
+                /* Do something with the data inside the success object */
+            }
+            is Result.Error -> {
+                /* Do something with the error */
+            }
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de utilização de classes de resultado em Kotlin}
+            \label{fig:kotlin_result_class_example}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Resultados orientado a tipos + Pattern Matching}
+    \begin{itemize}
+        \item Num exemplo como demonstrado em Java, onde um novo tipo de erro é adicionado, o código não compila até que este novo tipo de resultado seja implementado nas expressões \emph{when}
+        \begin{figure}[H]
+            \centering
+            \begin{lstlisting}[language=Kotlin]
+class Program {
+    fun main(args: String[]) {
+        val result = SomeComplexOperation.execute()
+
+        when(result) {
+            is Result.Success<*> -> {
+                /* Do something with the data inside the success object */
+            }
+            is Result.Error -> {
+                /* Do something with the error */
+            }
+            is Result.NetworkFail -> {
+                /* We have to handle the new type here */
+            }
+        }
+    }
+}
+            \end{lstlisting}
+            \caption{Exemplo de adição de um novo tipo de falha como um resultado}
+            \label{fig:kotlin_result_class_example_with_new_type}
+        \end{figure}
+    \end{itemize}
+\end{frame}
+
+\section{Ferramentas de detecção de erros}
+
+\begin{frame}{Implementação}
+    \begin{itemize}
+        \item A versão do Kotlin será a mais recente, até o momento da conversão, a 1.9.20 e a versão do Gradle a 8.4
+        \item Implementamos a versão 1.23.3 do plugin do linter \emph{detekt}, como prova de conceito
+        \item Com o plugin configurado, executamos a primeira vez para coletar um relatório de todas os alertas de código fora das regras configuradas
+        \item É importante destacar que a execução da análise passa a ser dependência de comandos de verificação, testes e \textit{build} do pacote executável da aplicação
+        \item O ganho disto é a implementação desta análise em fluxos de CI/CD, por exemplo
     \end{itemize}
 \end{frame}
 
